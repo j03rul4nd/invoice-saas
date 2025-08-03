@@ -1,252 +1,268 @@
-# 🚀 Next.js SaaS Template - PDF AI Summarizer
+Claro. Te paso una versión revisada y adaptada del README en español, centrada en que ahora el sistema genera **facturas con IA** en lugar de resúmenes. He limpiado, clarificado y ajustado términos para que sea coherente con el nuevo propósito.
 
-A complete SaaS template built with Next.js that allows users to upload PDF files and get intelligent summaries using Google's Gemini AI API.
+````markdown
+# 🚀 Clear Invoices AI - Plantilla SaaS con Next.js
 
-## ✨ Features
+Una plantilla SaaS completa construida con Next.js que permite a los usuarios subir PDFs (por ejemplo, recibos, órdenes de compra, datos contables) y generar / procesar facturas inteligentes usando IA.
 
-- 🏠 **Landing Page** - Attractive homepage
-- 💰 **Pricing Page** - Subscription plans with Stripe
-- 📊 **Dashboard** - User panel to manage PDFs
-- 🤖 **AI PDF Summarizer** - Automatic summaries with Gemini AI
-- 🔐 **Authentication** - Complete system with Clerk
-- 💳 **Payments** - Stripe integration
-- 🗄️ **Database** - Prisma + Supabase
-- 🚀 **Deploy Ready** - Configured for Vercel
+## ✨ Características principales
 
-## 🛠️ Tech Stack
+- 🏠 **Landing Page** – Página de presentación atractiva.
+- 💼 **Generación de Facturas con IA** – Extracción automática de datos y creación/normalización de facturas desde PDFs usando Google Gemini AI.
+- 🧾 **Procesamiento de PDFs** – OCR, validación de campos, deduplicación y detección de anomalías.
+- 📊 **Panel de Control (Dashboard)** – Gestión de facturas, historial y estado.
+- 💰 **Planes y Facturación** – Suscripciones y cobros con Stripe.
+- 🔐 **Autenticación** – Sistema completo con Clerk.
+- 📤 **Envío / Exportación** – Exporta facturas a PDF, envía por correo o intégralas con software contable.
+- 🗄️ **Base de Datos** – Prisma + Supabase.
+- 🚀 **Listo para Desplegar** – Configurado para Vercel.
 
-- **Framework**: Next.js 14
-- **Authentication**: Clerk
-- **Database**: Supabase + Prisma ORM
-- **Payments**: Stripe
-- **AI**: Google Gemini API (Free)
-- **Styling**: Tailwind CSS
-- **Deployment**: Vercel
+## 🛠️ Stack Tecnológico
 
-## 🚀 Quick Start
+- **Framework**: Next.js 14  
+- **Autenticación**: Clerk  
+- **Base de Datos**: Supabase + Prisma ORM  
+- **Pagos**: Stripe  
+- **IA**: Google Gemini AI (para análisis y generación de facturas)  
+- **Estilos**: Tailwind CSS  
+- **Despliegue**: Vercel  
 
-### 1. Clone the repository
+## 🚀 Inicio Rápido
+
+### 1. Clona el repositorio
 
 ```bash
-git clone [your-repository]
-cd nextjs-saas-template
-```
+git clone [tu-repositorio]
+cd clear-invoices-ai
+````
 
-### 2. Install dependencies
+### 2. Instala dependencias
 
 ```bash
 npm install
-# or
+# o
 yarn install
-# or
+# o
 pnpm install
 ```
 
-### 3. Set up environment variables
+### 3. Configura variables de entorno
 
-Create a `.env.local` file in the project root:
+Crea un archivo `.env.local` en la raíz del proyecto:
 
 ```env
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_public_key
-CLERK_SECRET_KEY=sk_test_your_secret_key
-WEBHOOK_SECRET=your_clerk_webhook_secret
+# Clerk (Autenticación)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_tu_clerck_publica
+CLERK_SECRET_KEY=sk_test_tu_clerck_secreta
+WEBHOOK_SECRET=tu_clerck_webhook_secret
 
-# Google Gemini AI
-GEMINI_API_KEY=your_gemini_api_key
+# Google Gemini AI (o la IA que uses para procesar facturas)
+GEMINI_API_KEY=tu_api_key_de_gemini
 
-# Stripe Payments
-STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_public_key
-STRIPE_PRICE_ID=price_your_price_id
-STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+# Stripe (Pagos / Suscripciones)
+STRIPE_SECRET_KEY=sk_test_tu_stripe_secreta
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_tu_stripe_publica
+STRIPE_PRICE_ID=price_tu_price_id
+STRIPE_WEBHOOK_SECRET=tu_stripe_webhook_secret
 
-# Supabase Database
-# For normal operations (queries, inserts, updates) - USE POOLING
-DATABASE_URL="postgresql://postgres.user:password@host:6543/postgres?pgbouncer=true&connection_limit=1"
+# Supabase (Base de datos)
+DATABASE_URL="postgresql://usuario:password@host:6543/postgres?pgbouncer=true&connection_limit=1"
+DIRECT_URL="postgresql://usuario:password@host:5432/postgres"
 
-# For migrations and operations requiring direct connection
-DIRECT_URL="postgresql://postgres.user:password@host:5432/postgres"
+# Configuración adicional de facturación
+INVOICE_DEFAULT_CURRENCY=EUR
+INVOICE_TAX_RATE=0.21             # Ejemplo: IVA 21%
+EMAIL_SMTP_HOST=smtp.tuservidor.com
+EMAIL_SMTP_PORT=587
+EMAIL_SMTP_USER=usuario@ejemplo.com
+EMAIL_SMTP_PASS=tu_contraseña
+INVOICE_SEQUENCE_PREFIX=INV
 ```
 
-### 4. Set up the database
+### 4. Prepara la base de datos
 
 ```bash
-# Generate Prisma client
+# Genera el cliente de Prisma
 npx prisma generate
 
-# Run migrations
+# Sincroniza el esquema (desarrollo)
 npx prisma db push
 ```
 
-### 5. Run the project
+### 5. Ejecuta el proyecto
 
 ```bash
 npm run dev
-# or
+# o
 yarn dev
-# or
+# o
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Abre `http://localhost:3000` en tu navegador.
 
-## 🔧 Service Configuration
+## 🔧 Configuración de Servicios
 
-### Clerk (Authentication)
+### Clerk (Autenticación)
 
-1. Create an account at [Clerk](https://clerk.com)
-2. Create a new application
-3. Copy the public and secret keys
-4. Configure webhooks to sync users
+1. Crea una cuenta en Clerk.
+2. Crea una nueva aplicación.
+3. Copia las claves pública y secreta.
+4. Configura webhooks para sincronizar usuarios.
 
-### Supabase (Database)
+### Supabase (Base de datos)
 
-1. Create a project at [Supabase](https://supabase.com)
-2. Go to Settings > Database
-3. Copy the Connection String (for both pooling and direct)
-4. Enable Row Level Security if needed
+1. Crea un proyecto en Supabase.
+2. Ve a Settings > Database y copia las cadenas de conexión.
+3. Habilita Row Level Security si lo necesitas y configura políticas.
 
-### Stripe (Payments)
+### Stripe (Pagos)
 
-1. Create an account at [Stripe](https://stripe.com)
-2. Go to Developers > API Keys
-3. Copy the public and secret keys
-4. Create products and prices
-5. Set up webhooks to handle payment events
+1. Crea una cuenta en Stripe.
+2. Ve a Developers > API Keys y copia claves.
+3. Crea productos y precios (por ejemplo, suscripciones por volumen de facturas).
+4. Configura webhooks para eventos de pago.
 
-### Google Gemini AI
+### Google Gemini AI (IA de facturas)
 
-1. Go to [Google AI Studio](https://aistudio.google.com)
-2. Create a free API Key
-3. Configure usage limits according to your needs
+1. Accede a Google AI Studio.
+2. Crea una API Key gratuita o de pago según tu uso.
+3. Ajusta límites y permisos para llamadas de extracción y generación.
 
-### Vercel (Deployment)
+### Email / Envío
 
-1. Connect your repository to Vercel
-2. Configure all environment variables
-3. Automatic deployment with each push
+Configura SMTP con las credenciales para permitir envío de facturas por correo (PDF adjunto, notificaciones, recordatorios).
 
-## 📁 Project Structure
+### Vercel (Despliegue)
+
+1. Conecta tu repositorio a Vercel.
+2. Configura todas las variables de entorno.
+3. Cada push dispara una nueva build automática.
+
+## 📁 Estructura del Proyecto
 
 ```
 ├── app/
-│   ├── (auth)/         # Authentication-related routes and components (login, register, etc.)
-│   ├── dashboard/      # Main section for authenticated users
-│   ├── pricing/        # Pricing and plans page
-│   ├── api/            # Internal API endpoints
-│   └── globals.css     # Global application styles
+│   ├── (auth)/         # Rutas y componentes de autenticación
+│   ├── dashboard/      # Panel de usuario (gestión de facturas)
+│   ├── pricing/        # Página de planes y precios
+│   ├── api/            # Endpoints internos (webhooks, procesamiento)
+│   └── globals.css     # Estilos globales
 ├── components/
-│   ├── ui/             # Reusable UI components
-│   ├── auth/           # Authentication-specific components
-│   └── dashboard/      # Dashboard-specific components
+│   ├── ui/             # Componentes UI reutilizables
+│   ├── auth/           # Componentes de autenticación
+│   └── invoices/        # Componentes específicos de facturas
 ├── lib/
-│   ├── prisma.ts       # Prisma ORM configuration and client
-│   ├── stripe.ts       # Stripe integration for payments
-│   └── gemini.ts       # Gemini AI integration for PDF processing
+│   ├── prisma.ts       # Configuración de Prisma
+│   ├── stripe.ts       # Integración con Stripe
+│   ├── gemini.ts       # Lógica de IA para extracción/generación de facturas
+│   └── invoices.ts     # Normalización, secuencias, validaciones
 ├── prisma/
-│   └── schema.prisma   # Database schema definition
-└── middleware.ts       # Global Next.js middleware (route protection)
+│   └── schema.prisma   # Esquema de base de datos
+├── utils/
+│   └── pdf.ts          # Helpers para generación/parseo de PDFs
+└── middleware.ts       # Middleware global (protección de rutas)
 ```
 
-## 🎯 Implemented Features
+## 🎯 Funcionalidades Implementadas
 
-### Dashboard
-- PDF file upload
-- List of processed PDFs
-- Summary visualization
-- Subscription management
+### Panel (Dashboard)
 
-### Payment System
-- Subscription plans
-- Stripe checkout
-- Webhooks for status updates
-- Customer portal
+* Subida de archivos PDF (facturas, recibos, órdenes).
+* Procesamiento automático con IA (extracción de datos).
+* Listado y estado de facturas.
+* Visualización y exportación.
 
-### AI Integration
-- PDF processing
-- Summary generation with Gemini
-- Subscription-based limits
+### Sistema de Pagos
 
-### Authentication
-- Login/Register with Clerk
-- Route protection middleware
-- Database synchronization
+* Planes por suscripción.
+* Checkout con Stripe.
+* Webhooks para sincronización de estado.
+* Portal de cliente.
 
-## 🔒 Middleware and Security
+### Integración de IA
 
-The middleware is configured to:
-- Protect dashboard routes
-- Validate authentication
-- Handle automatic redirects
-- Sync users with database
+* Extracción de campos de facturas (montos, fechas, proveedores, impuestos).
+* Generación / normalización de facturas.
+* Reglas de validación (duplicados, inconsistencias).
+* Límites por suscripción.
 
-## 📦 Available Scripts
+### Autenticación
+
+* Registro/Login con Clerk.
+* Middleware de protección de rutas.
+* Sincronización con base de datos.
+
+## 🔒 Seguridad y Middleware
+
+* Protección de rutas sensibles.
+* Validación de sesión y tokens.
+* Verificación de webhooks (Stripe / Clerk).
+* Sanitización y validación del input de facturas.
+
+## 📦 Scripts Disponibles
 
 ```bash
-# Development
+# Desarrollo
 npm run dev
 
-# Production build (includes automatic prisma generate)
+# Build de producción (incluye prisma generate)
 npm run build
 
-# Start in production
+# Iniciar en producción
 npm run start
 
 # Linting
 npm run lint
 
-# Database
-npx prisma studio      # Visual interface
-npx prisma db push     # Sync schema
-npx prisma generate    # Generate client (runs automatically on postinstall)
+# Herramientas de base de datos
+npx prisma studio      # Interfaz visual
+npx prisma db push     # Sincroniza el esquema
+npx prisma generate    # Genera cliente (se ejecuta en postinstall)
 ```
 
-## ⚙️ Vercel Configuration
-
-The project includes a `vercel.json` file with optimized configuration:
+## ⚙️ Configuración de Vercel
 
 ```json
 {
-    "buildCommand": "prisma generate && next build",
-    "installCommand": "npm install"
+  "buildCommand": "prisma generate && next build",
+  "installCommand": "npm install"
 }
 ```
 
-This configuration ensures that:
-- Prisma generates correctly before build
-- Dependencies install properly
-- Deployment is consistent
+Esto garantiza que:
 
-## 🚨 Important Notes
+* Prisma se genera antes del build.
+* Las dependencias se instalan correctamente.
+* El despliegue es reproducible.
 
-1. **API Keys**: Never commit real API keys to the repository
-2. **Webhooks**: Properly configure Stripe and Clerk webhooks
-3. **Database**: Use pooling URL for normal operations
-4. **Limits**: Gemini API has free limits, consider upgrading for production
-5. **CORS**: Properly configure domains in production
+## 📝 Buenas Prácticas
 
-## 🤝 Contributing
+1. **No subir claves reales**: Usa `.env.local` y añade `.env*` al `.gitignore`.
+2. **Verifica webhooks**: Asegúrate de validar firmas de Stripe y Clerk.
+3. **Usa URL de pooling para operaciones normales** y `DIRECT_URL` solo para migraciones o tareas que lo requieran.
+4. **Monitorea límites de Gemini AI** y prepara fallback si se agota.
+5. **Normaliza facturas**: Prefija, controla secuencias y evita duplicados.
 
-1. Fork the project
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+## 🤝 Contribuir
 
-## 📄 License
+1. Haz fork del repositorio.
+2. Crea una rama de feature: `git checkout -b feature/NombreFeature`
+3. Haz commits claros: `git commit -m "Agrega generación de facturas IA"`
+4. Push: `git push origin feature/NombreFeature`
+5. Abre un Pull Request.
 
-This project is under the MIT License. See the `LICENSE` file for more details.
+## 📄 Licencia
 
-## 🆘 Support
+Este proyecto está bajo la licencia MIT. Revisa el archivo `LICENSE` para más detalles.
 
-If you have problems or questions:
+## 🆘 Soporte
 
-1. Review the documentation for each service
-2. Verify that all environment variables are configured
-3. Check Vercel logs for deployment errors
-4. Make sure webhooks are working correctly
+Si tienes problemas:
+
+1. Revisa la documentación de cada servicio (Clerk, Stripe, Supabase, Gemini).
+2. Verifica que las variables de entorno estén definidas.
+3. Consulta los logs de Vercel.
+4. Asegúrate de que los webhooks se reciben y validan correctamente.
 
 ---
-
-**Developed with ❤️ for the SaaS community!**
