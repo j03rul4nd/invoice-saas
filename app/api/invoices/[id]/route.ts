@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 // DELETE - Eliminar factura
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth()
@@ -16,7 +16,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const invoiceId = params.id;
+    // En Next.js 15, params es una promesa que necesita ser resuelta
+    const { id: invoiceId } = await params;
 
     // Verificar que la factura pertenece al usuario
     const invoice = await prisma.invoice.findFirst({
