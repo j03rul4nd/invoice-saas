@@ -1,5 +1,7 @@
 import { Suspense } from 'react'
 import DashboardContent from "./_components/DashboardContentInvoice"
+import { Toaster } from 'sonner';
+
 
 // Componente de loading opcional
 function DashboardLoading() {
@@ -17,7 +19,9 @@ function DashboardLoading() {
 
 export default function Dashboard() {   
   return (     
+    
     <div className="font-sans p-4">       
+    <Toaster position="top-right" />
       <Suspense fallback={<DashboardLoading />}>
         <DashboardContent />     
       </Suspense>

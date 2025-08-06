@@ -18,8 +18,11 @@ import {
   EyeOff,
   Send,
   Loader2,
-  Sparkles
+  Sparkles,
+  Save, 
+  Archive
 } from 'lucide-react';
+import { useInvoices } from '@/hooks/useInvoices'; // Ajusta la ruta según tu estructura
 
 // Textos para internacionalización
 const TEXTS = {
@@ -484,12 +487,21 @@ export default function InvoiceGenerator() {
     applyAPIResponse,
     resetInvoice
   } = useInvoiceData();
+  const { 
+  invoices, 
+  loading: loadingInvoices, 
+  saving, 
+  saveInvoice, 
+  deleteInvoice, 
+  refreshInvoices 
+} = useInvoices();
 
   const { generateInvoice, isLoading, error } = useInvoiceAPI();
 
   const [showPreview, setShowPreview] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
+  const [showSavedInvoices, setShowSavedInvoices] = useState(false);
   const invoiceRef = useRef<HTMLDivElement>(null);
 
   // Efecto para inicializar datos que dependen del cliente
@@ -520,6 +532,40 @@ export default function InvoiceGenerator() {
       console.error(TEXTS.api.generatingError, err);
     }
   }, [aiPrompt, generateInvoice, applyAPIResponse]);
+  
+  const handleSaveInvoice = useCallback(async () => {
+        const success = await saveInvoice(invoiceData);
+        if (success) {
+            // Opcional: mostrar mensaje de éxito o realizar alguna acción
+        }
+  }, [saveInvoice, invoiceData]);
+  
+  const handleLoadInvoice = useCallback((savedInvoice: any) => {
+    // Usar tu función applyAPIResponse existente para cargar los datos
+    applyAPIResponse({
+        company: savedInvoice.company,
+        client: savedInvoice.client,
+        items: savedInvoice.items,
+        notes: savedInvoice.notes,
+        taxRate: savedInvoice.taxRate,
+        invoiceNumber: savedInvoice.invoiceNumber
+    });
+    
+    // También actualizar fechas y otros campos
+    updateInvoiceData({
+        date: savedInvoice.date,
+        dueDate: savedInvoice.dueDate
+    });
+    
+    setShowSavedInvoices(false);
+  }, [applyAPIResponse, updateInvoiceData]);
+  
+  const handleDeleteInvoice = useCallback(async (invoiceId: string, invoiceNumber: string) => {
+  if (confirm(`¿Estás seguro de que quieres eliminar la factura ${invoiceNumber}?`)) {
+    await deleteInvoice(invoiceId);
+  }
+  }, [deleteInvoice]);
+
 
   // Función para exportar la factura como PDF
   const exportToPDF = useCallback(async () => {
@@ -592,7 +638,115 @@ export default function InvoiceGenerator() {
             </div>
           )}
         </div>
+
+        {/* Gestión de Facturas Guardadas */}
+        <div className="p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30">
+         <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-semibold text-purple-200 flex items-center">
+            <Archive className="h-5 w-5 mr-2" />
+            Facturas Guardadas
+            </h3>
+            <span className="text-sm text-gray-400">
+            {invoices.length}/5 facturas
+            </span>
+        </div>
         
+        <div className="flex flex-wrap gap-3">
+            {/* Botón Guardar */}
+            <button
+            onClick={handleSaveInvoice}
+            disabled={saving || invoices.length >= 5}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600/20 hover:bg-green-600/30 
+                    border border-green-400/20 rounded-lg text-green-200 transition-all 
+                    disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+            <Save className="h-4 w-4" />
+            {saving ? 'Guardando...' : 'Guardar Factura'}
+            </button>
+            
+            {/* Botón Ver Facturas */}
+            <button
+            onClick={() => setShowSavedInvoices(!showSavedInvoices)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 
+                    border border-blue-400/20 rounded-lg text-blue-200 transition-all"
+            >
+            <Archive className="h-4 w-4" />
+            {showSavedInvoices ? 'Ocultar' : 'Ver'} Facturas ({invoices.length})
+            </button>
+        </div>
+        
+        {/* Mensaje de límite */}
+        {invoices.length >= 5 && (
+            <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-400/20 rounded-lg">
+            <p className="text-sm text-yellow-300">
+                Has alcanzado el límite de 5 facturas. Elimina alguna para guardar nuevas.
+            </p>
+            </div>
+        )}
+        </div>
+        
+        {/* Lista de Facturas Guardadas */}
+        {showSavedInvoices && (
+        <div className="p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30">
+            <h4 className="text-lg font-semibold text-purple-200 mb-4">Facturas Guardadas</h4>
+            
+            {loadingInvoices ? (
+            <div className="text-center py-4 text-gray-400">
+                <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                Cargando facturas...
+            </div>
+            ) : invoices.length === 0 ? (
+            <div className="text-center py-8 text-gray-400">
+                <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>No tienes facturas guardadas</p>
+            </div>
+            ) : (
+            <div className="space-y-3">
+                {invoices.map((invoice) => (
+                <div
+                    key={invoice.id}
+                    className="flex items-center justify-between p-4 bg-gray-800/30 rounded-lg border border-gray-600/20"
+                >
+                    <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                        <FileText className="h-4 w-4 text-gray-400" />
+                        <div>
+                        <p className="font-medium text-white">
+                            {invoice.invoiceNumber}
+                        </p>
+                        <p className="text-sm text-gray-400">
+                            {invoice.client.name} • €{invoice.total.toFixed(2)}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                            {new Date(invoice.createdAt).toLocaleDateString()}
+                        </p>
+                        </div>
+                    </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => handleLoadInvoice(invoice)}
+                        className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors"
+                        title="Cargar factura"
+                    >
+                        <Eye className="h-4 w-4" />
+                    </button>
+                    <button
+                        onClick={() => handleDeleteInvoice(invoice.id, invoice.invoiceNumber)}
+                        className="p-2 text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
+                        title="Eliminar factura"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </button>
+                    </div>
+                </div>
+                ))}
+            </div>
+            )}
+        </div>
+        )}
+
         {/* Toggle Preview Button */}
         <div className="flex justify-center">
           <button
