@@ -4,14 +4,18 @@ import { WebhookEvent } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(req: Request) {
+  console.log('Webhook endpoint hit') // Log inicial
+
   const SIGNING_SECRET = process.env.WEBHOOK_SECRET
 
   if (!SIGNING_SECRET) {
+    console.error('SIGNING_SECRET not found')
     throw new Error('Error: Please add SIGNING_SECRET from Clerk Dashboard to .env or .env')
   }
 
   // Create new Svix instance with secret
   const wh = new Webhook(SIGNING_SECRET)
+  console.log('Svix Webhook instance created')
 
   // Get headers
   const headerPayload = await headers()
@@ -19,8 +23,11 @@ export async function POST(req: Request) {
   const svix_timestamp = headerPayload.get('svix-timestamp')
   const svix_signature = headerPayload.get('svix-signature')
 
+  console.log('Headers received:', { svix_id, svix_timestamp, svix_signature })
+
   // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
+    console.error('Missing Svix headers')
     return new Response('Error: Missing Svix headers', {
       status: 400,
     })
@@ -29,6 +36,7 @@ export async function POST(req: Request) {
   // Get body
   const payload = await req.json()
   const body = JSON.stringify(payload)
+  console.log('Payload received:', body)
 
   let evt: WebhookEvent
 
@@ -39,6 +47,7 @@ export async function POST(req: Request) {
       'svix-timestamp': svix_timestamp,
       'svix-signature': svix_signature,
     }) as WebhookEvent
+    console.log('Webhook verified successfully')
   } catch (err) {
     console.error('Error: Could not verify webhook:', err)
     return new Response('Error: Verification error', {
@@ -46,26 +55,29 @@ export async function POST(req: Request) {
     })
   }
 
-    if (evt.type === 'user.created') {
-        const { id, email_addresses, first_name, last_name } = evt.data
+  console.log('Webhook event type:', evt.type)
 
-        try {
-            const fullName = `${first_name || ''} ${last_name || ''}`.trim()
+  if (evt.type === 'user.created') {
+    const { id, email_addresses, first_name, last_name } = evt.data
 
-            await prisma.user.create({
-              data: {
-                id,
-                email: email_addresses[0].email_address,
-                name: fullName || null
-              }
-            })
-            
-            console.log(`User with ID ${id} was inserted into the database.`)
-        } catch (error) {
-            console.error('Error saving user to the DB', error)
-            return new Response('Error saving user', {status: 500})
+    try {
+      const fullName = `${first_name || ''} ${last_name || ''}`.trim()
+
+      await prisma.user.create({
+        data: {
+          id,
+          email: email_addresses[0].email_address,
+          name: fullName || null
         }
+      })
+
+      console.log(`User with ID ${id} was inserted into the database.`)
+    } catch (error) {
+      console.error('Error saving user to the DB', error)
+      return new Response('Error saving user', { status: 500 })
     }
-      
+  }
+
+  console.log('Webhook processing complete')
   return new Response('Webhook received', { status: 200 })
 }
