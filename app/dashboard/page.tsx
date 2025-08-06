@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import DashboardContent from "./_components/DashboardContent"
+import DashboardContent from "./_components/DashboardContentInvoice"
 
 // Componente de loading opcional
 function DashboardLoading() {
