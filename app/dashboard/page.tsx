@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import DashboardContent from "./_components/DashboardContentInvoice"
 import { Toaster } from 'sonner';
-
+//taosster msg
 
 // Componente de loading opcional
 function DashboardLoading() {
