@@ -71,7 +71,7 @@ export async function POST(req: Request) {
         }
       })
 
-      console.log(`User with ID ${id} was inserted into the database.`)
+      console.log(`Users with ID ${id} was inserted into the database.`)
     } catch (error) {
       console.error('Error saving user to the DB', error)
       return new Response('Error saving user', { status: 500 })
