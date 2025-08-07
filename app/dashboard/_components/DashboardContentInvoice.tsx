@@ -23,6 +23,9 @@ import {
   Archive
 } from 'lucide-react';
 import { useInvoices } from '@/hooks/useInvoices'; // Ajusta la ruta según tu estructura
+import PromptUsageDisplay, { PromptUsageDisplayRef } from '@/components/PromptUsageDisplay'
+import { usePromptUsage } from '@/hooks/usePromptUsage'
+import { SignedIn } from "@clerk/nextjs";
 
 // Textos para internacionalización
 const TEXTS = {
@@ -504,6 +507,9 @@ export default function InvoiceGenerator() {
   const [showSavedInvoices, setShowSavedInvoices] = useState(false);
   const invoiceRef = useRef<HTMLDivElement>(null);
 
+  const { forceRefresh } = usePromptUsage()
+  const promptUsageRef = useRef<PromptUsageDisplayRef>(null)
+
   // Efecto para inicializar datos que dependen del cliente
   useEffect(() => {
     const now = new Date();
@@ -591,6 +597,12 @@ export default function InvoiceGenerator() {
   return (
     <div className="min-h-screen p-4">
       <div className="max-w-7xl mx-auto space-y-6">
+
+        <SignedIn>
+            <div className='p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30'>
+                <PromptUsageDisplay ref={promptUsageRef} />
+            </div>
+        </SignedIn>
         
         {/* Generación con IA */}
         <div className="p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30">
@@ -684,7 +696,7 @@ export default function InvoiceGenerator() {
             </div>
         )}
         </div>
-        
+
         {/* Lista de Facturas Guardadas */}
         {showSavedInvoices && (
         <div className="p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30">
