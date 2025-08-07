@@ -15,6 +15,8 @@ model User {
   name                  String?
   subscription          Subscription?
   invoices              Invoice[]     // Relación con facturas
+  preferredCurrency     String        @default("EUR")  // Nueva campo para moneda preferida
+
   // Campos para límite de prompts
   monthlyPromptLimit    Int           @default(10)  // Límite mensual de prompts (por defecto 10)
   currentPromptUsage    Int           @default(0)   // Uso actual de prompts en el mes
@@ -51,6 +53,8 @@ model Invoice {
   
   // Items de la factura (JSON array)
   items         Json
+
+  currency      String   @default("EUR")
   
   notes         String?
   subtotal      Float

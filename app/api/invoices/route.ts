@@ -5,7 +5,6 @@ import { PrismaClient, Prisma } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // Tipos derivados del esquema de Prisma para campos JSON
-// Esto asegura que tus tipos de TypeScript coincidan con tu base de datos
 type InvoiceItem = Prisma.JsonValue & {
   id: string;
   description: string;
@@ -29,12 +28,13 @@ type CompanyInfo = Prisma.JsonValue & {
   taxId: string;
 };
 
-// Tipo para los datos de entrada de la solicitud POST
+// Tipo para los datos de entrada de la solicitud POST/PUT
 interface InvoiceDataInput {
   invoiceNumber: string;
   date: string;
   dueDate: string;
   company: CompanyInfo;
+  currency: string;
   client: ClientInfo;
   items: InvoiceItem[];
   notes?: string;
@@ -59,13 +59,14 @@ export async function GET() {
       take: 5,
     });
 
-    // Transformar los datos para el frontend con un tipado seguro
+    // Transformar los datos para el frontend con tipado seguro
     const formattedInvoices = invoices.map(invoice => ({
       id: invoice.id,
       invoiceNumber: invoice.invoiceNumber,
       date: invoice.date,
       dueDate: invoice.dueDate,
       company: invoice.companyData as CompanyInfo,
+      currency: invoice.currency,
       client: invoice.clientData as ClientInfo,
       items: invoice.items as InvoiceItem[],
       notes: invoice.notes,
@@ -93,8 +94,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // Tipar los datos de la solicitud con el tipo de entrada
     const invoiceData: InvoiceDataInput = await request.json();
+
+    // Validar datos requeridos
+    if (!invoiceData.invoiceNumber || !invoiceData.currency) {
+      return NextResponse.json(
+        { error: 'Datos de factura incompletos' },
+        { status: 400 }
+      );
+    }
 
     const existingInvoicesCount = await prisma.invoice.count({
       where: { userId },
@@ -102,14 +110,26 @@ export async function POST(request: Request) {
 
     if (existingInvoicesCount >= 5) {
       return NextResponse.json(
-        {
-          error: 'Has alcanzado el límite máximo de 5 facturas guardadas',
-        },
+        { error: 'Has alcanzado el límite máximo de 5 facturas guardadas' },
         { status: 400 }
       );
     }
 
-    // Prisma acepta los objetos JSON directamente, sin necesidad de casting
+    // Verificar que no exista una factura con el mismo número para este usuario
+    const existingInvoice = await prisma.invoice.findFirst({
+      where: {
+        userId,
+        invoiceNumber: invoiceData.invoiceNumber,
+      },
+    });
+
+    if (existingInvoice) {
+      return NextResponse.json(
+        { error: 'Ya existe una factura con este número' },
+        { status: 400 }
+      );
+    }
+
     const invoice = await prisma.invoice.create({
       data: {
         userId,
@@ -117,6 +137,7 @@ export async function POST(request: Request) {
         date: invoiceData.date,
         dueDate: invoiceData.dueDate,
         companyData: invoiceData.company,
+        currency: invoiceData.currency,
         clientData: invoiceData.client,
         items: invoiceData.items,
         notes: invoiceData.notes || '',
@@ -133,11 +154,23 @@ export async function POST(request: Request) {
         id: invoice.id,
         invoiceNumber: invoice.invoiceNumber,
         date: invoice.date,
+        currency: invoice.currency,
         total: invoice.total,
       },
     });
   } catch (error) {
     console.error('Error al guardar factura:', error);
+    
+    // Manejar errores específicos de Prisma
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        return NextResponse.json(
+          { error: 'Ya existe una factura con estos datos únicos' },
+          { status: 400 }
+        );
+      }
+    }
+
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

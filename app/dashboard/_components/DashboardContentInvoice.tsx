@@ -1,6 +1,9 @@
 "use client";
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { 
+    Edit,
+  Copy,
+  X,
   Plus, 
   Minus, 
   Download, 
@@ -25,6 +28,8 @@ import {
 import { useInvoices } from '@/hooks/useInvoices'; // Ajusta la ruta según tu estructura
 import PromptUsageDisplay, { PromptUsageDisplayRef } from '@/components/PromptUsageDisplay'
 import { usePromptUsage } from '@/hooks/usePromptUsage'
+import { useCurrency } from '@/hooks/useCurrency';
+import CurrencySelector from '@/components/CurrencySelector';
 import { SignedIn } from "@clerk/nextjs";
 
 // Textos para internacionalización
@@ -74,6 +79,15 @@ const TEXTS = {
     email: "email@cliente.com",
     phone: "Teléfono",
     address: "Dirección del cliente"
+  },
+
+  currency: {
+    title: "Moneda",
+    selector: "Seleccionar Moneda",
+    current: "Moneda Actual",
+    change: "Cambiar Moneda",
+    updateError: "Error al actualizar la moneda",
+    updateSuccess: "Moneda actualizada correctamente"
   },
   
   // Items de factura
@@ -166,6 +180,7 @@ interface InvoiceData {
   date: string;
   dueDate: string;
   company: CompanyInfo;
+  currency: string; // Nueva propiedad
   client: ClientInfo;
   items: InvoiceItem[];
   notes: string;
@@ -187,6 +202,7 @@ interface APIInvoiceResponse {
   notes?: string;
   taxRate?: number;
   invoiceNumber?: string;
+  currency?: string;
 }
 
 // Hook personalizado mejorado para manejar el estado de la factura
@@ -195,6 +211,7 @@ const useInvoiceData = () => {
     invoiceNumber: '',
     date: '',
     dueDate: '',
+    currency: 'EUR',
     company: {
       name: '',
       email: '',
@@ -268,6 +285,13 @@ const useInvoiceData = () => {
     setInvoiceData(prev => ({
       ...prev,
       client: { ...prev.client, ...updates }
+    }));
+  }, []);
+
+  const updateCurrency = useCallback((newCurrency: string) => {
+    setInvoiceData(prev => ({
+      ...prev,
+      currency: newCurrency
     }));
   }, []);
 
@@ -365,6 +389,8 @@ const useInvoiceData = () => {
       if (apiData.notes) newData.notes = apiData.notes;
       if (apiData.taxRate !== undefined) newData.taxRate = apiData.taxRate;
       if (apiData.invoiceNumber) newData.invoiceNumber = apiData.invoiceNumber;
+      if (apiData.currency) newData.currency = apiData.currency;
+
       
       // Recalcular totales
       const totals = calculateTotals(newData.items, newData.taxRate);
@@ -373,7 +399,7 @@ const useInvoiceData = () => {
   }, [generateItemId, calculateTotals]);
 
   // Función para resetear la factura completa
-  const resetInvoice = useCallback(() => {
+  const resetInvoice = useCallback((defaultCurrency = 'EUR') => {
     const now = new Date();
     const futureDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
     
@@ -381,6 +407,7 @@ const useInvoiceData = () => {
       invoiceNumber: `INV-${Date.now()}`,
       date: now.toISOString().split('T')[0],
       dueDate: futureDate.toISOString().split('T')[0],
+      currency: defaultCurrency,
       company: {
         name: '',
         email: '',
@@ -411,6 +438,7 @@ const useInvoiceData = () => {
 
   return {
     invoiceData,
+    updateCurrency,
     updateInvoiceData,
     updateCompanyInfo,
     updateClientInfo,
@@ -428,7 +456,7 @@ const useInvoiceAPI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const generateInvoice = useCallback(async (prompt: string): Promise<APIInvoiceResponse | null> => {
+  const generateInvoice = useCallback(async (prompt: string, currency?: string): Promise<APIInvoiceResponse | null> => {
     setIsLoading(true);
     setError(null);
     
@@ -439,7 +467,7 @@ const useInvoiceAPI = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, currency: currency || 'EUR' }),
       });
 
       if (!response.ok) {
@@ -480,10 +508,20 @@ const useInvoiceAPI = () => {
 
 export default function InvoiceGenerator() {
   const {
+    currentCurrency,
+    defaultCurrency,
+    isLoading: currencyLoading,
+    error: currencyError,
+    updateUserCurrency,
+    formatPrice,
+  } = useCurrency();
+
+  const {
     invoiceData,
     updateInvoiceData,
     updateCompanyInfo,
     updateClientInfo,
+    updateCurrency,
     addItem,
     updateItem,
     removeItem,
@@ -495,8 +533,12 @@ export default function InvoiceGenerator() {
   invoices, 
   loading: loadingInvoices, 
   saving, 
+  updating,
   saveInvoice, 
+  updateInvoice, 
   deleteInvoice, 
+  getInvoice,      // ✅ Nueva función
+  duplicateInvoice,
   refreshInvoices 
 } = useInvoices();
   const { forceRefresh } = usePromptUsage();
@@ -512,6 +554,9 @@ export default function InvoiceGenerator() {
   const invoiceRef = useRef<HTMLDivElement>(null);
   const promptUsageRef = useRef<PromptUsageDisplayRef>(null)
 
+  const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
 
   // Efecto para inicializar datos que dependen del cliente
   useEffect(() => {
@@ -521,18 +566,23 @@ export default function InvoiceGenerator() {
     updateInvoiceData({
       invoiceNumber: `INV-${Date.now()}`,
       date: now.toISOString().split('T')[0],
-      dueDate: futureDate.toISOString().split('T')[0]
+      dueDate: futureDate.toISOString().split('T')[0],
+      currency: defaultCurrency.code
     });
     
     setMounted(true);
-  }, [updateInvoiceData]);
+
+    if (currentCurrency && invoiceData.currency !== currentCurrency.code) {
+      updateCurrency(currentCurrency.code);
+    }
+  }, [updateInvoiceData, currentCurrency, invoiceData.currency, updateCurrency]);
 
   // Función para manejar la generación con IA
   const handleAIGeneration = useCallback(async () => {
     if (!aiPrompt.trim()) return;
 
     try {
-      const result = await generateInvoice(aiPrompt);
+      const result = await generateInvoice(aiPrompt,  currentCurrency.code);
       if (result) {
         applyAPIResponse(result);
         setAiPrompt(''); // Limpiar el prompt después de usarlo
@@ -546,7 +596,7 @@ export default function InvoiceGenerator() {
     } catch (err) {
       console.error(TEXTS.api.generatingError, err);
     }
-  }, [aiPrompt, generateInvoice, applyAPIResponse, forceRefresh]);
+  }, [aiPrompt, generateInvoice, applyAPIResponse, forceRefresh, currentCurrency.code]);
   
   const handleSaveInvoice = useCallback(async () => {
         const success = await saveInvoice(invoiceData);
@@ -563,6 +613,7 @@ export default function InvoiceGenerator() {
         items: savedInvoice.items,
         notes: savedInvoice.notes,
         taxRate: savedInvoice.taxRate,
+        currency: savedInvoice.currency,
         invoiceNumber: savedInvoice.invoiceNumber
     });
     
@@ -580,6 +631,120 @@ export default function InvoiceGenerator() {
     await deleteInvoice(invoiceId);
   }
   }, [deleteInvoice]);
+
+  // Función para manejar cambio de moneda
+  const handleCurrencyChange = useCallback(async (currencyCode: string) => {
+    await updateUserCurrency(currencyCode);
+    updateCurrency(currencyCode);
+  }, [updateUserCurrency, updateCurrency]);
+
+  // Función para resetear factura con la moneda por defecto del usuario
+  const handleResetInvoice = useCallback(() => {
+    resetInvoice(defaultCurrency.code);
+  }, [resetInvoice, defaultCurrency]);
+
+
+  // ✅ Handler para actualizar factura existente
+const handleUpdateInvoice = useCallback(async (invoiceId: string) => {
+  const success = await updateInvoice(invoiceId, invoiceData);
+  if (success) {
+    setEditingInvoiceId(null);
+    // Opcional: mostrar mensaje de éxito o realizar alguna acción
+  }
+}, [updateInvoice, invoiceData]);
+
+// ✅ Handler para cargar factura específica para edición
+const handleEditInvoice = useCallback(async (invoiceId: string) => {
+  const invoice = await getInvoice(invoiceId);
+  if (invoice) {
+    // Cargar datos de la factura en el formulario
+    applyAPIResponse({
+      company: invoice.company,
+      client: invoice.client,
+      items: invoice.items,
+      notes: invoice.notes,
+      taxRate: invoice.taxRate,
+      invoiceNumber: invoice.invoiceNumber,
+      currency: invoice.currency 
+    });
+    
+    // Actualizar fechas y moneda
+    updateInvoiceData({
+      date: invoice.date,
+      dueDate: invoice.dueDate,
+      currency: invoice.currency
+    });
+    
+    // Marcar como editando
+    setEditingInvoiceId(invoiceId);
+    setShowSavedInvoices(false);
+  }
+}, [getInvoice, applyAPIResponse, updateInvoiceData]);
+
+// ✅ Handler para duplicar factura
+const handleDuplicateInvoice = useCallback(async (invoiceId: string, invoiceNumber: string) => {
+  if (confirm(`¿Duplicar la factura ${invoiceNumber}?`)) {
+    const success = await duplicateInvoice(invoiceId);
+    if (success) {
+      await refreshInvoices();
+      // La factura duplicada aparecerá en la lista
+    }
+  }
+}, [duplicateInvoice, refreshInvoices]);
+
+// ✅ Handler mejorado para guardar (actualizar si está editando, crear si es nueva)
+const handleSaveOrUpdateInvoice = useCallback(async () => {
+  if (editingInvoiceId) {
+    // Está editando una factura existente
+    await handleUpdateInvoice(editingInvoiceId);
+  } else {
+    // Es una nueva factura
+    const success = await saveInvoice(invoiceData);
+    if (success) {
+      // Opcional: limpiar formulario o mantener datos
+    }
+  }
+}, [editingInvoiceId, handleUpdateInvoice, saveInvoice, invoiceData]);
+
+// ✅ Handler para cancelar edición
+const handleCancelEdit = useCallback(() => {
+  setEditingInvoiceId(null);
+  handleResetInvoice(); // Limpiar formulario
+}, [handleResetInvoice]);
+
+// ✅ Handler para validar antes de guardar
+const handleValidateAndSave = useCallback(async () => {
+  // Limpiar errores anteriores
+  setValidationErrors([]);
+  
+  // Validación básica local (opcional, ya que el hook también valida)
+  const errors: string[] = [];
+  
+  if (!invoiceData.invoiceNumber.trim()) {
+    errors.push('Número de factura es requerido');
+  }
+  
+  if (!invoiceData.client.name.trim()) {
+    errors.push('Nombre del cliente es requerido');
+  }
+  
+  if (invoiceData.items.some(item => !item.description.trim())) {
+    errors.push('Todos los items deben tener descripción');
+  }
+  
+  if (errors.length > 0) {
+    setValidationErrors(errors);
+    return;
+  }
+  
+  // Si pasa la validación local, proceder a guardar/actualizar
+  await handleSaveOrUpdateInvoice();
+}, [invoiceData, handleSaveOrUpdateInvoice]);
+
+
+
+
+
 
 
   // Función para exportar la factura como PDF
@@ -688,30 +853,61 @@ export default function InvoiceGenerator() {
           )}
         </div>
 
-        {/* Gestión de Facturas Guardadas */}
+        {/* Gestión de Facturas Guardadas - VERSIÓN MEJORADA */}
         <div className="p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30">
-         <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-purple-200 flex items-center">
             <Archive className="h-5 w-5 mr-2" />
             Facturas Guardadas
+            {editingInvoiceId && (
+                <span className="ml-2 px-2 py-1 bg-yellow-500/20 border border-yellow-400/20 rounded text-xs text-yellow-200">
+                Editando
+                </span>
+            )}
             </h3>
             <span className="text-sm text-gray-400">
             {invoices.length}/5 facturas
             </span>
         </div>
         
+        {/* Mostrar errores de validación */}
+        {validationErrors.length > 0 && (
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-400/20 rounded-lg">
+            <ul className="text-sm text-red-300">
+                {validationErrors.map((error, index) => (
+                <li key={index}>• {error}</li>
+                ))}
+            </ul>
+            </div>
+        )}
+        
         <div className="flex flex-wrap gap-3">
-            {/* Botón Guardar */}
+            {/* Botón Guardar/Actualizar Inteligente */}
             <button
-            onClick={handleSaveInvoice}
-            disabled={saving || invoices.length >= 5}
+            onClick={handleValidateAndSave}
+            disabled={(saving || updating) || invoices.length >= 5 && !editingInvoiceId}
             className="flex items-center gap-2 px-4 py-2 bg-green-600/20 hover:bg-green-600/30 
                     border border-green-400/20 rounded-lg text-green-200 transition-all 
                     disabled:opacity-50 disabled:cursor-not-allowed"
             >
             <Save className="h-4 w-4" />
-            {saving ? 'Guardando...' : 'Guardar Factura'}
+            {editingInvoiceId 
+                ? (updating ? 'Actualizando...' : 'Actualizar Factura')
+                : (saving ? 'Guardando...' : 'Guardar Factura')
+            }
             </button>
+            
+            {/* Botón Cancelar Edición */}
+            {editingInvoiceId && (
+            <button
+                onClick={handleCancelEdit}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600/20 hover:bg-gray-600/30 
+                        border border-gray-400/20 rounded-lg text-gray-200 transition-all"
+            >
+                <X className="h-4 w-4" />
+                Cancelar Edición
+            </button>
+            )}
             
             {/* Botón Ver Facturas */}
             <button
@@ -725,16 +921,16 @@ export default function InvoiceGenerator() {
         </div>
         
         {/* Mensaje de límite */}
-        {invoices.length >= 5 && (
+        {invoices.length >= 5 && !editingInvoiceId && (
             <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-400/20 rounded-lg">
             <p className="text-sm text-yellow-300">
-                Has alcanzado el límite de 5 facturas. Elimina alguna para guardar nuevas.
+                Has alcanzado el límite de 5 facturas. Elimina alguna o edita una existente.
             </p>
             </div>
         )}
         </div>
 
-        {/* Lista de Facturas Guardadas */}
+        {/* Lista de Facturas Guardadas - VERSIÓN MEJORADA */}
         {showSavedInvoices && (
         <div className="p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30">
             <h4 className="text-lg font-semibold text-purple-200 mb-4">Facturas Guardadas</h4>
@@ -754,33 +950,69 @@ export default function InvoiceGenerator() {
                 {invoices.map((invoice) => (
                 <div
                     key={invoice.id}
-                    className="flex items-center justify-between p-4 bg-gray-800/30 rounded-lg border border-gray-600/20"
+                    className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
+                    editingInvoiceId === invoice.id
+                        ? 'bg-yellow-500/10 border-yellow-400/20'
+                        : 'bg-gray-800/30 border-gray-600/20'
+                    }`}
                 >
                     <div className="flex-1">
                     <div className="flex items-center gap-3">
                         <FileText className="h-4 w-4 text-gray-400" />
                         <div>
-                        <p className="font-medium text-white">
+                        <p className="font-medium text-white flex items-center gap-2">
                             {invoice.invoiceNumber}
+                            {editingInvoiceId === invoice.id && (
+                            <span className="px-1 py-0.5 bg-yellow-500/20 rounded text-xs text-yellow-200">
+                                Editando
+                            </span>
+                            )}
                         </p>
                         <p className="text-sm text-gray-400">
-                            {invoice.client.name} • €{invoice.total.toFixed(2)}
+                            {invoice.client.name} • {formatPrice(invoice.total)}
                         </p>
                         <p className="text-xs text-gray-500">
                             {new Date(invoice.createdAt).toLocaleDateString()}
+                            {invoice.updatedAt !== invoice.createdAt && (
+                            <span className="ml-2">
+                                (Actualizada: {new Date(invoice.updatedAt).toLocaleDateString()})
+                            </span>
+                            )}
                         </p>
                         </div>
                     </div>
                     </div>
                     
                     <div className="flex items-center gap-2">
+                    {/* Botón Cargar/Ver */}
                     <button
                         onClick={() => handleLoadInvoice(invoice)}
                         className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors"
-                        title="Cargar factura"
+                        title="Cargar factura para ver"
                     >
                         <Eye className="h-4 w-4" />
                     </button>
+                    
+                    {/* Botón Editar */}
+                    <button
+                        onClick={() => handleEditInvoice(invoice.id)}
+                        disabled={editingInvoiceId === invoice.id}
+                        className="p-2 text-green-400 hover:bg-green-500/10 rounded-md transition-colors disabled:opacity-50"
+                        title="Editar factura"
+                    >
+                        <Edit className="h-4 w-4" />
+                    </button>
+                    
+                    {/* Botón Duplicar */}
+                    <button
+                        onClick={() => handleDuplicateInvoice(invoice.id, invoice.invoiceNumber)}
+                        className="p-2 text-purple-400 hover:bg-purple-500/10 rounded-md transition-colors"
+                        title="Duplicar factura"
+                    >
+                        <Copy className="h-4 w-4" />
+                    </button>
+                    
+                    {/* Botón Eliminar */}
                     <button
                         onClick={() => handleDeleteInvoice(invoice.id, invoice.invoiceNumber)}
                         className="p-2 text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
@@ -815,10 +1047,19 @@ export default function InvoiceGenerator() {
             
             {/* Información de la Factura */}
             <div className="p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30">
-              <h3 className="text-xl font-semibold text-purple-200 mb-4 flex items-center">
-                <Hash className="h-5 w-5 mr-2" />
-                {TEXTS.invoiceInfo.title}
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-semibold text-purple-200 flex items-center">
+                    <Hash className="h-5 w-5 mr-2" />
+                    {TEXTS.invoiceInfo.title}
+                    </h3>
+                    {/* Nuevo selector de moneda */}
+                    <CurrencySelector
+                    currentCurrency={currentCurrency}
+                    onCurrencyChange={handleCurrencyChange}
+                    isLoading={currencyLoading}
+                    error={currencyError}
+                    />
+               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -1023,20 +1264,20 @@ export default function InvoiceGenerator() {
                       
                       <div className="md:col-span-2">
                         <input
-                          type="number"
-                          placeholder={TEXTS.items.price}
-                          min="0"
-                          step="0.01"
-                          value={item.price}
-                          onChange={(e) => updateItem(item.id, { price: parseFloat(e.target.value) || 0 })}
-                          className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded 
-                                   text-white text-sm focus:border-purple-400 focus:outline-none"
+                            type="number"
+                            placeholder={`${TEXTS.items.price} (${currentCurrency.symbol})`}
+                            min="0"
+                            step="0.01"
+                            value={item.price}
+                            onChange={(e) => updateItem(item.id, { price: parseFloat(e.target.value) || 0 })}
+                            className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded 
+                                    text-white text-sm focus:border-purple-400 focus:outline-none"
                         />
                       </div>
                       
                       <div className="md:col-span-2">
                         <div className="px-3 py-2 bg-gray-600/30 rounded text-white text-sm text-center">
-                          €{item.total.toFixed(2)}
+                           {formatPrice(item.total)}
                         </div>
                       </div>
                       
@@ -1118,11 +1359,14 @@ export default function InvoiceGenerator() {
                 </button>
               
               <button
-                onClick={resetInvoice}
+                onClick={() => {
+                    setEditingInvoiceId(null); // Cancelar edición si existe
+                    handleResetInvoice();
+                }}
                 className="w-full px-4 py-3 bg-gray-600/20 hover:bg-gray-600/30 border border-gray-400/20 
-                         rounded-xl text-gray-200 transition-all"
-              >
-                {TEXTS.actions.newInvoice}
+                        rounded-xl text-gray-200 transition-all"
+                >
+                {editingInvoiceId ? 'Cancelar y Nueva Factura' : TEXTS.actions.newInvoice}
               </button>
             </div>
           </div>
@@ -1189,8 +1433,8 @@ export default function InvoiceGenerator() {
                           <tr key={item.id} className="border-b border-gray-100">
                             <td className="py-3 text-sm text-gray-700">{item.description || TEXTS.items.defaultDescription}</td>
                             <td className="py-3 text-sm text-gray-700 text-center">{item.quantity}</td>
-                            <td className="py-3 text-sm text-gray-700 text-right">€{item.price.toFixed(2)}</td>
-                            <td className="py-3 text-sm text-gray-700 text-right">€{item.total.toFixed(2)}</td>
+                            <td className="py-3 text-sm text-gray-700 text-right">{formatPrice(item.price)}</td>
+                            <td className="py-3 text-sm text-gray-700 text-right">{formatPrice(item.total)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1202,15 +1446,15 @@ export default function InvoiceGenerator() {
                     <div className="w-64">
                       <div className="flex justify-between py-2 text-sm">
                         <span className="text-gray-600">{TEXTS.invoice.subtotal}</span>
-                        <span className="text-gray-800">€{invoiceData.subtotal.toFixed(2)}</span>
+                        <span className="text-gray-800">{formatPrice(invoiceData.subtotal)}</span>
                       </div>
                       <div className="flex justify-between py-2 text-sm">
                         <span className="text-gray-600">{TEXTS.invoice.tax} ({invoiceData.taxRate}%):</span>
-                        <span className="text-gray-800">€{invoiceData.tax.toFixed(2)}</span>
+                        <span className="text-gray-800">{formatPrice(invoiceData.tax)}</span>
                       </div>
                       <div className="flex justify-between py-2 text-lg font-semibold border-t border-gray-200">
                         <span className="text-gray-800">{TEXTS.invoice.finalTotal}</span>
-                        <span className="text-gray-800">€{invoiceData.total.toFixed(2)}</span>
+                        <span className="text-gray-800">{formatPrice(invoiceData.total)}</span>
                       </div>
                     </div>
                   </div>
