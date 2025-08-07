@@ -48,6 +48,8 @@ export async function POST(request: NextRequest) {
                 text: `
                     You are an AI assistant that generates invoice data from natural language descriptions. 
                     
+                    CRITICAL: You must respond with ONLY a raw JSON object. Do NOT wrap it in markdown code blocks, do NOT use \`\`\`json, and do NOT include any additional text or explanation.
+                    
                     IMPORTANT: You must respond ONLY with a valid JSON object that matches this exact structure:
                     
                     {
@@ -86,7 +88,8 @@ export async function POST(request: NextRequest) {
                     7. Set appropriate tax rate (21% for Spain unless specified otherwise)
                     8. Only include company fields if explicitly mentioned in the input
                     9. Be conservative with pricing - better to underestimate than overestimate
-                    10. RESPOND ONLY WITH THE JSON OBJECT - NO ADDITIONAL TEXT OR EXPLANATION
+                    10. RESPOND ONLY WITH THE RAW JSON OBJECT - NO MARKDOWN, NO CODE BLOCKS, NO ADDITIONAL TEXT OR EXPLANATION
+                    11. Do NOT use \`\`\`json or any markdown formatting
                     
                     Examples of what to extract:
                     - "Factura para Juan Pérez por diseño web" → client.name: "Juan Pérez", items: [{"description": "Servicios de diseño web", "quantity": 1, "price": 800}]
@@ -124,7 +127,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Obtener el JSON generado por Gemini
-    const aiResponseText = data.candidates[0].content.parts[0].text.trim()
+    let aiResponseText = data.candidates[0].content.parts[0].text.trim()
+    
+    // Limpiar la respuesta de markdown si existe
+    if (aiResponseText.startsWith('```json')) {
+      aiResponseText = aiResponseText.replace(/^```json\s*/, '').replace(/\s*```$/, '')
+    } else if (aiResponseText.startsWith('```')) {
+      aiResponseText = aiResponseText.replace(/^```\s*/, '').replace(/\s*```$/, '')
+    }
     
     // Parsear el JSON devuelto por la IA
     let parsedInvoiceData
