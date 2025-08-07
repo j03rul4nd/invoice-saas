@@ -502,6 +502,8 @@ export default function InvoiceGenerator() {
   const { forceRefresh } = usePromptUsage();
 
   const { generateInvoice, isLoading, error } = useInvoiceAPI();
+  
+  const [isExporting, setIsExporting] = useState(false);
 
   const [showPreview, setShowPreview] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -582,8 +584,36 @@ export default function InvoiceGenerator() {
 
   // Función para exportar la factura como PDF
   const exportToPDF = useCallback(async () => {
-    alert(TEXTS.actions.pdfComingSoon);
-  }, []);
+  try {
+    setIsExporting(true) // Estado de loading
+    
+    const response = await fetch('/api/generate-pdf', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ invoiceData }),
+    })
+
+    if (!response.ok) throw new Error('Error generating PDF')
+
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `invoice-${invoiceData.invoiceNumber}.pdf`
+    document.body.appendChild(a)
+    a.click()
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(a)
+    
+  } catch (error) {
+    console.error('Error exporting PDF:', error)
+    // Mostrar error al usuario
+  } finally {
+    setIsExporting(false)
+  }
+}, [invoiceData])
 
   // No renderizar hasta que el componente esté montado en el cliente
   if (!mounted) {
@@ -1064,18 +1094,28 @@ export default function InvoiceGenerator() {
             {/* Action Buttons */}
             <div className="space-y-4">
               <button
-                onClick={exportToPDF}
-                className="group relative inline-flex items-center justify-center w-full gap-2 rounded-xl bg-black px-4 py-4
-                          text-white transition-all hover:bg-white/5"
-              >
-                <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#FF1E56] via-[#FF00FF] to-[#00FFFF]
-                                opacity-70 blur-sm transition-all group-hover:opacity-100" />
-                <span className="absolute inset-0.5 rounded-xl bg-black/50" />
-                <span className="relative flex items-center gap-2 font-medium">
-                  <Download className="h-5 w-5" />
-                  {TEXTS.actions.downloadPdf}
-                </span>
-              </button>
+  onClick={exportToPDF}
+  disabled={isExporting}
+  className="group relative inline-flex items-center justify-center w-full gap-2 rounded-xl bg-black px-4 py-4
+             text-white transition-all hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+>
+  <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#FF1E56] via-[#FF00FF] to-[#00FFFF]
+                  opacity-70 blur-sm transition-all group-hover:opacity-100" />
+  <span className="absolute inset-0.5 rounded-xl bg-black/50" />
+  <span className="relative flex items-center gap-2 font-medium">
+    {isExporting ? (
+      <>
+        <Loader2 className="h-5 w-5 animate-spin" />
+        Generando PDF...
+      </>
+    ) : (
+      <>
+        <Download className="h-5 w-5" />
+        {TEXTS.actions.downloadPdf}
+      </>
+    )}
+  </span>
+                </button>
               
               <button
                 onClick={resetInvoice}
