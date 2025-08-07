@@ -4,7 +4,6 @@ import { rateLimiter } from '@/lib/rateLimiters'
 import { auth } from '@clerk/nextjs/server'
 import puppeteer from 'puppeteer'
 
-
 interface CompanyInfo {
   name: string;
   email: string;
@@ -40,8 +39,70 @@ interface InvoiceData {
   tax: number;
   taxRate: number;
   total: number;
+  currency: string; // ✅ Añadido el campo currency
 }
 
+// ✅ Mapeo de símbolos de monedas comunes
+const CURRENCY_SYMBOLS: { [key: string]: string } = {
+  'EUR': '€',
+  'USD': '$',
+  'GBP': '£',
+  'JPY': '¥',
+  'CAD': 'C$',
+  'AUD': 'A$',
+  'CHF': 'Fr',
+  'CNY': '¥',
+  'SEK': 'kr',
+  'NOK': 'kr',
+  'DKK': 'kr',
+  'PLN': 'zł',
+  'CZK': 'Kč',
+  'HUF': 'Ft',
+  'RON': 'lei',
+  'BGN': 'лв',
+  'HRK': 'kn',
+  'RUB': '₽',
+  'TRY': '₺',
+  'BRL': 'R$',
+  'MXN': '$',
+  'ARS': '$',
+  'CLP': '$',
+  'COP': '$',
+  'PEN': 'S/',
+  'UYU': '$U',
+  'INR': '₹',
+  'KRW': '₩',
+  'THB': '฿',
+  'SGD': 'S$',
+  'MYR': 'RM',
+  'IDR': 'Rp',
+  'PHP': '₱',
+  'VND': '₫',
+  'ZAR': 'R',
+  'EGP': 'E£',
+  'MAD': 'د.م',
+  'NGN': '₦',
+  'KES': 'KSh',
+  'GHS': '₵'
+};
+
+// ✅ Función para obtener el símbolo de la moneda
+function getCurrencySymbol(currencyCode: string): string {
+  return CURRENCY_SYMBOLS[currencyCode.toUpperCase()] || currencyCode;
+}
+
+// ✅ Función para formatear precios con la moneda correcta
+function formatPrice(amount: number, currencyCode: string): string {
+  const symbol = getCurrencySymbol(currencyCode);
+  
+  // Para EUR, USD, GBP ponemos el símbolo al principio
+  if (['EUR', 'USD', 'GBP', 'CAD', 'AUD'].includes(currencyCode.toUpperCase())) {
+    return `${symbol}${amount.toFixed(2)}`;
+  }
+  
+  // Para otras monedas, ponemos el símbolo al final
+  return `${amount.toFixed(2)} ${symbol}`;
+}
 
 const TEXTS = {
   invoice: {
@@ -71,6 +132,10 @@ const TEXTS = {
 };
 
 function generateInvoiceHTML(invoiceData: InvoiceData): string {
+  // ✅ Usar la moneda de la factura para formatear precios
+  const { currency } = invoiceData;
+  const formatWithCurrency = (amount: number) => formatPrice(amount, currency);
+
   return `
     <!DOCTYPE html>
     <html>
@@ -206,10 +271,28 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
           margin: 0;
           white-space: pre-line;
         }
+        /* ✅ Agregar indicador de moneda en la esquina superior derecha */
+        .currency-indicator {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          background: #f3f4f6;
+          border: 1px solid #e5e7eb;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: 600;
+          color: #6b7280;
+        }
       </style>
     </head>
     <body>
       <div class="invoice-container">
+        <!-- ✅ Indicador de moneda -->
+        <div class="currency-indicator">
+          ${currency.toUpperCase()}
+        </div>
+
         <!-- Header -->
         <div class="header">
           <div>
@@ -260,8 +343,8 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
               <tr>
                 <td>${item.description || TEXTS.items.defaultDescription}</td>
                 <td>${item.quantity}</td>
-                <td>€${item.price.toFixed(2)}</td>
-                <td>€${item.total.toFixed(2)}</td>
+                <td>${formatWithCurrency(item.price)}</td>
+                <td>${formatWithCurrency(item.total)}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -272,15 +355,15 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
           <div class="totals-box">
             <div class="total-row">
               <span class="label">${TEXTS.invoice.subtotal}</span>
-              <span class="value">€${invoiceData.subtotal.toFixed(2)}</span>
+              <span class="value">${formatWithCurrency(invoiceData.subtotal)}</span>
             </div>
             <div class="total-row">
               <span class="label">${TEXTS.invoice.tax} (${invoiceData.taxRate}%):</span>
-              <span class="value">€${invoiceData.tax.toFixed(2)}</span>
+              <span class="value">${formatWithCurrency(invoiceData.tax)}</span>
             </div>
             <div class="total-row final">
               <span class="label">${TEXTS.invoice.finalTotal}</span>
-              <span class="value">€${invoiceData.total.toFixed(2)}</span>
+              <span class="value">${formatWithCurrency(invoiceData.total)}</span>
             </div>
           </div>
         </div>
@@ -317,7 +400,6 @@ async function generatePDF(htmlContent: string): Promise<Buffer> {
   return Buffer.from(pdfBuffer)
 }
 
-
 export async function POST(request: NextRequest) {
   try {
     await rateLimiter(request)
@@ -335,17 +417,27 @@ export async function POST(request: NextRequest) {
       throw new ApiError(400, 'Invalid input: invoiceData is required')
     }
 
-    // Generar HTML (siguiente paso)
+    // ✅ Validar que currency esté presente, usar EUR como fallback
+    if (!invoiceData.currency) {
+      invoiceData.currency = 'EUR';
+    }
+
+    console.log(`Generating PDF with currency: ${invoiceData.currency}`); // ✅ Log para debug
+
+    // Generar HTML con soporte completo de moneda
     const htmlContent = generateInvoiceHTML(invoiceData)
     
-    // Generar PDF con Puppeteer (siguiente paso)
+    // Generar PDF con Puppeteer
     const pdfBuffer = await generatePDF(htmlContent)
+    
+    // ✅ Incluir la moneda en el nombre del archivo
+    const filename = `invoice-${invoiceData.invoiceNumber}-${invoiceData.currency.toLowerCase()}.pdf`;
     
     // Retornar PDF
     return new NextResponse(pdfBuffer, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="invoice-${invoiceData.invoiceNumber}.pdf"`
+        'Content-Disposition': `attachment; filename="${filename}"`
       }
     })
 
