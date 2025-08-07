@@ -427,7 +427,7 @@ const useInvoiceData = () => {
 const useInvoiceAPI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  
   const generateInvoice = useCallback(async (prompt: string): Promise<APIInvoiceResponse | null> => {
     setIsLoading(true);
     setError(null);
@@ -447,6 +447,7 @@ const useInvoiceAPI = () => {
       }
 
       const data = await response.json();
+
       return data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : TEXTS.api.unknownError;
@@ -498,6 +499,7 @@ export default function InvoiceGenerator() {
   deleteInvoice, 
   refreshInvoices 
 } = useInvoices();
+  const { forceRefresh } = usePromptUsage();
 
   const { generateInvoice, isLoading, error } = useInvoiceAPI();
 
@@ -506,9 +508,8 @@ export default function InvoiceGenerator() {
   const [aiPrompt, setAiPrompt] = useState('');
   const [showSavedInvoices, setShowSavedInvoices] = useState(false);
   const invoiceRef = useRef<HTMLDivElement>(null);
-
-  const { forceRefresh } = usePromptUsage()
   const promptUsageRef = useRef<PromptUsageDisplayRef>(null)
+
 
   // Efecto para inicializar datos que dependen del cliente
   useEffect(() => {
@@ -533,11 +534,17 @@ export default function InvoiceGenerator() {
       if (result) {
         applyAPIResponse(result);
         setAiPrompt(''); // Limpiar el prompt después de usarlo
+        // Actualizar uso aquí
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await Promise.all([
+            forceRefresh(),
+            promptUsageRef.current?.refresh()
+        ]);
       }
     } catch (err) {
       console.error(TEXTS.api.generatingError, err);
     }
-  }, [aiPrompt, generateInvoice, applyAPIResponse]);
+  }, [aiPrompt, generateInvoice, applyAPIResponse, forceRefresh]);
   
   const handleSaveInvoice = useCallback(async () => {
         const success = await saveInvoice(invoiceData);
