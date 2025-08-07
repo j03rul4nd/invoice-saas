@@ -5,74 +5,297 @@ import { auth } from '@clerk/nextjs/server'
 import puppeteer from 'puppeteer'
 
 
-interface Company {
-    name: string
-    address: string
-    email: string
+interface CompanyInfo {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  taxId: string;
 }
 
-interface Client {
-    name: string
-    address: string
-    email: string
+interface ClientInfo {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
 }
 
 interface InvoiceItem {
-    description: string
-    quantity: number
-    price: number
-    total: number
+  id: string;
+  description: string;
+  quantity: number;
+  price: number;
+  total: number;
 }
 
 interface InvoiceData {
-    invoiceNumber: string
-    date: string
-    dueDate: string
-    company: Company
-    client: Client
-    items: InvoiceItem[]
-    subtotal: number
-    tax: number
-    total: number
+  invoiceNumber: string;
+  date: string;
+  dueDate: string;
+  company: CompanyInfo;
+  client: ClientInfo;
+  items: InvoiceItem[];
+  notes: string;
+  subtotal: number;
+  tax: number;
+  taxRate: number;
+  total: number;
 }
 
+
+const TEXTS = {
+  invoice: {
+    title: "FACTURA",
+    from: "De:",
+    to: "Para:",
+    description: "Descripción",
+    quantity: "Cant.",
+    price: "Precio", 
+    total: "Total",
+    subtotal: "Subtotal:",
+    tax: "IVA",
+    finalTotal: "Total:",
+    defaultCompany: "Tu Empresa",
+    defaultClient: "Cliente"
+  },
+  invoiceInfo: {
+    date: "Fecha",
+    dueDate: "Fecha de Vencimiento"
+  },
+  notes: {
+    previewTitle: "Notas:"
+  },
+  items: {
+    defaultDescription: "Producto/Servicio"
+  }
+};
+
 function generateInvoiceHTML(invoiceData: InvoiceData): string {
-    return `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <title>Invoice ${invoiceData.invoiceNumber}</title>
-            <style>
-                /* Aquí irán los estilos CSS equivalentes a tu Tailwind */
-            </style>
-        </head>
-        <body>
-            <h1>Factura ${invoiceData.invoiceNumber}</h1>
-            <p>Fecha: ${invoiceData.date}</p>
-            <p>Vencimiento: ${invoiceData.dueDate}</p>
-            <h2>De:</h2>
-            <p>${invoiceData.company.name}</p>
-            <p>${invoiceData.company.address}</p>
-            <p>${invoiceData.company.email}</p>
-            <h2>Para:</h2>
-            <p>${invoiceData.client.name}</p>
-            <p>${invoiceData.client.address}</p>
-            <p>${invoiceData.client.email}</p>
-            <h2>Items:</h2>
-            <ul>
-                ${invoiceData.items.map((item: InvoiceItem) => `
-                    <li>
-                        ${item.description} - ${item.quantity} x ${item.price} = ${item.total}
-                    </li>
-                `).join('')}
-            </ul>
-            <h2>Subtotal: ${invoiceData.subtotal}</h2>
-            <h2>IVA: ${invoiceData.tax}</h2>
-            <h2>Total: ${invoiceData.total}</h2>
-        </body>
-        </html>
-    `
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Invoice ${invoiceData.invoiceNumber}</title>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          margin: 0;
+          padding: 32px;
+          background: white;
+          color: black;
+          line-height: 1.5;
+        }
+        .invoice-container {
+          background: white;
+          max-width: 800px;
+          margin: 0 auto;
+        }
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 32px;
+        }
+        .header h1 {
+          font-size: 30px;
+          font-weight: bold;
+          color: #1f2937;
+          margin: 0 0 8px 0;
+        }
+        .header .invoice-number {
+          color: #6b7280;
+          margin: 0;
+        }
+        .header .dates {
+          text-align: right;
+        }
+        .header .dates p {
+          font-size: 14px;
+          color: #6b7280;
+          margin: 0;
+        }
+        .info-section {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 32px;
+          margin-bottom: 32px;
+        }
+        .info-section h3 {
+          font-weight: 600;
+          color: #1f2937;
+          margin: 0 0 8px 0;
+        }
+        .info-section .details {
+          font-size: 14px;
+          color: #6b7280;
+        }
+        .info-section .details p {
+          margin: 0;
+        }
+        .info-section .details .name {
+          font-weight: 500;
+        }
+        .items-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 32px;
+        }
+        .items-table thead {
+          border-bottom: 2px solid #e5e7eb;
+        }
+        .items-table th {
+          padding: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          color: #1f2937;
+        }
+        .items-table th:first-child { text-align: left; }
+        .items-table th:nth-child(2) { text-align: center; }
+        .items-table th:nth-child(3) { text-align: right; }
+        .items-table th:nth-child(4) { text-align: right; }
+        .items-table tbody tr {
+          border-bottom: 1px solid #f3f4f6;
+        }
+        .items-table td {
+          padding: 12px 8px;
+          font-size: 14px;
+          color: #374151;
+        }
+        .items-table td:first-child { text-align: left; }
+        .items-table td:nth-child(2) { text-align: center; }
+        .items-table td:nth-child(3) { text-align: right; }
+        .items-table td:nth-child(4) { text-align: right; }
+        .totals {
+          display: flex;
+          justify-content: flex-end;
+          margin-bottom: 32px;
+        }
+        .totals-box {
+          width: 256px;
+        }
+        .total-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 0;
+          font-size: 14px;
+        }
+        .total-row.final {
+          font-size: 18px;
+          font-weight: 600;
+          border-top: 1px solid #e5e7eb;
+          padding-top: 8px;
+        }
+        .total-row .label {
+          color: #6b7280;
+        }
+        .total-row .value {
+          color: #1f2937;
+        }
+        .notes {
+          margin-top: 32px;
+        }
+        .notes h3 {
+          font-weight: 600;
+          color: #1f2937;
+          margin: 0 0 8px 0;
+        }
+        .notes p {
+          font-size: 14px;
+          color: #6b7280;
+          margin: 0;
+          white-space: pre-line;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="invoice-container">
+        <!-- Header -->
+        <div class="header">
+          <div>
+            <h1>${TEXTS.invoice.title}</h1>
+            <p class="invoice-number">#${invoiceData.invoiceNumber}</p>
+          </div>
+          <div class="dates">
+            <p>${TEXTS.invoiceInfo.date}: ${invoiceData.date}</p>
+            <p>${TEXTS.invoiceInfo.dueDate}: ${invoiceData.dueDate}</p>
+          </div>
+        </div>
+
+        <!-- Company & Client Info -->
+        <div class="info-section">
+          <div>
+            <h3>${TEXTS.invoice.from}</h3>
+            <div class="details">
+              <p class="name">${invoiceData.company.name || TEXTS.invoice.defaultCompany}</p>
+              ${invoiceData.company.email ? `<p>${invoiceData.company.email}</p>` : ''}
+              ${invoiceData.company.phone ? `<p>${invoiceData.company.phone}</p>` : ''}
+              ${invoiceData.company.taxId ? `<p>${invoiceData.company.taxId}</p>` : ''}
+              ${invoiceData.company.address ? `<p>${invoiceData.company.address.replace(/\n/g, '<br>')}</p>` : ''}
+            </div>
+          </div>
+          <div>
+            <h3>${TEXTS.invoice.to}</h3>
+            <div class="details">
+              <p class="name">${invoiceData.client.name || TEXTS.invoice.defaultClient}</p>
+              ${invoiceData.client.email ? `<p>${invoiceData.client.email}</p>` : ''}
+              ${invoiceData.client.phone ? `<p>${invoiceData.client.phone}</p>` : ''}
+              ${invoiceData.client.address ? `<p>${invoiceData.client.address.replace(/\n/g, '<br>')}</p>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>${TEXTS.invoice.description}</th>
+              <th>${TEXTS.invoice.quantity}</th>
+              <th>${TEXTS.invoice.price}</th>
+              <th>${TEXTS.invoice.total}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${invoiceData.items.map(item => `
+              <tr>
+                <td>${item.description || TEXTS.items.defaultDescription}</td>
+                <td>${item.quantity}</td>
+                <td>€${item.price.toFixed(2)}</td>
+                <td>€${item.total.toFixed(2)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div class="totals">
+          <div class="totals-box">
+            <div class="total-row">
+              <span class="label">${TEXTS.invoice.subtotal}</span>
+              <span class="value">€${invoiceData.subtotal.toFixed(2)}</span>
+            </div>
+            <div class="total-row">
+              <span class="label">${TEXTS.invoice.tax} (${invoiceData.taxRate}%):</span>
+              <span class="value">€${invoiceData.tax.toFixed(2)}</span>
+            </div>
+            <div class="total-row final">
+              <span class="label">${TEXTS.invoice.finalTotal}</span>
+              <span class="value">€${invoiceData.total.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        ${invoiceData.notes ? `
+          <div class="notes">
+            <h3>${TEXTS.notes.previewTitle}</h3>
+            <p>${invoiceData.notes}</p>
+          </div>
+        ` : ''}
+      </div>
+    </body>
+    </html>
+  `
 }
 
 async function generatePDF(htmlContent: string): Promise<Buffer> {
