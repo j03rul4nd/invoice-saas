@@ -1,0 +1,224 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import { PrismaClient } from '@prisma/client';
+import { nanoid } from 'nanoid';
+
+const prisma = new PrismaClient();
+
+// ✅ POST: Generar enlace público
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const invoiceId = params.id;
+
+    // Verificar que la factura pertenece al usuario
+    const invoice = await prisma.invoice.findFirst({
+      where: {
+        id: invoiceId,
+        userId: userId,
+      },
+    });
+
+    if (!invoice) {
+      return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
+    }
+
+    // ✅ Verificar si ya tiene un enlace público activo
+    if (invoice.isPublic && invoice.publicToken) {
+      // Si ya existe, devolver el enlace actual
+      const publicUrl = `${process.env.PRODUCTION_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/invoice/public/${invoice.publicToken}`;
+      
+      return NextResponse.json({
+        success: true,
+        publicUrl,
+        publicToken: invoice.publicToken,
+        message: 'Enlace público ya existe'
+      });
+    }
+
+    // Generar nuevo token único
+    const publicToken = nanoid(32);
+
+    // Actualizar la factura con el token público
+    const updatedInvoice = await prisma.invoice.update({
+      where: { id: invoiceId },
+      data: {
+        publicToken,
+        isPublic: true,
+        // ✅ Establecer fecha de expiración (30 días)
+        publicExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    const publicUrl = `${process.env.PRODUCTION_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/invoice/public/${publicToken}`;
+
+    return NextResponse.json({
+      success: true,
+      publicUrl,
+      publicToken,
+      createdAt: updatedInvoice.updatedAt.toISOString(),
+    });
+
+  } catch (error) {
+    console.error('Error generating public link:', error);
+    return NextResponse.json({ 
+      error: 'Error interno del servidor',
+      success: false 
+    }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+// ✅ DELETE: Desactivar enlace público
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const invoiceId = params.id;
+
+    // Verificar que la factura pertenece al usuario
+    const invoice = await prisma.invoice.findFirst({
+      where: {
+        id: invoiceId,
+        userId: userId,
+      },
+    });
+
+    if (!invoice) {
+      return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
+    }
+
+    // Desactivar enlace público
+    await prisma.invoice.update({
+      where: {
+        id: invoiceId,
+        userId: userId,
+      },
+      data: {
+        publicToken: null,
+        isPublic: false,
+        publicExpiresAt: null,
+      },
+    });
+
+    return NextResponse.json({ 
+      success: true,
+      message: 'Enlace público eliminado exitosamente'
+    });
+
+  } catch (error) {
+    console.error('Error disabling public link:', error);
+    return NextResponse.json({ 
+      error: 'Error interno del servidor',
+      success: false 
+    }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+// ✅ GET: Obtener estado del enlace público (opcional, para la Opción 2)
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const invoiceId = params.id;
+
+    // Obtener la factura con su información de enlace público
+    const invoice = await prisma.invoice.findFirst({
+      where: {
+        id: invoiceId,
+        userId: userId,
+      },
+      select: {
+        id: true,
+        publicToken: true,
+        isPublic: true,
+        publicExpiresAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!invoice) {
+      return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
+    }
+
+    // Si no tiene enlace público, devolver estado
+    if (!invoice.isPublic || !invoice.publicToken) {
+      return NextResponse.json({
+        success: true,
+        isPublic: false,
+        publicToken: null,
+        publicUrl: null,
+      });
+    }
+
+    // ✅ Verificar si el enlace ha expirado
+    const isExpired = invoice.publicExpiresAt && new Date() > invoice.publicExpiresAt;
+    
+    if (isExpired) {
+      // Auto-limpiar enlaces expirados
+      await prisma.invoice.update({
+        where: { id: invoiceId },
+        data: {
+          publicToken: null,
+          isPublic: false,
+          publicExpiresAt: null,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        isPublic: false,
+        publicToken: null,
+        publicUrl: null,
+        message: 'Enlace público expirado y eliminado'
+      });
+    }
+
+    // Si tiene enlace público válido, devolver información completa
+    const publicUrl = `${process.env.PRODUCTION_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/invoice/public/${invoice.publicToken}`;
+
+    return NextResponse.json({
+      success: true,
+      isPublic: invoice.isPublic,
+      publicToken: invoice.publicToken,
+      publicUrl: publicUrl,
+      createdAt: invoice.createdAt.toISOString(),
+      expiresAt: invoice.publicExpiresAt?.toISOString() || null,
+    });
+
+  } catch (error) {
+    console.error('Error getting public link:', error);
+    return NextResponse.json({ 
+      error: 'Error interno del servidor',
+      success: false 
+    }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
+  }
+}

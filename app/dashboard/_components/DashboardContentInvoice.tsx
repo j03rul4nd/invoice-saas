@@ -1,6 +1,10 @@
 "use client";
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { 
+    Link,          
+  ExternalLink,   
+  Globe,          
+  Link2Off,         
     Edit,
   Copy,
   X,
@@ -29,6 +33,8 @@ import { useInvoices } from '@/hooks/useInvoices'; // Ajusta la ruta según tu e
 import PromptUsageDisplay, { PromptUsageDisplayRef } from '@/components/PromptUsageDisplay'
 import { usePromptUsage } from '@/hooks/usePromptUsage'
 import { useCurrency } from '@/hooks/useCurrency';
+
+import { usePublicLinks } from '@/hooks/usePublicLinks';
 import CurrencySelector from '@/components/CurrencySelector';
 import { SignedIn } from "@clerk/nextjs";
 
@@ -541,6 +547,23 @@ export default function InvoiceGenerator() {
   duplicateInvoice,
   refreshInvoices 
 } = useInvoices();
+
+  const {
+      publicLinks,
+      generatePublicLink,
+      removePublicLink,
+      copyPublicLink,
+      openPublicLink,
+      hasPublicLink,
+      getPublicLinkData,
+      loadPublicLinksForInvoices,
+      generateAndCopyPublicLink,
+      togglePublicLink,
+      isGenerating,
+      isRemoving,
+      isCopying
+  } = usePublicLinks();
+
   const { forceRefresh } = usePromptUsage();
 
   const { generateInvoice, isLoading, error } = useInvoiceAPI();
@@ -575,7 +598,13 @@ export default function InvoiceGenerator() {
     if (currentCurrency && invoiceData.currency !== currentCurrency.code) {
       updateCurrency(currentCurrency.code);
     }
-  }, [updateInvoiceData, currentCurrency, invoiceData.currency, updateCurrency]);
+
+    if (invoices.length > 0) {
+      const invoiceIds = invoices.map(invoice => invoice.id);
+      loadPublicLinksForInvoices(invoiceIds);
+    }
+
+  }, [updateInvoiceData, currentCurrency, invoiceData.currency, updateCurrency, invoices, loadPublicLinksForInvoices]);
 
   // Función para manejar la generación con IA
   const handleAIGeneration = useCallback(async () => {
@@ -743,8 +772,32 @@ const handleValidateAndSave = useCallback(async () => {
 
 
 
+const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNumber: string) => {
+    const result = await generatePublicLink(invoiceId);
+    if (result.success) {
+      // Opcional: mostrar modal con el enlace o copiarlo automáticamente
+      console.log(`Enlace público generado para factura ${invoiceNumber}`);
+    }
+  }, [generatePublicLink]);
 
+  const handleCopyPublicLink = useCallback(async (invoiceId: string, publicUrl: string) => {
+    await copyPublicLink(invoiceId, publicUrl);
+  }, [copyPublicLink]);
 
+  const handleRemovePublicLink = useCallback(async (invoiceId: string, invoiceNumber: string) => {
+    if (confirm(`¿Eliminar el enlace público de la factura ${invoiceNumber}?`)) {
+      await removePublicLink(invoiceId);
+    }
+  }, [removePublicLink]);
+
+  const handleTogglePublicLink = useCallback(async (invoiceId: string, invoiceNumber: string) => {
+    const hasLink = hasPublicLink(invoiceId);
+    if (hasLink) {
+      await handleRemovePublicLink(invoiceId, invoiceNumber);
+    } else {
+      await handleGeneratePublicLink(invoiceId, invoiceNumber);
+    }
+  }, [hasPublicLink, handleRemovePublicLink, handleGeneratePublicLink]);
 
 
   // Función para exportar la factura como PDF
@@ -932,100 +985,172 @@ const handleValidateAndSave = useCallback(async () => {
 
         {/* Lista de Facturas Guardadas - VERSIÓN MEJORADA */}
         {showSavedInvoices && (
-        <div className="p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30">
+          <div className="p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30">
             <h4 className="text-lg font-semibold text-purple-200 mb-4">Facturas Guardadas</h4>
             
             {loadingInvoices ? (
-            <div className="text-center py-4 text-gray-400">
+              <div className="text-center py-4 text-gray-400">
                 <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
                 Cargando facturas...
-            </div>
+              </div>
             ) : invoices.length === 0 ? (
-            <div className="text-center py-8 text-gray-400">
+              <div className="text-center py-8 text-gray-400">
                 <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p>No tienes facturas guardadas</p>
-            </div>
+              </div>
             ) : (
-            <div className="space-y-3">
-                {invoices.map((invoice) => (
-                <div
-                    key={invoice.id}
-                    className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
-                    editingInvoiceId === invoice.id
-                        ? 'bg-yellow-500/10 border-yellow-400/20'
-                        : 'bg-gray-800/30 border-gray-600/20'
-                    }`}
-                >
-                    <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                        <FileText className="h-4 w-4 text-gray-400" />
-                        <div>
-                        <p className="font-medium text-white flex items-center gap-2">
-                            {invoice.invoiceNumber}
-                            {editingInvoiceId === invoice.id && (
-                            <span className="px-1 py-0.5 bg-yellow-500/20 rounded text-xs text-yellow-200">
-                                Editando
-                            </span>
+              <div className="space-y-3">
+                {invoices.map((invoice) => {
+                  const publicLinkData = getPublicLinkData(invoice.id);
+                  const hasLink = hasPublicLink(invoice.id);
+                  
+                  return (
+                    <div
+                      key={invoice.id}
+                      className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
+                        editingInvoiceId === invoice.id
+                          ? 'bg-yellow-500/10 border-yellow-400/20'
+                          : 'bg-gray-800/30 border-gray-600/20'
+                      }`}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <FileText className="h-4 w-4 text-gray-400" />
+                          <div>
+                            <p className="font-medium text-white flex items-center gap-2">
+                              {invoice.invoiceNumber}
+                              {editingInvoiceId === invoice.id && (
+                                <span className="px-1 py-0.5 bg-yellow-500/20 rounded text-xs text-yellow-200">
+                                  Editando
+                                </span>
+                              )}
+                              {/* ✅ Indicador de enlace público */}
+                              {hasLink && (
+                                <span className="px-1 py-0.5 bg-green-500/20 border border-green-400/20 rounded text-xs text-green-200 flex items-center gap-1">
+                                  <Globe className="h-3 w-3" />
+                                  Público
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-sm text-gray-400">
+                              {invoice.client.name} • {formatPrice(invoice.total)}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(invoice.createdAt).toLocaleDateString()}
+                              {invoice.updatedAt !== invoice.createdAt && (
+                                <span className="ml-2">
+                                  (Actualizada: {new Date(invoice.updatedAt).toLocaleDateString()})
+                                </span>
+                              )}
+                            </p>
+                            {/* ✅ Mostrar URL pública si existe */}
+                            {hasLink && publicLinkData && (
+                              <p className="text-xs text-blue-400 mt-1 font-mono">
+                                🔗 {publicLinkData.publicUrl}
+                              </p>
                             )}
-                        </p>
-                        <p className="text-sm text-gray-400">
-                            {invoice.client.name} • {formatPrice(invoice.total)}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                            {new Date(invoice.createdAt).toLocaleDateString()}
-                            {invoice.updatedAt !== invoice.createdAt && (
-                            <span className="ml-2">
-                                (Actualizada: {new Date(invoice.updatedAt).toLocaleDateString()})
-                            </span>
-                            )}
-                        </p>
+                          </div>
                         </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        {/* Botones existentes */}
+                        <button
+                          onClick={() => handleLoadInvoice(invoice)}
+                          className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors"
+                          title="Cargar factura para ver"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        
+                        <button
+                          onClick={() => handleEditInvoice(invoice.id)}
+                          disabled={editingInvoiceId === invoice.id}
+                          className="p-2 text-green-400 hover:bg-green-500/10 rounded-md transition-colors disabled:opacity-50"
+                          title="Editar factura"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        
+                        <button
+                          onClick={() => handleDuplicateInvoice(invoice.id, invoice.invoiceNumber)}
+                          className="p-2 text-purple-400 hover:bg-purple-500/10 rounded-md transition-colors"
+                          title="Duplicar factura"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </button>
+
+                        {/* ✅ Nuevos botones para enlaces públicos */}
+                        {hasLink ? (
+                          <>
+                            {/* Copiar enlace */}
+                            <button
+                              onClick={() => handleCopyPublicLink(invoice.id, publicLinkData!.publicUrl)}
+                              disabled={isCopying(invoice.id)}
+                              className="p-2 text-cyan-400 hover:bg-cyan-500/10 rounded-md transition-colors disabled:opacity-50"
+                              title="Copiar enlace público"
+                            >
+                              {isCopying(invoice.id) ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Copy className="h-4 w-4" />
+                              )}
+                            </button>
+                            
+                            {/* Abrir enlace */}
+                            <button
+                              onClick={() => openPublicLink(publicLinkData!.publicUrl)}
+                              className="p-2 text-emerald-400 hover:bg-emerald-500/10 rounded-md transition-colors"
+                              title="Abrir enlace público"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </button>
+                            
+                            {/* Eliminar enlace */}
+                            <button
+                              onClick={() => handleRemovePublicLink(invoice.id, invoice.invoiceNumber)}
+                              disabled={isRemoving(invoice.id)}
+                              className="p-2 text-orange-400 hover:bg-orange-500/10 rounded-md transition-colors disabled:opacity-50"
+                              title="Eliminar enlace público"
+                            >
+                              {isRemoving(invoice.id) ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Link2Off className="h-4 w-4" />
+                              )}
+                            </button>
+                          </>
+                        ) : (
+                          /* Generar enlace */
+                          <button
+                            onClick={() => handleGeneratePublicLink(invoice.id, invoice.invoiceNumber)}
+                            disabled={isGenerating(invoice.id)}
+                            className="p-2 text-teal-400 hover:bg-teal-500/10 rounded-md transition-colors disabled:opacity-50"
+                            title="Generar enlace público"
+                          >
+                            {isGenerating(invoice.id) ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Link className="h-4 w-4" />
+                            )}
+                          </button>
+                        )}
+                        
+                        {/* Botón eliminar factura */}
+                        <button
+                          onClick={() => handleDeleteInvoice(invoice.id, invoice.invoiceNumber)}
+                          className="p-2 text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
+                          title="Eliminar factura"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                    {/* Botón Cargar/Ver */}
-                    <button
-                        onClick={() => handleLoadInvoice(invoice)}
-                        className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors"
-                        title="Cargar factura para ver"
-                    >
-                        <Eye className="h-4 w-4" />
-                    </button>
-                    
-                    {/* Botón Editar */}
-                    <button
-                        onClick={() => handleEditInvoice(invoice.id)}
-                        disabled={editingInvoiceId === invoice.id}
-                        className="p-2 text-green-400 hover:bg-green-500/10 rounded-md transition-colors disabled:opacity-50"
-                        title="Editar factura"
-                    >
-                        <Edit className="h-4 w-4" />
-                    </button>
-                    
-                    {/* Botón Duplicar */}
-                    <button
-                        onClick={() => handleDuplicateInvoice(invoice.id, invoice.invoiceNumber)}
-                        className="p-2 text-purple-400 hover:bg-purple-500/10 rounded-md transition-colors"
-                        title="Duplicar factura"
-                    >
-                        <Copy className="h-4 w-4" />
-                    </button>
-                    
-                    {/* Botón Eliminar */}
-                    <button
-                        onClick={() => handleDeleteInvoice(invoice.id, invoice.invoiceNumber)}
-                        className="p-2 text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
-                        title="Eliminar factura"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </button>
-                    </div>
-                </div>
-                ))}
-            </div>
+                  );
+                })}
+              </div>
             )}
-        </div>
+          </div>
         )}
 
         {/* Toggle Preview Button */}
