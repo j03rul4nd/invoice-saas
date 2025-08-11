@@ -633,6 +633,15 @@ export default function InvoiceGenerator() {
             // Opcional: mostrar mensaje de éxito o realizar alguna acción
         }
   }, [saveInvoice, invoiceData]);
+
+  // Función para manejar cambio de moneda
+  const handleCurrencyChange = useCallback(async (currencyCode: string) => {
+    await updateUserCurrency(currencyCode);
+    updateCurrency(currencyCode);
+    if (editingInvoiceId) {
+     updateInvoiceData({ currency: currencyCode });
+    }
+  }, [updateUserCurrency, updateCurrency, updateInvoiceData, editingInvoiceId]);
   
   const handleLoadInvoice = useCallback((savedInvoice: any) => {
     // Usar tu función applyAPIResponse existente para cargar los datos
@@ -651,9 +660,13 @@ export default function InvoiceGenerator() {
         date: savedInvoice.date,
         dueDate: savedInvoice.dueDate
     });
+
+    if (savedInvoice.currency && savedInvoice.currency !== currentCurrency.code) {
+     handleCurrencyChange(savedInvoice.currency);
+    }
     
     setShowSavedInvoices(false);
-  }, [applyAPIResponse, updateInvoiceData]);
+  }, [applyAPIResponse, updateInvoiceData, handleCurrencyChange, currentCurrency.code]);
   
   const handleDeleteInvoice = useCallback(async (invoiceId: string, invoiceNumber: string) => {
   if (confirm(`¿Estás seguro de que quieres eliminar la factura ${invoiceNumber}?`)) {
@@ -661,18 +674,16 @@ export default function InvoiceGenerator() {
   }
   }, [deleteInvoice]);
 
-  // Función para manejar cambio de moneda
-  const handleCurrencyChange = useCallback(async (currencyCode: string) => {
-    await updateUserCurrency(currencyCode);
-    updateCurrency(currencyCode);
-  }, [updateUserCurrency, updateCurrency]);
-
   // Función para resetear factura con la moneda por defecto del usuario
   const handleResetInvoice = useCallback(() => {
+    // Al resetear, volver a la moneda por defecto del usuario
+    if (currentCurrency.code !== defaultCurrency.code) {
+      handleCurrencyChange(defaultCurrency.code);
+    }
     resetInvoice(defaultCurrency.code);
-  }, [resetInvoice, defaultCurrency]);
-
-
+    setEditingInvoiceId(null);
+  }, [resetInvoice, defaultCurrency, currentCurrency.code, handleCurrencyChange]);
+  
   // ✅ Handler para actualizar factura existente
 const handleUpdateInvoice = useCallback(async (invoiceId: string) => {
   const success = await updateInvoice(invoiceId, invoiceData);
@@ -703,12 +714,16 @@ const handleEditInvoice = useCallback(async (invoiceId: string) => {
       dueDate: invoice.dueDate,
       currency: invoice.currency
     });
+
+    if (invoice.currency && invoice.currency !== currentCurrency.code) {
+      handleCurrencyChange(invoice.currency);
+    }
     
     // Marcar como editando
     setEditingInvoiceId(invoiceId);
     setShowSavedInvoices(false);
   }
-}, [getInvoice, applyAPIResponse, updateInvoiceData]);
+}, [getInvoice, applyAPIResponse, updateInvoiceData, handleCurrencyChange, currentCurrency.code]);
 
 // ✅ Handler para duplicar factura
 const handleDuplicateInvoice = useCallback(async (invoiceId: string, invoiceNumber: string) => {
@@ -738,8 +753,12 @@ const handleSaveOrUpdateInvoice = useCallback(async () => {
 // ✅ Handler para cancelar edición
 const handleCancelEdit = useCallback(() => {
   setEditingInvoiceId(null);
-  handleResetInvoice(); // Limpiar formulario
-}, [handleResetInvoice]);
+  // Al cancelar, volver a la moneda por defecto del usuario
+  if (currentCurrency.code !== defaultCurrency.code) {
+    handleCurrencyChange(defaultCurrency.code);
+  }
+  handleResetInvoice();
+}, [handleResetInvoice, currentCurrency.code, defaultCurrency.code, handleCurrencyChange]);
 
 // ✅ Handler para validar antes de guardar
 const handleValidateAndSave = useCallback(async () => {

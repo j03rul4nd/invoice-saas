@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 // ✅ POST: Generar enlace público
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -17,7 +17,7 @@ export async function POST(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const invoiceId = params.id;
+    const { id: invoiceId } = await context.params;
 
     // Verificar que la factura pertenece al usuario
     const invoice = await prisma.invoice.findFirst({
@@ -81,7 +81,7 @@ export async function POST(
 // ✅ DELETE: Desactivar enlace público
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -90,7 +90,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const invoiceId = params.id;
+    const { id: invoiceId } = await context.params;
 
     // Verificar que la factura pertenece al usuario
     const invoice = await prisma.invoice.findFirst({
@@ -133,10 +133,10 @@ export async function DELETE(
   }
 }
 
-// ✅ GET: Obtener estado del enlace público (opcional, para la Opción 2)
+// ✅ GET: Obtener estado del enlace público
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -145,7 +145,7 @@ export async function GET(
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const invoiceId = params.id;
+    const { id: invoiceId } = await context.params;
 
     // Obtener la factura con su información de enlace público
     const invoice = await prisma.invoice.findFirst({
