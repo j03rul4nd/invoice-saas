@@ -40,7 +40,7 @@ export default async function PublicInvoicePage({ params }: PublicInvoicePagePro
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <PublicInvoiceView invoice={invoice} />
     </div>
   );
