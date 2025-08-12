@@ -69,10 +69,7 @@ export default function PublicInvoiceView({ invoice }: PublicInvoiceViewProps) {
         {/* Contenedor principal de la factura - fondo blanco limpio */}
         <div className="bg-white shadow-2xl rounded-2xl overflow-hidden border border-white/30">
           <div className="relative p-8">
-            {/* Indicador de moneda en la esquina superior derecha */}
-            <div className="absolute top-5 right-5 bg-gray-100 border border-gray-200 px-2 py-1 rounded text-xs font-semibold text-gray-600">
-              {invoice.currency.toUpperCase()}
-            </div>
+            
 
             {/* Header de la factura */}
             <div className="flex justify-between items-start mb-8">

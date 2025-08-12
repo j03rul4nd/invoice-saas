@@ -288,11 +288,6 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
     </head>
     <body>
       <div class="invoice-container">
-        <!-- ✅ Indicador de moneda -->
-        <div class="currency-indicator">
-          ${currency.toUpperCase()}
-        </div>
-
         <!-- Header -->
         <div class="header">
           <div>
