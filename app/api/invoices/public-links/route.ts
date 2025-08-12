@@ -6,14 +6,34 @@ const prisma = new PrismaClient();
 
 // ✅ Función helper para construir la URL base correctamente
 function getBaseUrl(): string {
+  // Verificar si estamos en Vercel y usar VERCEL_URL
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  // Variables de entorno personalizadas
   const productionUrl = process.env.PRODUCTION_URL;
   const publicUrl = process.env.NEXT_PUBLIC_BASE_URL;
   const fallbackUrl = 'http://localhost:3000';
   
   let baseUrl = productionUrl || publicUrl || fallbackUrl;
   
+  // ✅ Limpiar URL duplicadas y normalizar
+  // Si la URL contiene el dominio duplicado, limpiarlo
+  if (baseUrl.includes('invoice-saas-delta.vercel.app/invoice-saas-delta.vercel.app')) {
+    baseUrl = baseUrl.replace('/invoice-saas-delta.vercel.app/invoice/public/', '/invoice/public/');
+    baseUrl = 'https://invoice-saas-delta.vercel.app';
+  }
+  
+  // ✅ Asegurarse de que tenga https:// al inicio si es production
+  if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+    baseUrl = baseUrl.includes('localhost') ? `http://${baseUrl}` : `https://${baseUrl}`;
+  }
+  
   // ✅ Eliminar barra final si existe para consistencia
   baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  
+  console.log('🔍 getBaseUrl() result:', baseUrl); // Para debugging
   
   return baseUrl;
 }
@@ -22,7 +42,7 @@ function getBaseUrl(): string {
 export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
-    
+        
     if (!userId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -52,16 +72,20 @@ export async function POST(request: NextRequest) {
 
     // Transformar los datos al formato esperado por el hook
     const publicLinks: Record<string, any> = {};
-    
+        
+    const baseUrl = getBaseUrl();
+        
     invoices.forEach(invoice => {
       // ✅ Solo incluir facturas que realmente tienen enlace público activo
       if (invoice.isPublic && invoice.publicToken) {
         // ✅ Verificar si el enlace no ha expirado (si hay fecha de expiración)
         const isExpired = invoice.publicExpiresAt && new Date() > invoice.publicExpiresAt;
-        
+                
         if (!isExpired) {
-          const publicUrl = `${getBaseUrl()}/invoice/public/${invoice.publicToken}`;
+          const publicUrl = `${baseUrl}/invoice/public/${invoice.publicToken}`;
           
+          console.log('🔗 Generated bulk public URL:', publicUrl); // Para debugging
+                    
           publicLinks[invoice.id] = {
             publicId: invoice.publicToken,
             publicUrl: publicUrl,

@@ -7,14 +7,34 @@ const prisma = new PrismaClient();
 
 // ✅ Función helper para construir la URL base correctamente
 function getBaseUrl(): string {
+  // Verificar si estamos en Vercel y usar VERCEL_URL
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  // Variables de entorno personalizadas
   const productionUrl = process.env.PRODUCTION_URL;
   const publicUrl = process.env.NEXT_PUBLIC_BASE_URL;
   const fallbackUrl = 'http://localhost:3000';
   
   let baseUrl = productionUrl || publicUrl || fallbackUrl;
   
+  // ✅ Limpiar URL duplicadas y normalizar
+  // Si la URL contiene el dominio duplicado, limpiarlo
+  if (baseUrl.includes('invoice-saas-delta.vercel.app/invoice-saas-delta.vercel.app')) {
+    baseUrl = baseUrl.replace('/invoice-saas-delta.vercel.app/invoice/public/', '/invoice/public/');
+    baseUrl = 'https://invoice-saas-delta.vercel.app';
+  }
+  
+  // ✅ Asegurarse de que tenga https:// al inicio si es production
+  if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+    baseUrl = baseUrl.includes('localhost') ? `http://${baseUrl}` : `https://${baseUrl}`;
+  }
+  
   // ✅ Eliminar barra final si existe para consistencia
   baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  
+  console.log('🔍 getBaseUrl() result:', baseUrl); // Para debugging
   
   return baseUrl;
 }
@@ -48,7 +68,10 @@ export async function POST(
     // ✅ Verificar si ya tiene un enlace público activo
     if (invoice.isPublic && invoice.publicToken) {
       // Si ya existe, devolver el enlace actual
-      const publicUrl = `${getBaseUrl()}/invoice/public/${invoice.publicToken}`;
+      const baseUrl = getBaseUrl();
+      const publicUrl = `${baseUrl}/invoice/public/${invoice.publicToken}`;
+      
+      console.log('🔗 Returning existing public URL:', publicUrl); // Para debugging
       
       return NextResponse.json({
         success: true,
@@ -72,7 +95,10 @@ export async function POST(
       },
     });
 
-    const publicUrl = `${getBaseUrl()}/invoice/public/${publicToken}`;
+    const baseUrl = getBaseUrl();
+    const publicUrl = `${baseUrl}/invoice/public/${publicToken}`;
+    
+    console.log('🔗 Generated new public URL:', publicUrl); // Para debugging
 
     return NextResponse.json({
       success: true,
@@ -215,7 +241,10 @@ export async function GET(
     }
 
     // Si tiene enlace público válido, devolver información completa
-    const publicUrl = `${getBaseUrl()}/invoice/public/${invoice.publicToken}`;
+    const baseUrl = getBaseUrl();
+    const publicUrl = `${baseUrl}/invoice/public/${invoice.publicToken}`;
+    
+    console.log('🔗 Retrieved public URL:', publicUrl); // Para debugging
 
     return NextResponse.json({
       success: true,
