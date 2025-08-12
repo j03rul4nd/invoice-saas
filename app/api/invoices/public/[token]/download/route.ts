@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import puppeteer from 'puppeteer';
 
-// ✅ Define el tipo correcto para los params
+// ✅ Fix: Correct type for Next.js App Router params
 type RouteParams = {
-  params: { token: string }
+  params: Promise<{ token: string }>
 }
 
 interface CompanyInfo {
@@ -76,6 +76,7 @@ function validateInvoiceItems(data: any): InvoiceItem[] {
     total: Number(item?.total) || 0
   }));
 }
+
 const CURRENCY_SYMBOLS: { [key: string]: string } = {
   'EUR': '€',
   'USD': '$',
@@ -410,31 +411,54 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
   `;
 }
 
-async function generatePDF(htmlContent: string): Promise<Buffer> {
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
+// ✅ FUNCIÓN CORREGIDA: Ahora devuelve Uint8Array para solucionar el error de tipos
+async function generatePDF(htmlContent: string): Promise<Uint8Array> {
+  let browser;
   
-  const page = await browser.newPage();
-  await page.setContent(htmlContent);
-  
-  const pdfBuffer = await page.pdf({
-    format: 'A4',
-    margin: { top: '20mm', right: '20mm', bottom: '20mm', left: '20mm' },
-    printBackground: true
-  });
-  
-  await browser.close();
-  return Buffer.from(pdfBuffer);
+  try {
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox', 
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage'
+      ]
+    });
+    
+    const page = await browser.newPage();
+    
+    // ✅ Configurar viewport para consistencia
+    await page.setViewport({ width: 1200, height: 800 });
+    
+    await page.setContent(htmlContent, { 
+      waitUntil: 'networkidle0'
+    });
+    
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      margin: { top: '20mm', right: '20mm', bottom: '20mm', left: '20mm' },
+      printBackground: true,
+      preferCSSPageSize: true
+    });
+    
+    // ✅ CLAVE: Convertir a Uint8Array para máxima compatibilidad con NextResponse
+    return new Uint8Array(pdfBuffer);
+    
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
+  }
 }
 
+// ✅ Fix: Updated function signature to await params
 export async function GET(
   request: NextRequest,
-  { params }: RouteParams
+  context: RouteParams
 ) {
   try {
-    const token = params.token;
+    // ✅ Await the params promise
+    const { token } = await context.params;
 
     // Buscar la factura pública
     const invoice = await prisma.invoice.findUnique({
@@ -482,17 +506,18 @@ export async function GET(
     // ✅ Generar HTML con la misma plantilla
     const htmlContent = generateInvoiceHTML(invoiceData);
     
-    // ✅ Generar PDF con Puppeteer
+    // ✅ Generar PDF con Puppeteer (ahora devuelve Uint8Array)
     const pdfBuffer = await generatePDF(htmlContent);
     
     // ✅ Incluir la moneda en el nombre del archivo
     const filename = `factura-${invoiceData.invoiceNumber}-${invoiceData.currency.toLowerCase()}.pdf`;
     
-    // ✅ Retornar PDF para descarga
-    return new NextResponse(pdfBuffer, {
+    // ✅ SOLUCIÓN: Convertir Uint8Array a Buffer para NextResponse
+    return new NextResponse(Buffer.from(pdfBuffer), {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${filename}"`
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Length': pdfBuffer.length.toString()
       }
     });
 
