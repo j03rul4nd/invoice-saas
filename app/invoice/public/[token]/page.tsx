@@ -53,12 +53,13 @@ export async function generateMetadata({ params }: PublicInvoicePageProps) {
 
   if (!invoice) {
     return {
-      title: 'Factura no encontrada',
+      title: 'Invoice not found | Factura no encontrada | Fatura não encontrada',
+      description: 'The requested invoice could not be found | La factura solicitada no se pudo encontrar | A fatura solicitada não pôde ser encontrada',
     };
   }
 
   return {
-    title: `Factura ${invoice.invoiceNumber}`,
-    description: `Factura ${invoice.invoiceNumber} - Ver factura online`,
+    title: `Invoice ${invoice.invoiceNumber} | Factura ${invoice.invoiceNumber} | Fatura ${invoice.invoiceNumber}`,
+    description: `View invoice ${invoice.invoiceNumber} online | Ver factura ${invoice.invoiceNumber} en línea | Ver fatura ${invoice.invoiceNumber} online`,
   };
 }

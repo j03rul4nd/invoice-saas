@@ -279,3 +279,210 @@ export const getNavTranslation = (language: Language) => {
 export const getHeroTranslation = (language: Language) => {
   return heroTranslations[language] || heroTranslations.en;
 };
+
+
+
+
+// Traducciones para la vista pública de factura
+export const publicInvoiceTranslations: Record<Language, {
+  title: string;
+  invoiceTitle: string;
+  issuedOn: string;
+  dueDate: string;
+  amount: string;
+  status: string;
+  fromLabel: string;
+  toLabel: string;
+  description: string;
+  quantity: string;
+  unitPrice: string;
+  total: string;
+  subtotal: string;
+  tax: string;
+  discount: string;
+  finalAmount: string;
+  footerText: string;
+  paid: string;
+  pending: string;
+  overdue: string;
+  cancelled: string;
+  downloadPdf: string;
+  printInvoice: string;
+  contactInfo: string;
+  items: string;
+  language: string;
+}> = {
+  en: {
+    title: "Public Invoice View",
+    invoiceTitle: "Invoice",
+    issuedOn: "Issued on",
+    dueDate: "Due date",
+    amount: "Amount",
+    status: "Status",
+    fromLabel: "From",
+    toLabel: "To",
+    description: "Description",
+    quantity: "Qty",
+    unitPrice: "Unit Price",
+    total: "Total",
+    subtotal: "Subtotal",
+    tax: "Tax",
+    discount: "Discount", 
+    finalAmount: "Final Amount",
+    footerText: "This is a public view of the invoice. For questions, please contact the issuer.",
+    paid: "Paid",
+    pending: "Pending",
+    overdue: "Overdue",
+    cancelled: "Cancelled",
+    downloadPdf: "Download PDF",
+    printInvoice: "Print Invoice",
+    contactInfo: "Contact Information",
+    items: "Items",
+    language: "Language"
+  },
+  es: {
+    title: "Vista Pública de Factura",
+    invoiceTitle: "Factura",
+    issuedOn: "Emitida el",
+    dueDate: "Fecha de vencimiento",
+    amount: "Importe",
+    status: "Estado",
+    fromLabel: "De",
+    toLabel: "Para",
+    description: "Descripción",
+    quantity: "Cant.",
+    unitPrice: "Precio Unit.",
+    total: "Total",
+    subtotal: "Subtotal",
+    tax: "Impuestos",
+    discount: "Descuento",
+    finalAmount: "Importe Final",
+    footerText: "Esta es una vista pública de la factura. Para consultas, contacte al emisor.",
+    paid: "Pagada",
+    pending: "Pendiente",
+    overdue: "Vencida",
+    cancelled: "Cancelada",
+    downloadPdf: "Descargar PDF",
+    printInvoice: "Imprimir Factura",
+    contactInfo: "Información de Contacto",
+    items: "Elementos",
+    language: "Idioma"
+  },
+  pt: {
+    title: "Visualização Pública da Fatura",
+    invoiceTitle: "Fatura",
+    issuedOn: "Emitida em",
+    dueDate: "Data de vencimento",
+    amount: "Valor",
+    status: "Status",
+    fromLabel: "De",
+    toLabel: "Para",
+    description: "Descrição",
+    quantity: "Qtd.",
+    unitPrice: "Preço Unit.",
+    total: "Total",
+    subtotal: "Subtotal",
+    tax: "Impostos",
+    discount: "Desconto",
+    finalAmount: "Valor Final",
+    footerText: "Esta é uma visualização pública da fatura. Para dúvidas, entre em contato com o emissor.",
+    paid: "Paga",
+    pending: "Pendente",
+    overdue: "Vencida",
+    cancelled: "Cancelada",
+    downloadPdf: "Baixar PDF",
+    printInvoice: "Imprimir Fatura",
+    contactInfo: "Informações de Contato",
+    items: "Itens",
+    language: "Idioma"
+  },
+  ja: {
+    title: "請求書公開ビュー",
+    invoiceTitle: "請求書",
+    issuedOn: "発行日",
+    dueDate: "支払期限",
+    amount: "金額",
+    status: "ステータス",
+    fromLabel: "発行者",
+    toLabel: "宛先",
+    description: "説明",
+    quantity: "数量",
+    unitPrice: "単価",
+    total: "合計",
+    subtotal: "小計",
+    tax: "税金",
+    discount: "割引",
+    finalAmount: "最終金額",
+    footerText: "これは請求書の公開ビューです。ご質問は発行者にお問い合わせください。",
+    paid: "支払済み",
+    pending: "支払待ち",
+    overdue: "期限切れ",
+    cancelled: "キャンセル",
+    downloadPdf: "PDF ダウンロード",
+    printInvoice: "請求書を印刷",
+    contactInfo: "連絡先情報",
+    items: "項目",
+    language: "言語"
+  },
+  fr: {
+    title: "Vue Publique de la Facture",
+    invoiceTitle: "Facture",
+    issuedOn: "Émise le",
+    dueDate: "Date d'échéance",
+    amount: "Montant",
+    status: "Statut",
+    fromLabel: "De",
+    toLabel: "À",
+    description: "Description",
+    quantity: "Qté",
+    unitPrice: "Prix Unit.",
+    total: "Total",
+    subtotal: "Sous-total",
+    tax: "Taxe",
+    discount: "Remise",
+    finalAmount: "Montant Final",
+    footerText: "Il s'agit d'une vue publique de la facture. Pour toute question, contactez l'émetteur.",
+    paid: "Payée",
+    pending: "En attente",
+    overdue: "En retard",
+    cancelled: "Annulée",
+    downloadPdf: "Télécharger PDF",
+    printInvoice: "Imprimer Facture",
+    contactInfo: "Informations de Contact",
+    items: "Articles",
+    language: "Langue"
+  },
+  de: {
+    title: "Öffentliche Rechnungsansicht",
+    invoiceTitle: "Rechnung",
+    issuedOn: "Ausgestellt am",
+    dueDate: "Fälligkeitsdatum",
+    amount: "Betrag",
+    status: "Status",
+    fromLabel: "Von",
+    toLabel: "An",
+    description: "Beschreibung",
+    quantity: "Anz.",
+    unitPrice: "Einzelpreis",
+    total: "Gesamt",
+    subtotal: "Zwischensumme",
+    tax: "Steuer",
+    discount: "Rabatt",
+    finalAmount: "Endbetrag",
+    footerText: "Dies ist eine öffentliche Ansicht der Rechnung. Bei Fragen wenden Sie sich an den Aussteller.",
+    paid: "Bezahlt",
+    pending: "Ausstehend",
+    overdue: "Überfällig",
+    cancelled: "Storniert",
+    downloadPdf: "PDF Herunterladen",
+    printInvoice: "Rechnung Drucken",
+    contactInfo: "Kontaktinformationen",
+    items: "Artikel",
+    language: "Sprache"
+  }
+};
+
+// Función helper para traducciones de factura pública
+export const getPublicInvoiceTranslation = (language: Language) => {
+  return publicInvoiceTranslations[language] || publicInvoiceTranslations.en;
+};
