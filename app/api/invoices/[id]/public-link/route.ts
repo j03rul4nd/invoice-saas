@@ -5,6 +5,20 @@ import { nanoid } from 'nanoid';
 
 const prisma = new PrismaClient();
 
+// ✅ Función helper para construir la URL base correctamente
+function getBaseUrl(): string {
+  const productionUrl = process.env.PRODUCTION_URL;
+  const publicUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const fallbackUrl = 'http://localhost:3000';
+  
+  let baseUrl = productionUrl || publicUrl || fallbackUrl;
+  
+  // ✅ Eliminar barra final si existe para consistencia
+  baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  
+  return baseUrl;
+}
+
 // ✅ POST: Generar enlace público
 export async function POST(
   request: NextRequest,
@@ -34,7 +48,7 @@ export async function POST(
     // ✅ Verificar si ya tiene un enlace público activo
     if (invoice.isPublic && invoice.publicToken) {
       // Si ya existe, devolver el enlace actual
-      const publicUrl = `${process.env.PRODUCTION_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/invoice/public/${invoice.publicToken}`;
+      const publicUrl = `${getBaseUrl()}/invoice/public/${invoice.publicToken}`;
       
       return NextResponse.json({
         success: true,
@@ -58,7 +72,7 @@ export async function POST(
       },
     });
 
-    const publicUrl = `${process.env.PRODUCTION_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/invoice/public/${publicToken}`;
+    const publicUrl = `${getBaseUrl()}/invoice/public/${publicToken}`;
 
     return NextResponse.json({
       success: true,
@@ -201,7 +215,7 @@ export async function GET(
     }
 
     // Si tiene enlace público válido, devolver información completa
-    const publicUrl = `${process.env.PRODUCTION_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/invoice/public/${invoice.publicToken}`;
+    const publicUrl = `${getBaseUrl()}/invoice/public/${invoice.publicToken}`;
 
     return NextResponse.json({
       success: true,

@@ -4,6 +4,20 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// ✅ Función helper para construir la URL base correctamente
+function getBaseUrl(): string {
+  const productionUrl = process.env.PRODUCTION_URL;
+  const publicUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const fallbackUrl = 'http://localhost:3000';
+  
+  let baseUrl = productionUrl || publicUrl || fallbackUrl;
+  
+  // ✅ Eliminar barra final si existe para consistencia
+  baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  
+  return baseUrl;
+}
+
 // POST: Obtener enlaces públicos para múltiples facturas
 export async function POST(request: NextRequest) {
   try {
@@ -46,7 +60,7 @@ export async function POST(request: NextRequest) {
         const isExpired = invoice.publicExpiresAt && new Date() > invoice.publicExpiresAt;
         
         if (!isExpired) {
-          const publicUrl = `${process.env.PRODUCTION_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/invoice/public/${invoice.publicToken}`;
+          const publicUrl = `${getBaseUrl()}/invoice/public/${invoice.publicToken}`;
           
           publicLinks[invoice.id] = {
             publicId: invoice.publicToken,
