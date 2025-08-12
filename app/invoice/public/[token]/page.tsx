@@ -3,9 +3,9 @@ import { prisma } from '@/lib/prisma';
 import PublicInvoiceView from '@/components/PublicInvoiceView';
 
 interface PublicInvoicePageProps {
-  params: {
+  params: Promise<{
     token: string;
-  };
+  }>;
 }
 
 async function getPublicInvoice(token: string) {
@@ -33,7 +33,8 @@ async function getPublicInvoice(token: string) {
 }
 
 export default async function PublicInvoicePage({ params }: PublicInvoicePageProps) {
-  const invoice = await getPublicInvoice(params.token);
+  const { token } = await params;
+  const invoice = await getPublicInvoice(token);
 
   if (!invoice) {
     notFound();
@@ -47,7 +48,8 @@ export default async function PublicInvoicePage({ params }: PublicInvoicePagePro
 }
 
 export async function generateMetadata({ params }: PublicInvoicePageProps) {
-  const invoice = await getPublicInvoice(params.token);
+  const { token } = await params;
+  const invoice = await getPublicInvoice(token);
 
   if (!invoice) {
     return {
