@@ -235,54 +235,6 @@ export const heroTranslations: Record<Language, {
   }
 };
 
-// Utilidades para detectar idioma
-export const detectBrowserLanguage = (): Language => {
-  if (typeof window === 'undefined') return 'en';
-  
-  const browserLang = navigator.language.split('-')[0];
-  const supportedLanguages: Language[] = ['en', 'es', 'pt', 'ja', 'fr', 'de'];
-  
-  return supportedLanguages.includes(browserLang as Language) 
-    ? (browserLang as Language) 
-    : 'en';
-};
-
-export const getStoredLanguage = (): Language | null => {
-  if (typeof window === 'undefined') return null;
-  
-  const stored = localStorage.getItem('preferred-language');
-  const supportedLanguages: Language[] = ['en', 'es', 'pt', 'ja', 'fr', 'de'];
-  
-  return stored && supportedLanguages.includes(stored as Language) 
-    ? (stored as Language) 
-    : null;
-};
-
-export const setStoredLanguage = (language: Language): void => {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem('preferred-language', language);
-};
-
-// Evento personalizado para comunicación entre componentes
-export const LANGUAGE_CHANGE_EVENT = 'languageChange';
-
-export const dispatchLanguageChange = (language: Language): void => {
-  if (typeof window === 'undefined') return;
-  window.dispatchEvent(new CustomEvent(LANGUAGE_CHANGE_EVENT, { detail: language }));
-};
-
-// Función helper para obtener traducciones
-export const getNavTranslation = (language: Language) => {
-  return navTranslations[language] || navTranslations.en;
-};
-
-export const getHeroTranslation = (language: Language) => {
-  return heroTranslations[language] || heroTranslations.en;
-};
-
-
-
-
 // Traducciones para la vista pública de factura
 export const publicInvoiceTranslations: Record<Language, {
   title: string;
@@ -482,7 +434,136 @@ export const publicInvoiceTranslations: Record<Language, {
   }
 };
 
-// Función helper para traducciones de factura pública
+// **NUEVAS TRADUCCIONES PARA PROMPT USAGE DISPLAY**
+export const promptUsageTranslations: Record<Language, {
+  title: string;
+  available: string;
+  limitReached: string;
+  progress: string;
+  remainingPrompts: string;
+  nextReset: string;
+  limitReachedMessage: string;
+  lowUsageWarning: string;
+  error: string;
+}> = {
+  en: {
+    title: "Monthly Prompt Usage",
+    available: "Available",
+    limitReached: "Limit reached",
+    progress: "Progress",
+    remainingPrompts: "Remaining Prompts",
+    nextReset: "Next Reset",
+    limitReachedMessage: "You've reached your monthly prompt limit. Your quota will reset on",
+    lowUsageWarning: "You're running low on prompts this month. Consider upgrading your plan for more access.",
+    error: "Error"
+  },
+  es: {
+    title: "Uso Mensual de Prompts",
+    available: "Disponible",
+    limitReached: "Límite alcanzado",
+    progress: "Progreso",
+    remainingPrompts: "Prompts Restantes",
+    nextReset: "Próximo Reinicio",
+    limitReachedMessage: "Has alcanzado tu límite mensual de prompts. Tu cuota se reiniciará el",
+    lowUsageWarning: "Te quedan pocos prompts este mes. Considera actualizar tu plan para más acceso.",
+    error: "Error"
+  },
+  pt: {
+    title: "Uso Mensal de Prompts",
+    available: "Disponível",
+    limitReached: "Limite atingido",
+    progress: "Progresso",
+    remainingPrompts: "Prompts Restantes",
+    nextReset: "Próximo Reset",
+    limitReachedMessage: "Você atingiu seu limite mensal de prompts. Sua cota será reiniciada em",
+    lowUsageWarning: "Você está ficando com poucos prompts este mês. Considere fazer upgrade do seu plano para mais acesso.",
+    error: "Erro"
+  },
+  ja: {
+    title: "月間プロンプト使用量",
+    available: "利用可能",
+    limitReached: "制限に達しました",
+    progress: "進行状況",
+    remainingPrompts: "残りプロンプト",
+    nextReset: "次回リセット",
+    limitReachedMessage: "月間プロンプト制限に達しました。クォータは次の日にリセットされます：",
+    lowUsageWarning: "今月のプロンプトが不足しています。より多くのアクセスのためにプランのアップグレードを検討してください。",
+    error: "エラー"
+  },
+  fr: {
+    title: "Usage Mensuel des Prompts",
+    available: "Disponible",
+    limitReached: "Limite atteinte",
+    progress: "Progression",
+    remainingPrompts: "Prompts Restants",
+    nextReset: "Prochaine Réinitialisation",
+    limitReachedMessage: "Vous avez atteint votre limite mensuelle de prompts. Votre quota sera réinitialisé le",
+    lowUsageWarning: "Il vous reste peu de prompts ce mois-ci. Envisagez de mettre à niveau votre plan pour plus d'accès.",
+    error: "Erreur"
+  },
+  de: {
+    title: "Monatliche Prompt-Nutzung",
+    available: "Verfügbar",
+    limitReached: "Limit erreicht",
+    progress: "Fortschritt",
+    remainingPrompts: "Verbleibende Prompts",
+    nextReset: "Nächster Reset",
+    limitReachedMessage: "Sie haben Ihr monatliches Prompt-Limit erreicht. Ihr Kontingent wird zurückgesetzt am",
+    lowUsageWarning: "Ihnen gehen die Prompts in diesem Monat aus. Erwägen Sie ein Upgrade Ihres Plans für mehr Zugang.",
+    error: "Fehler"
+  }
+};
+
+// Utilidades para detectar idioma
+export const detectBrowserLanguage = (): Language => {
+  if (typeof window === 'undefined') return 'en';
+  
+  const browserLang = navigator.language.split('-')[0];
+  const supportedLanguages: Language[] = ['en', 'es', 'pt', 'ja', 'fr', 'de'];
+  
+  return supportedLanguages.includes(browserLang as Language) 
+    ? (browserLang as Language) 
+    : 'en';
+};
+
+export const getStoredLanguage = (): Language | null => {
+  if (typeof window === 'undefined') return null;
+  
+  const stored = localStorage.getItem('preferred-language');
+  const supportedLanguages: Language[] = ['en', 'es', 'pt', 'ja', 'fr', 'de'];
+  
+  return stored && supportedLanguages.includes(stored as Language) 
+    ? (stored as Language) 
+    : null;
+};
+
+export const setStoredLanguage = (language: Language): void => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('preferred-language', language);
+};
+
+// Evento personalizado para comunicación entre componentes
+export const LANGUAGE_CHANGE_EVENT = 'languageChange';
+
+export const dispatchLanguageChange = (language: Language): void => {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(LANGUAGE_CHANGE_EVENT, { detail: language }));
+};
+
+// Función helper para obtener traducciones
+export const getNavTranslation = (language: Language) => {
+  return navTranslations[language] || navTranslations.en;
+};
+
+export const getHeroTranslation = (language: Language) => {
+  return heroTranslations[language] || heroTranslations.en;
+};
+
 export const getPublicInvoiceTranslation = (language: Language) => {
   return publicInvoiceTranslations[language] || publicInvoiceTranslations.en;
+};
+
+// **NUEVA FUNCIÓN HELPER PARA PROMPT USAGE**
+export const getPromptUsageTranslation = (language: Language) => {
+  return promptUsageTranslations[language] || promptUsageTranslations.en;
 };

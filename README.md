@@ -1,6 +1,3 @@
-Claro. Te paso una versión revisada y adaptada del README en español, centrada en que ahora el sistema genera **facturas con IA** en lugar de resúmenes. He limpiado, clarificado y ajustado términos para que sea coherente con el nuevo propósito.
-
-````markdown
 # 🚀 Clear Invoices AI - Plantilla SaaS con Next.js
 
 Una plantilla SaaS completa construida con Next.js que permite a los usuarios subir PDFs (por ejemplo, recibos, órdenes de compra, datos contables) y generar / procesar facturas inteligentes usando IA.

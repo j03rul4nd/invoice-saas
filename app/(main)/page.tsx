@@ -1,6 +1,6 @@
 import HeroSectionInovice from "@/components/HeroSectionInovice";
 
-import Aurora from '../components/aurora';
+import Aurora from '../../components/aurora';
   
 export default function Home() {
   return (

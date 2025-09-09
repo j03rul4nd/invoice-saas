@@ -27,6 +27,7 @@ type CompanyInfo = Prisma.JsonValue & {
   address: string;
   taxId: string;
 };
+type InvoiceLanguageCode = 'es' | 'en' | 'fr' | 'de' | 'it' | 'pt' | 'ca' | 'ja' | 'zh' | 'ar';
 
 // Tipo para los datos de entrada de la solicitud PUT
 interface InvoiceUpdateInput {
@@ -35,6 +36,7 @@ interface InvoiceUpdateInput {
   dueDate?: string;
   company?: CompanyInfo;
   currency?: string;
+  language?: InvoiceLanguageCode;
   client?: ClientInfo;
   items?: InvoiceItem[];
   notes?: string;
@@ -77,6 +79,7 @@ export async function GET(
       dueDate: invoice.dueDate,
       company: invoice.companyData as CompanyInfo,
       currency: invoice.currency,
+      language: invoice.language as InvoiceLanguageCode,
       client: invoice.clientData as ClientInfo,
       items: invoice.items as InvoiceItem[],
       notes: invoice.notes,
@@ -148,6 +151,7 @@ export async function PUT(
     if (updateData.dueDate !== undefined) updatePayload.dueDate = updateData.dueDate;
     if (updateData.company !== undefined) updatePayload.companyData = updateData.company;
     if (updateData.currency !== undefined) updatePayload.currency = updateData.currency;
+    if (updateData.language !== undefined) updatePayload.language = updateData.language;
     if (updateData.client !== undefined) updatePayload.clientData = updateData.client;
     if (updateData.items !== undefined) updatePayload.items = updateData.items;
     if (updateData.notes !== undefined) updatePayload.notes = updateData.notes;
@@ -168,6 +172,7 @@ export async function PUT(
         invoiceNumber: updatedInvoice.invoiceNumber,
         date: updatedInvoice.date,
         currency: updatedInvoice.currency,
+        language: updatedInvoice.language as InvoiceLanguageCode,
         total: updatedInvoice.total,
         updatedAt: updatedInvoice.updatedAt,
       },

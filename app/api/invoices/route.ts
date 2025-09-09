@@ -28,6 +28,8 @@ type CompanyInfo = Prisma.JsonValue & {
   taxId: string;
 };
 
+type InvoiceLanguageCode = 'es' | 'en' | 'fr' | 'de' | 'it' | 'pt' | 'ca' | 'ja' | 'zh' | 'ar';
+
 // Tipo para los datos de entrada de la solicitud POST/PUT
 interface InvoiceDataInput {
   invoiceNumber: string;
@@ -35,6 +37,7 @@ interface InvoiceDataInput {
   dueDate: string;
   company: CompanyInfo;
   currency: string;
+  language: InvoiceLanguageCode;
   client: ClientInfo;
   items: InvoiceItem[];
   notes?: string;
@@ -67,6 +70,7 @@ export async function GET() {
       dueDate: invoice.dueDate,
       company: invoice.companyData as CompanyInfo,
       currency: invoice.currency,
+      language: invoice.language,
       client: invoice.clientData as ClientInfo,
       items: invoice.items as InvoiceItem[],
       notes: invoice.notes,
@@ -138,6 +142,7 @@ export async function POST(request: Request) {
         dueDate: invoiceData.dueDate,
         companyData: invoiceData.company,
         currency: invoiceData.currency,
+        language: invoiceData.language,
         clientData: invoiceData.client,
         items: invoiceData.items,
         notes: invoiceData.notes || '',
@@ -155,6 +160,7 @@ export async function POST(request: Request) {
         invoiceNumber: invoice.invoiceNumber,
         date: invoice.date,
         currency: invoice.currency,
+        language: invoice.language,
         total: invoice.total,
       },
     });

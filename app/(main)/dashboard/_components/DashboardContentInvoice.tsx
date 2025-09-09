@@ -29,10 +29,24 @@ import {
   Save, 
   Archive
 } from 'lucide-react';
+
+import { 
+  useInvoiceTranslations, 
+  getInvoiceTexts, 
+//  InvoiceLanguageCode,
+  INVOICE_TRANSLATIONS 
+} from '@/utils/invoice-translations';
+
+import { 
+   InvoiceLanguageCode, 
+  useInvoiceLanguage } from '@/hooks/useInvoiceLanguage';
+import InvoiceLanguageSelector from '@/components/InvoiceLanguageSelector';
+
 import { useInvoices } from '@/hooks/useInvoices'; // Ajusta la ruta según tu estructura
 import PromptUsageDisplay, { PromptUsageDisplayRef } from '@/components/PromptUsageDisplay'
 import { usePromptUsage } from '@/hooks/usePromptUsage'
 import { useCurrency } from '@/hooks/useCurrency';
+
 
 import { usePublicLinks } from '@/hooks/usePublicLinks';
 import CurrencySelector from '@/components/CurrencySelector';
@@ -186,6 +200,7 @@ interface InvoiceData {
   date: string;
   dueDate: string;
   company: CompanyInfo;
+  language: InvoiceLanguageCode;
   currency: string; // Nueva propiedad
   client: ClientInfo;
   items: InvoiceItem[];
@@ -209,6 +224,7 @@ interface APIInvoiceResponse {
   taxRate?: number;
   invoiceNumber?: string;
   currency?: string;
+  language?: InvoiceLanguageCode;
 }
 
 // Hook personalizado mejorado para manejar el estado de la factura
@@ -217,6 +233,7 @@ const useInvoiceData = () => {
     invoiceNumber: '',
     date: '',
     dueDate: '',
+    language: 'es' as InvoiceLanguageCode, // o defaultInvoiceLanguage.code
     currency: 'EUR',
     company: {
       name: '',
@@ -379,6 +396,9 @@ const useInvoiceData = () => {
       if (apiData.client) {
         newData.client = { ...prev.client, ...apiData.client };
       }
+
+      // En applyAPIResponse, añadir:
+      if (apiData.language) newData.language = apiData.language;
       
       // Actualizar items si vienen en la respuesta
       if (apiData.items && apiData.items.length > 0) {
@@ -405,7 +425,7 @@ const useInvoiceData = () => {
   }, [generateItemId, calculateTotals]);
 
   // Función para resetear la factura completa
-  const resetInvoice = useCallback((defaultCurrency = 'EUR') => {
+  const resetInvoice = useCallback((defaultCurrency = 'EUR', defaultLanguage: InvoiceLanguageCode = 'es') => {
     const now = new Date();
     const futureDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
     
@@ -414,6 +434,7 @@ const useInvoiceData = () => {
       date: now.toISOString().split('T')[0],
       dueDate: futureDate.toISOString().split('T')[0],
       currency: defaultCurrency,
+      language: defaultLanguage,
       company: {
         name: '',
         email: '',
@@ -564,6 +585,15 @@ export default function InvoiceGenerator() {
       isCopying
   } = usePublicLinks();
 
+  // Añadir junto a los otros hooks
+  const {
+   currentInvoiceLanguage,
+   defaultInvoiceLanguage,
+   isLoading: languageLoading,
+   error: languageError,
+   updateUserInvoiceLanguage,
+ } = useInvoiceLanguage();
+
   const { forceRefresh } = usePromptUsage();
 
   const { generateInvoice, isLoading, error } = useInvoiceAPI();
@@ -579,6 +609,8 @@ export default function InvoiceGenerator() {
 
   const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+
 
 
   // Efecto para inicializar datos que dependen del cliente
@@ -603,8 +635,12 @@ export default function InvoiceGenerator() {
       const invoiceIds = invoices.map(invoice => invoice.id);
       loadPublicLinksForInvoices(invoiceIds);
     }
+    // En el useEffect existente, añadir:
+    if (currentInvoiceLanguage && invoiceData.language !== currentInvoiceLanguage.code) {
+      updateInvoiceData({ language: currentInvoiceLanguage.code });
+    }
 
-  }, [updateInvoiceData, currentCurrency, invoiceData.currency, updateCurrency, invoices, loadPublicLinksForInvoices]);
+  }, [updateInvoiceData, currentCurrency, invoiceData.currency, updateCurrency, invoices, loadPublicLinksForInvoices, currentInvoiceLanguage, invoiceData.language]);
 
   // Función para manejar la generación con IA
   const handleAIGeneration = useCallback(async () => {
@@ -642,8 +678,14 @@ export default function InvoiceGenerator() {
      updateInvoiceData({ currency: currencyCode });
     }
   }, [updateUserCurrency, updateCurrency, updateInvoiceData, editingInvoiceId]);
+
+  // Añadir esta función en el componente principal
+  const handleInvoiceLanguageChange = useCallback(async (languageCode: InvoiceLanguageCode) => {
+    await updateUserInvoiceLanguage(languageCode);
+    updateInvoiceData({ language: languageCode });
+  }, [updateUserInvoiceLanguage, updateInvoiceData]);
   
-  const handleLoadInvoice = useCallback((savedInvoice: any) => {
+  const handleLoadInvoice = useCallback(async (savedInvoice: any) => {
     // Usar tu función applyAPIResponse existente para cargar los datos
     applyAPIResponse({
         company: savedInvoice.company,
@@ -652,21 +694,29 @@ export default function InvoiceGenerator() {
         notes: savedInvoice.notes,
         taxRate: savedInvoice.taxRate,
         currency: savedInvoice.currency,
-        invoiceNumber: savedInvoice.invoiceNumber
+        invoiceNumber: savedInvoice.invoiceNumber,
+        language: savedInvoice.language // ✅ Incluir el idioma
     });
     
     // También actualizar fechas y otros campos
     updateInvoiceData({
         date: savedInvoice.date,
-        dueDate: savedInvoice.dueDate
+        dueDate: savedInvoice.dueDate,
+        currency: savedInvoice.currency
     });
 
+    // ✅ Actualizar moneda si es diferente
     if (savedInvoice.currency && savedInvoice.currency !== currentCurrency.code) {
-     handleCurrencyChange(savedInvoice.currency);
+     await handleCurrencyChange(savedInvoice.currency);
+    }
+
+    // ✅ Actualizar idioma si es diferente
+    if (savedInvoice.language && savedInvoice.language !== currentInvoiceLanguage?.code) {
+      await handleInvoiceLanguageChange(savedInvoice.language);
     }
     
     setShowSavedInvoices(false);
-  }, [applyAPIResponse, updateInvoiceData, handleCurrencyChange, currentCurrency.code]);
+  }, [applyAPIResponse, updateInvoiceData, handleCurrencyChange, currentCurrency.code, handleInvoiceLanguageChange, currentInvoiceLanguage]);
   
   const handleDeleteInvoice = useCallback(async (invoiceId: string, invoiceNumber: string) => {
   if (confirm(`¿Estás seguro de que quieres eliminar la factura ${invoiceNumber}?`)) {
@@ -680,9 +730,10 @@ export default function InvoiceGenerator() {
     if (currentCurrency.code !== defaultCurrency.code) {
       handleCurrencyChange(defaultCurrency.code);
     }
-    resetInvoice(defaultCurrency.code);
+    // ✅ Pasar tanto moneda como idioma por defecto
+    resetInvoice(defaultCurrency.code, currentInvoiceLanguage?.code || 'es');
     setEditingInvoiceId(null);
-  }, [resetInvoice, defaultCurrency, currentCurrency.code, handleCurrencyChange]);
+  }, [resetInvoice, defaultCurrency, currentCurrency.code, handleCurrencyChange, currentInvoiceLanguage]);
   
   // ✅ Handler para actualizar factura existente
 const handleUpdateInvoice = useCallback(async (invoiceId: string) => {
@@ -693,7 +744,9 @@ const handleUpdateInvoice = useCallback(async (invoiceId: string) => {
   }
 }, [updateInvoice, invoiceData]);
 
-// ✅ Handler para cargar factura específica para edición
+
+
+  // ✅ Handler para cargar factura específica para edición
 const handleEditInvoice = useCallback(async (invoiceId: string) => {
   const invoice = await getInvoice(invoiceId);
   if (invoice) {
@@ -705,7 +758,8 @@ const handleEditInvoice = useCallback(async (invoiceId: string) => {
       notes: invoice.notes,
       taxRate: invoice.taxRate,
       invoiceNumber: invoice.invoiceNumber,
-      currency: invoice.currency 
+      currency: invoice.currency,
+      language: invoice.language // ✅ Incluir el idioma
     });
     
     // Actualizar fechas y moneda
@@ -715,16 +769,21 @@ const handleEditInvoice = useCallback(async (invoiceId: string) => {
       currency: invoice.currency
     });
 
+    // ✅ Actualizar moneda si es diferente
     if (invoice.currency && invoice.currency !== currentCurrency.code) {
-      handleCurrencyChange(invoice.currency);
+      await handleCurrencyChange(invoice.currency);
+    }
+
+    // ✅ Actualizar idioma si es diferente
+    if (invoice.language && invoice.language !== currentInvoiceLanguage?.code) {
+      await handleInvoiceLanguageChange(invoice.language);
     }
     
     // Marcar como editando
     setEditingInvoiceId(invoiceId);
     setShowSavedInvoices(false);
   }
-}, [getInvoice, applyAPIResponse, updateInvoiceData, handleCurrencyChange, currentCurrency.code]);
-
+}, [getInvoice, applyAPIResponse, updateInvoiceData, handleCurrencyChange, currentCurrency.code, handleInvoiceLanguageChange, currentInvoiceLanguage]);
 // ✅ Handler para duplicar factura
 const handleDuplicateInvoice = useCallback(async (invoiceId: string, invoiceNumber: string) => {
   if (confirm(`¿Duplicar la factura ${invoiceNumber}?`)) {
@@ -790,6 +849,7 @@ const handleValidateAndSave = useCallback(async () => {
 }, [invoiceData, handleSaveOrUpdateInvoice]);
 
 
+  const invoiceTexts = useInvoiceTranslations(invoiceData.language);
 
 const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNumber: string) => {
     const result = await generatePublicLink(invoiceId);
@@ -818,6 +878,8 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
     }
   }, [hasPublicLink, handleRemovePublicLink, handleGeneratePublicLink]);
 
+
+  
 
   // Función para exportar la factura como PDF
   const exportToPDF = useCallback(async () => {
@@ -1196,6 +1258,14 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                     <Hash className="h-5 w-5 mr-2" />
                     {TEXTS.invoiceInfo.title}
                     </h3>
+
+                    <InvoiceLanguageSelector
+                      currentInvoiceLanguage={currentInvoiceLanguage}
+                      onInvoiceLanguageChange={handleInvoiceLanguageChange}
+                      isLoading={languageLoading}
+                      error={languageError}
+                    />
+
                     {/* Nuevo selector de moneda */}
                     <CurrencySelector
                     currentCurrency={currentCurrency}
@@ -1529,21 +1599,24 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                   {/* Header */}
                   <div className="flex justify-between items-start mb-8">
                     <div>
-                      <h1 className="text-3xl font-bold text-gray-800 mb-2">{TEXTS.invoice.title}</h1>
+                      {/* ✅ CORREGIDO: Usar nueva estructura de tipado */}
+                      <h1 className="text-3xl font-bold text-gray-800 mb-2">{invoiceTexts.invoice.title}</h1>
                       <p className="text-gray-600">#{invoiceData.invoiceNumber}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-gray-600">{TEXTS.invoiceInfo.date}: {invoiceData.date}</p>
-                      <p className="text-sm text-gray-600">{TEXTS.invoiceInfo.dueDate}: {invoiceData.dueDate}</p>
+                      {/* ✅ CORREGIDO: Usar nueva estructura de tipado */}
+                      <p className="text-sm text-gray-600">{invoiceTexts.invoice.date}: {invoiceData.date}</p>
+                      <p className="text-sm text-gray-600">{invoiceTexts.invoice.dueDate}: {invoiceData.dueDate}</p>
                     </div>
                   </div>
 
                   {/* Company & Client Info */}
                   <div className="grid grid-cols-2 gap-8 mb-8">
                     <div>
-                      <h3 className="font-semibold text-gray-800 mb-2">{TEXTS.invoice.from}</h3>
+                      {/* ✅ CORREGIDO: Usar nueva estructura de tipado */}
+                      <h3 className="font-semibold text-gray-800 mb-2">{invoiceTexts.invoice.from}</h3>
                       <div className="text-sm text-gray-600">
-                        <p className="font-medium">{invoiceData.company.name || TEXTS.invoice.defaultCompany}</p>
+                        <p className="font-medium">{invoiceData.company.name || invoiceTexts.other.defaultCompany}</p>
                         <p>{invoiceData.company.email}</p>
                         <p>{invoiceData.company.phone}</p>
                         <p>{invoiceData.company.taxId}</p>
@@ -1551,9 +1624,10 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                       </div>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-800 mb-2">{TEXTS.invoice.to}</h3>
+                      {/* ✅ CORREGIDO: Usar nueva estructura de tipado */}
+                      <h3 className="font-semibold text-gray-800 mb-2">{invoiceTexts.invoice.to}</h3>
                       <div className="text-sm text-gray-600">
-                        <p className="font-medium">{invoiceData.client.name || TEXTS.invoice.defaultClient}</p>
+                        <p className="font-medium">{invoiceData.client.name || invoiceTexts.other.defaultClient}</p>
                         <p>{invoiceData.client.email}</p>
                         <p>{invoiceData.client.phone}</p>
                         <p className="whitespace-pre-line">{invoiceData.client.address}</p>
@@ -1566,16 +1640,17 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                     <table className="w-full">
                       <thead className="border-b-2 border-gray-200">
                         <tr>
-                          <th className="text-left py-2 text-sm font-semibold text-gray-800">{TEXTS.invoice.description}</th>
-                          <th className="text-center py-2 text-sm font-semibold text-gray-800">{TEXTS.invoice.quantity}</th>
-                          <th className="text-right py-2 text-sm font-semibold text-gray-800">{TEXTS.invoice.price}</th>
-                          <th className="text-right py-2 text-sm font-semibold text-gray-800">{TEXTS.invoice.total}</th>
+                          {/* ✅ CORREGIDO: Usar nueva estructura de tipado */}
+                          <th className="text-left py-2 text-sm font-semibold text-gray-800">{invoiceTexts.table.description}</th>
+                          <th className="text-center py-2 text-sm font-semibold text-gray-800">{invoiceTexts.table.quantity}</th>
+                          <th className="text-right py-2 text-sm font-semibold text-gray-800">{invoiceTexts.table.price}</th>
+                          <th className="text-right py-2 text-sm font-semibold text-gray-800">{invoiceTexts.table.total}</th>
                         </tr>
                       </thead>
                       <tbody>
                         {invoiceData.items.map((item) => (
                           <tr key={item.id} className="border-b border-gray-100">
-                            <td className="py-3 text-sm text-gray-700">{item.description || TEXTS.items.defaultDescription}</td>
+                            <td className="py-3 text-sm text-gray-700">{item.description || invoiceTexts.other.defaultItem}</td>
                             <td className="py-3 text-sm text-gray-700 text-center">{item.quantity}</td>
                             <td className="py-3 text-sm text-gray-700 text-right">{formatPrice(item.price)}</td>
                             <td className="py-3 text-sm text-gray-700 text-right">{formatPrice(item.total)}</td>
@@ -1589,15 +1664,18 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                   <div className="flex justify-end mb-8">
                     <div className="w-64">
                       <div className="flex justify-between py-2 text-sm">
-                        <span className="text-gray-600">{TEXTS.invoice.subtotal}</span>
+                        {/* ✅ CORREGIDO: Usar nueva estructura de tipado */}
+                        <span className="text-gray-600">{invoiceTexts.totals.subtotal}</span>
                         <span className="text-gray-800">{formatPrice(invoiceData.subtotal)}</span>
                       </div>
                       <div className="flex justify-between py-2 text-sm">
-                        <span className="text-gray-600">{TEXTS.invoice.tax} ({invoiceData.taxRate}%):</span>
+                        {/* ✅ CORREGIDO: Usar nueva estructura de tipado */}
+                        <span className="text-gray-600">{invoiceTexts.totals.tax} ({invoiceData.taxRate}%):</span>
                         <span className="text-gray-800">{formatPrice(invoiceData.tax)}</span>
                       </div>
                       <div className="flex justify-between py-2 text-lg font-semibold border-t border-gray-200">
-                        <span className="text-gray-800">{TEXTS.invoice.finalTotal}</span>
+                        {/* ✅ CORREGIDO: Usar nueva estructura de tipado */}
+                        <span className="text-gray-800">{invoiceTexts.totals.total}</span>
                         <span className="text-gray-800">{formatPrice(invoiceData.total)}</span>
                       </div>
                     </div>
@@ -1606,7 +1684,8 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                   {/* Notes */}
                   {invoiceData.notes && (
                     <div className="mt-8">
-                      <h3 className="font-semibold text-gray-800 mb-2">{TEXTS.notes.previewTitle}</h3>
+                      {/* ✅ CORREGIDO: Usar nueva estructura de tipado */}
+                      <h3 className="font-semibold text-gray-800 mb-2">{invoiceTexts.other.notes}</h3>
                       <p className="text-sm text-gray-600 whitespace-pre-line">{invoiceData.notes}</p>
                     </div>
                   )}

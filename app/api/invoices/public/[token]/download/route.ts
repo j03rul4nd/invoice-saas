@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import puppeteer from 'puppeteer';
+import { getInvoiceTexts, type InvoiceLanguageCode } from '@/utils/invoice-translations';
 
 // ✅ Fix: Correct type for Next.js App Router params
 type RouteParams = {
@@ -43,6 +44,7 @@ interface InvoiceData {
   taxRate: number;
   total: number;
   currency: string;
+  language: InvoiceLanguageCode; // ✅ NUEVO: Idioma de la factura
 }
 
 // ✅ Funciones de validación y casting seguro
@@ -138,44 +140,26 @@ function formatPrice(amount: number, currencyCode: string): string {
   return `${amount.toFixed(2)} ${symbol}`;
 }
 
-const TEXTS = {
-  invoice: {
-    title: "FACTURA",
-    from: "De:",
-    to: "Para:",
-    description: "Descripción",
-    quantity: "Cant.",
-    price: "Precio", 
-    total: "Total",
-    subtotal: "Subtotal:",
-    tax: "IVA",
-    finalTotal: "Total:",
-    defaultCompany: "Tu Empresa",
-    defaultClient: "Cliente"
-  },
-  invoiceInfo: {
-    date: "Fecha",
-    dueDate: "Fecha de Vencimiento"
-  },
-  notes: {
-    previewTitle: "Notas:"
-  },
-  items: {
-    defaultDescription: "Producto/Servicio"
-  }
-};
-
+// ✅ NUEVA FUNCIÓN: Generar HTML con traducciones dinámicas
 function generateInvoiceHTML(invoiceData: InvoiceData): string {
+  // ✅ Obtener las traducciones según el idioma de la factura
+  const texts = getInvoiceTexts(invoiceData.language);
+  
   // ✅ Usar la moneda de la factura para formatear precios
   const { currency } = invoiceData;
   const formatWithCurrency = (amount: number) => formatPrice(amount, currency);
 
+  // ✅ Detectar si es un idioma RTL (Right-to-Left)
+  const isRTL = invoiceData.language === 'ar';
+  const directionStyle = isRTL ? 'direction: rtl; text-align: right;' : '';
+  const textAlign = isRTL ? 'text-align: right;' : 'text-align: left;';
+
   return `
     <!DOCTYPE html>
-    <html>
+    <html lang="${invoiceData.language}" ${isRTL ? 'dir="rtl"' : ''}>
     <head>
       <meta charset="utf-8">
-      <title>Invoice ${invoiceData.invoiceNumber}</title>
+      <title>${texts.invoice.title} ${invoiceData.invoiceNumber}</title>
       <style>
         body {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -184,6 +168,7 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
           background: white;
           color: black;
           line-height: 1.5;
+          ${directionStyle}
         }
         .invoice-container {
           background: white;
@@ -195,6 +180,7 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
           justify-content: space-between;
           align-items: flex-start;
           margin-bottom: 32px;
+          ${isRTL ? 'flex-direction: row-reverse;' : ''}
         }
         .header h1 {
           font-size: 30px;
@@ -207,7 +193,7 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
           margin: 0;
         }
         .header .dates {
-          text-align: right;
+          ${isRTL ? 'text-align: left;' : 'text-align: right;'}
         }
         .header .dates p {
           font-size: 14px;
@@ -219,6 +205,7 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
           grid-template-columns: 1fr 1fr;
           gap: 32px;
           margin-bottom: 32px;
+          ${isRTL ? 'direction: rtl;' : ''}
         }
         .info-section h3 {
           font-weight: 600;
@@ -249,10 +236,10 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
           font-weight: 600;
           color: #1f2937;
         }
-        .items-table th:first-child { text-align: left; }
+        .items-table th:first-child { ${isRTL ? 'text-align: right;' : 'text-align: left;'} }
         .items-table th:nth-child(2) { text-align: center; }
-        .items-table th:nth-child(3) { text-align: right; }
-        .items-table th:nth-child(4) { text-align: right; }
+        .items-table th:nth-child(3) { ${isRTL ? 'text-align: left;' : 'text-align: right;'} }
+        .items-table th:nth-child(4) { ${isRTL ? 'text-align: left;' : 'text-align: right;'} }
         .items-table tbody tr {
           border-bottom: 1px solid #f3f4f6;
         }
@@ -261,13 +248,13 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
           font-size: 14px;
           color: #374151;
         }
-        .items-table td:first-child { text-align: left; }
+        .items-table td:first-child { ${isRTL ? 'text-align: right;' : 'text-align: left;'} }
         .items-table td:nth-child(2) { text-align: center; }
-        .items-table td:nth-child(3) { text-align: right; }
-        .items-table td:nth-child(4) { text-align: right; }
+        .items-table td:nth-child(3) { ${isRTL ? 'text-align: left;' : 'text-align: right;'} }
+        .items-table td:nth-child(4) { ${isRTL ? 'text-align: left;' : 'text-align: right;'} }
         .totals {
           display: flex;
-          justify-content: flex-end;
+          justify-content: ${isRTL ? 'flex-start' : 'flex-end'};
           margin-bottom: 32px;
         }
         .totals-box {
@@ -305,11 +292,11 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
           margin: 0;
           white-space: pre-line;
         }
-        /* ✅ Agregar indicador de moneda en la esquina superior derecha */
-        .currency-indicator {
+        /* ✅ Indicador de moneda e idioma */
+        .language-currency-indicator {
           position: absolute;
           top: 20px;
-          right: 20px;
+          ${isRTL ? 'left: 20px;' : 'right: 20px;'}
           background: #f3f4f6;
           border: 1px solid #e5e7eb;
           padding: 4px 8px;
@@ -322,25 +309,26 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
     </head>
     <body>
       <div class="invoice-container">        
+        
 
         <!-- Header -->
         <div class="header">
           <div>
-            <h1>${TEXTS.invoice.title}</h1>
+            <h1>${texts.invoice.title}</h1>
             <p class="invoice-number">#${invoiceData.invoiceNumber}</p>
           </div>
           <div class="dates">
-            <p>${TEXTS.invoiceInfo.date}: ${invoiceData.date}</p>
-            <p>${TEXTS.invoiceInfo.dueDate}: ${invoiceData.dueDate}</p>
+            <p>${texts.invoice.date}: ${invoiceData.date}</p>
+            <p>${texts.invoice.dueDate}: ${invoiceData.dueDate}</p>
           </div>
         </div>
 
         <!-- Company & Client Info -->
         <div class="info-section">
           <div>
-            <h3>${TEXTS.invoice.from}</h3>
+            <h3>${texts.invoice.from}</h3>
             <div class="details">
-              <p class="name">${invoiceData.company.name || TEXTS.invoice.defaultCompany}</p>
+              <p class="name">${invoiceData.company.name || texts.other.defaultCompany}</p>
               ${invoiceData.company.email ? `<p>${invoiceData.company.email}</p>` : ''}
               ${invoiceData.company.phone ? `<p>${invoiceData.company.phone}</p>` : ''}
               ${invoiceData.company.taxId ? `<p>${invoiceData.company.taxId}</p>` : ''}
@@ -348,9 +336,9 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
             </div>
           </div>
           <div>
-            <h3>${TEXTS.invoice.to}</h3>
+            <h3>${texts.invoice.to}</h3>
             <div class="details">
-              <p class="name">${invoiceData.client.name || TEXTS.invoice.defaultClient}</p>
+              <p class="name">${invoiceData.client.name || texts.other.defaultClient}</p>
               ${invoiceData.client.email ? `<p>${invoiceData.client.email}</p>` : ''}
               ${invoiceData.client.phone ? `<p>${invoiceData.client.phone}</p>` : ''}
               ${invoiceData.client.address ? `<p>${invoiceData.client.address.replace(/\n/g, '<br>')}</p>` : ''}
@@ -362,16 +350,16 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
         <table class="items-table">
           <thead>
             <tr>
-              <th>${TEXTS.invoice.description}</th>
-              <th>${TEXTS.invoice.quantity}</th>
-              <th>${TEXTS.invoice.price}</th>
-              <th>${TEXTS.invoice.total}</th>
+              <th>${texts.table.description}</th>
+              <th>${texts.table.quantity}</th>
+              <th>${texts.table.price}</th>
+              <th>${texts.table.total}</th>
             </tr>
           </thead>
           <tbody>
             ${invoiceData.items.map(item => `
               <tr>
-                <td>${item.description || TEXTS.items.defaultDescription}</td>
+                <td>${item.description || texts.other.defaultItem}</td>
                 <td>${item.quantity}</td>
                 <td>${formatWithCurrency(item.price)}</td>
                 <td>${formatWithCurrency(item.total)}</td>
@@ -384,15 +372,15 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
         <div class="totals">
           <div class="totals-box">
             <div class="total-row">
-              <span class="label">${TEXTS.invoice.subtotal}</span>
+              <span class="label">${texts.totals.subtotal}</span>
               <span class="value">${formatWithCurrency(invoiceData.subtotal)}</span>
             </div>
             <div class="total-row">
-              <span class="label">${TEXTS.invoice.tax} (${invoiceData.taxRate}%):</span>
+              <span class="label">${texts.totals.tax} (${invoiceData.taxRate}%):</span>
               <span class="value">${formatWithCurrency(invoiceData.tax)}</span>
             </div>
             <div class="total-row final">
-              <span class="label">${TEXTS.invoice.finalTotal}</span>
+              <span class="label">${texts.totals.total}</span>
               <span class="value">${formatWithCurrency(invoiceData.total)}</span>
             </div>
           </div>
@@ -401,7 +389,7 @@ function generateInvoiceHTML(invoiceData: InvoiceData): string {
         <!-- Notes -->
         ${invoiceData.notes ? `
           <div class="notes">
-            <h3>${TEXTS.notes.previewTitle}</h3>
+            <h3>${texts.other.notes}</h3>
             <p>${invoiceData.notes}</p>
           </div>
         ` : ''}
@@ -451,14 +439,16 @@ async function generatePDF(htmlContent: string): Promise<Uint8Array> {
   }
 }
 
-// ✅ Fix: Updated function signature to await params
 export async function GET(
   request: NextRequest,
   context: RouteParams
 ) {
   try {
-    // ✅ Await the params promise
     const { token } = await context.params;
+
+    if (!token) {
+      return NextResponse.json({ error: 'Token requerido' }, { status: 400 });
+    }
 
     // Buscar la factura pública
     const invoice = await prisma.invoice.findUnique({
@@ -481,9 +471,17 @@ export async function GET(
     }
 
     // Verificar si el enlace ha expirado
-    if (invoice.publicExpiresAt && invoice.publicExpiresAt < new Date()) {
-      return NextResponse.json({ error: 'Enlace expirado' }, { status: 410 });
+    if (invoice.publicExpiresAt) {
+      const now = new Date();
+      const expiry = new Date(invoice.publicExpiresAt);
+      
+      if (expiry < now) {
+        return NextResponse.json({ error: 'Enlace expirado' }, { status: 410 });
+      }
     }
+
+    // ✅ Validar el idioma desde la base de datos
+    const invoiceLanguage = (invoice.language as InvoiceLanguageCode) || 'es';
 
     // ✅ Transformar los datos de Prisma al formato InvoiceData con validación segura
     const invoiceData: InvoiceData = {
@@ -498,19 +496,18 @@ export async function GET(
       tax: invoice.tax,
       taxRate: invoice.taxRate,
       total: invoice.total,
-      currency: invoice.currency || 'EUR' // ✅ Fallback a EUR si no hay moneda
+      currency: invoice.currency || 'EUR', // ✅ Fallback a EUR si no hay moneda
+      language: invoiceLanguage // ✅ NUEVO: Usar el idioma de la factura desde la DB
     };
 
-    console.log(`Generating public PDF with currency: ${invoiceData.currency}`);
-
-    // ✅ Generar HTML con la misma plantilla
+    // ✅ Generar HTML con las traducciones correspondientes
     const htmlContent = generateInvoiceHTML(invoiceData);
     
     // ✅ Generar PDF con Puppeteer (ahora devuelve Uint8Array)
     const pdfBuffer = await generatePDF(htmlContent);
     
-    // ✅ Incluir la moneda en el nombre del archivo
-    const filename = `factura-${invoiceData.invoiceNumber}-${invoiceData.currency.toLowerCase()}.pdf`;
+    // ✅ Incluir el idioma y moneda en el nombre del archivo
+    const filename = `invoice-${invoiceData.invoiceNumber}-${invoiceData.language}-${invoiceData.currency.toLowerCase()}.pdf`;
     
     // ✅ SOLUCIÓN: Convertir Uint8Array a Buffer para NextResponse
     return new NextResponse(Buffer.from(pdfBuffer), {
@@ -522,7 +519,13 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('Error downloading public invoice:', error);
+    console.error('Error generating public PDF:', error);
+    
+    // Log adicional si es error de Prisma
+    if (error && typeof error === 'object' && 'code' in error) {
+      console.error('Prisma error code:', (error as any).code);
+    }
+    
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

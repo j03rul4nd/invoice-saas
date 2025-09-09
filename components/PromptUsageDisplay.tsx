@@ -2,6 +2,8 @@
 
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { Progress } from '@/components/ui/progress'
+import { getPromptUsageTranslation, Language } from '@/lib/i18n'
+import { useLanguage } from '@/hooks/useLanguage'
 
 interface PromptUsageData {
   canUse: boolean
@@ -26,6 +28,10 @@ const PromptUsageDisplay = forwardRef<PromptUsageDisplayRef, PromptUsageDisplayP
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [isRefreshing, setIsRefreshing] = useState(false)
+
+    // Hook para manejo de idiomas
+    const { language } = useLanguage()
+    const t = getPromptUsageTranslation(language)
 
     const fetchPromptUsage = async () => {
       try {
@@ -79,7 +85,7 @@ const PromptUsageDisplay = forwardRef<PromptUsageDisplayRef, PromptUsageDisplayP
       return (
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
           <p className="text-red-400 text-sm">
-            Error: {error}
+            {t.error}: {error}
           </p>
         </div>
       )
@@ -90,7 +96,19 @@ const PromptUsageDisplay = forwardRef<PromptUsageDisplayRef, PromptUsageDisplayP
     }
 
     const formatDate = (dateString: string) => {
-      return new Date(dateString).toLocaleDateString('en-US', {
+      const date = new Date(dateString)
+      
+      // Formatear según el idioma
+      const localeMap: Record<Language, string> = {
+        en: 'en-US',
+        es: 'es-ES',
+        pt: 'pt-BR',
+        ja: 'ja-JP',
+        fr: 'fr-FR',
+        de: 'de-DE'
+      }
+
+      return date.toLocaleDateString(localeMap[language] || 'en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
@@ -109,7 +127,7 @@ const PromptUsageDisplay = forwardRef<PromptUsageDisplayRef, PromptUsageDisplayP
       }`}>
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-gray-100">
-            Monthly Prompt Usage
+            {t.title}
           </h3>
           <div className="flex items-center gap-2">
             {isRefreshing && (
@@ -120,14 +138,14 @@ const PromptUsageDisplay = forwardRef<PromptUsageDisplayRef, PromptUsageDisplayP
                 ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                 : 'bg-red-500/20 text-red-400 border border-red-500/30'
             }`}>
-              {usageData.canUse ? 'Available' : 'Limit reached'}
+              {usageData.canUse ? t.available : t.limitReached}
             </span>
           </div>
         </div>
 
         <div className="mb-6">
           <div className="flex justify-between text-sm text-gray-400 mb-2">
-            <span>Progress</span>
+            <span>{t.progress}</span>
             <span className="font-medium text-gray-200">{usageData.currentUsage} / {usageData.monthlyLimit}</span>
           </div>
           <div className="w-full bg-gray-800 rounded-full h-3 border border-gray-700">
@@ -140,13 +158,13 @@ const PromptUsageDisplay = forwardRef<PromptUsageDisplayRef, PromptUsageDisplayP
 
         <div className="grid grid-cols-2 gap-6 text-sm">
           <div className="bg-black/30 rounded-lg p-4 border border-gray-700/50">
-            <p className="text-gray-400 mb-1">Remaining Prompts</p>
+            <p className="text-gray-400 mb-1">{t.remainingPrompts}</p>
             <p className="text-2xl font-bold text-purple-300">
               {usageData.remainingPrompts}
             </p>
           </div>
           <div className="bg-black/30 rounded-lg p-4 border border-gray-700/50">
-            <p className="text-gray-400 mb-1">Next Reset</p>
+            <p className="text-gray-400 mb-1">{t.nextReset}</p>
             <p className="text-sm font-medium text-gray-200 leading-tight">
               {formatDate(usageData.nextResetDate)}
             </p>
@@ -156,7 +174,7 @@ const PromptUsageDisplay = forwardRef<PromptUsageDisplayRef, PromptUsageDisplayP
         {!usageData.canUse && (
           <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
             <p className="text-yellow-400 text-sm">
-              You’ve reached your monthly prompt limit. Your quota will reset on {formatDate(usageData.nextResetDate)}.
+              {t.limitReachedMessage} {formatDate(usageData.nextResetDate)}.
             </p>
           </div>
         )}
@@ -164,7 +182,7 @@ const PromptUsageDisplay = forwardRef<PromptUsageDisplayRef, PromptUsageDisplayP
         {usageData.usagePercentage >= 75 && usageData.canUse && (
           <div className="mt-6 p-4 bg-orange-500/10 border border-orange-500/20 rounded-lg">
             <p className="text-orange-400 text-sm">
-              You’re running low on prompts this month. Consider upgrading your plan for more access.
+              {t.lowUsageWarning}
             </p>
           </div>
         )}

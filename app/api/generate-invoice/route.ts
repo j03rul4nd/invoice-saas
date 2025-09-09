@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => ({}))
-    const { prompt, currency = 'EUR' } = body // Cambiado de 'text' a 'prompt' para coincidir con el hook
+    const { prompt, currency = 'EUR', language = 'es' } = body // Cambiado de 'text' a 'prompt' para coincidir con el hook
     
     if (!prompt || typeof prompt !== 'string') {
       throw new ApiError(400, 'Invalid input: prompt is required and must be a string')
@@ -161,6 +161,25 @@ export async function POST(request: NextRequest) {
     if (currency && !validCurrencies.includes(currency)) {
       throw new ApiError(400, `Invalid currency: ${currency}. Supported currencies: ${validCurrencies.join(', ')}`)
     }
+
+    const validLanguages = ['es', 'en', 'fr', 'de', 'it', 'pt'] // ✅ AÑADIR validación
+    if (language && !validLanguages.includes(language)) {
+      throw new ApiError(400, `Invalid language: ${language}. Supported languages: ${validLanguages.join(', ')}`)
+    }
+
+    function getLanguageInstructions(lang: string): string {
+      const instructions = {
+        'es': 'Usa español para descripciones y notas. Formato de factura español.',
+        'en': 'Use English for descriptions and notes. English invoice format.',
+        'fr': 'Utilise le français pour les descriptions et notes. Format de facture française.',
+        'de': 'Verwende Deutsch für Beschreibungen und Notizen. Deutsches Rechnungsformat.',
+        'it': 'Usa l\'italiano per descrizioni e note. Formato fattura italiana.',
+        'pt': 'Use português para descrições e notas. Formato de fatura portuguesa.'
+      };
+      return instructions[lang as keyof typeof instructions] || instructions['es'];
+    }
+
+
 
     // Verificar límites de prompts antes de procesar
     const promptLimitResult = await checkAndIncrementPromptUsage(userId)
@@ -212,7 +231,9 @@ export async function POST(request: NextRequest) {
                             "notes": "string (optional)",
                             "taxRate": number (optional, default 21, between 0-100),
                             "invoiceNumber": "string (optional)",
-                            "currency": "string (required, must be: ${currency})"
+                            "currency": "string (required, must be: ${currency})",
+                            "language": "string (required, must be: ${language})"
+
                         }
                         
                         CURRENCY AND PRICING RULES:
@@ -220,7 +241,12 @@ export async function POST(request: NextRequest) {
                         - All prices must be in ${currency}
                         - Use appropriate market rates for ${currency === 'EUR' ? 'Europe/Spain' : currency === 'USD' ? 'United States' : currency === 'GBP' ? 'United Kingdom' : 'the respective region'}
                         - Consider local market pricing standards for the currency region
-                        
+                      
+                        LANGUAGE AND LOCALIZATION RULES:
+                        - Target language: ${language}
+                        - ${getLanguageInstructions(language)}
+                        - All text content should be in ${language}
+                    
                         ${getCurrencyPricingGuidelines(currency)}
                         
                         GENERAL RULES:
@@ -304,13 +330,22 @@ export async function POST(request: NextRequest) {
 
     // Asegurar que la currency esté en la respuesta
     if (!parsedInvoiceData.currency) {
-      parsedInvoiceData.currency = currency // Fallback a la currency solicitada
+      parsedInvoiceData.currency = currency; // Fallback a la currency solicitada
     }
 
     // Validar que la currency coincida o sea válida
     if (parsedInvoiceData.currency !== currency) {
       console.warn(`AI returned currency ${parsedInvoiceData.currency}, expected ${currency}. Using requested currency.`)
-      parsedInvoiceData.currency = currency
+      parsedInvoiceData.currency = currency;
+    }
+
+    if (!parsedInvoiceData.language) {
+      parsedInvoiceData.language = language;
+    }
+
+    if (parsedInvoiceData.language !== language) {
+      console.warn(`AI returned language ${parsedInvoiceData.language}, expected ${language}. Using requested language.`)
+      parsedInvoiceData.language = language
     }
 
 
@@ -321,6 +356,8 @@ export async function POST(request: NextRequest) {
     // Devolver la respuesta en el formato esperado por el hook
     return NextResponse.json({
       ...parsedInvoiceData, // Spread del objeto parseado (client, items, notes, etc.)
+      language,
+      currency,
       promptUsage: {
         remaining: promptLimitResult.remainingPrompts - 1,
         used: promptLimitResult.currentUsage + 1,

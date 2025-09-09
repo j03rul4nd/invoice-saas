@@ -19,6 +19,8 @@ model User {
   subscription          Subscription?
   invoices              Invoice[]     // Relación con facturas
   preferredCurrency     String        @default("EUR")  // Nueva campo para moneda preferida
+  preferredLanguage     String        @default("es")   // ✅ NUEVO: Idioma preferido del usuario
+  preferredInvoiceLanguage String @default("es")
 
   // Campos para límite de prompts
   monthlyPromptLimit    Int           @default(10)  // Límite mensual de prompts (por defecto 10)
@@ -56,8 +58,9 @@ model Invoice {
   
   // Items de la factura (JSON array)
   items         Json
-
+  
   currency      String   @default("EUR")
+  language      String   @default("es")     // ✅ NUEVO: Idioma de la factura (es, en, fr, de, etc.)
   
   notes         String?
   subtotal      Float
@@ -79,4 +82,5 @@ model Invoice {
   @@index([userId])
   @@index([userId, createdAt])
   @@index([publicToken])  // ✅ NUEVO ÍNDICE para búsquedas rápidas
+  @@index([language])     // ✅ NUEVO ÍNDICE para filtrar por idioma
 }
