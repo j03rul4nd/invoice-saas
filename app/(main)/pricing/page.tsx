@@ -42,9 +42,15 @@ export default async function Pricing() {
     async function createSubscription() {
         "use server"
 
+        console.log("🚀 Starting createSubscription function")
+        console.log("📊 authCheck:", JSON.stringify(authCheck, null, 2))
+
         if (!authCheck.userId) {
+            console.log("❌ No userId found, redirecting to sign-in")
             return redirect('/sign-in?redirect_url=/pricing')
         }
+
+        console.log("👤 User ID:", authCheck.userId)
 
         let databaseUser = await prisma.user.findUnique({
             where: {
@@ -55,16 +61,23 @@ export default async function Pricing() {
             }
         })
 
+        console.log("🗄️ Database user:", JSON.stringify(databaseUser, null, 2))
+
         if (!databaseUser) {
+            console.log("❌ DatabaseUser Not Found")
             throw new Error('DatabaseUser Not Found')
         }
 
         const email = user?.primaryEmailAddress?.emailAddress
+        console.log("📧 User email:", email)
         
         if (!databaseUser.stripeCustomerId) {
+            console.log("🔄 Creating new Stripe customer...")
             const customer = await stripe.customers.create({
                 email: email
             })
+
+            console.log("✅ Stripe customer created:", customer.id)
 
             databaseUser = await prisma.user.update({
                 where: {
@@ -75,35 +88,88 @@ export default async function Pricing() {
                 },
                 select: { stripeCustomerId: true }
             })
+
+            console.log("📝 Updated database user:", JSON.stringify(databaseUser, null, 2))
         }
 
         if (!databaseUser.stripeCustomerId) {
+            console.log("❌ Failed to set stripeCustomerId")
             throw new Error('Failed to set stripeCustomerId for the user')
         }
+
+        // Log environment variables
+        console.log("🔧 Environment variables:")
+        console.log("  - NODE_ENV:", process.env.NODE_ENV)
+        console.log("  - NEXT_PUBLIC_URL:", process.env.NEXT_PUBLIC_URL)
+        console.log("  - PRODUCTION_URL:", process.env.PRODUCTION_URL)
+        console.log("  - STRIPE_PRICE_ID:", process.env.STRIPE_PRICE_ID)
 
         const domainUrl = process.env.NEXT_PUBLIC_URL || 
             (process.env.NODE_ENV === 'production' 
                 ? process.env.PRODUCTION_URL 
                 : 'http://localhost:3000')
 
+        console.log("🌐 Determined domain URL:", domainUrl)
+
         if (!domainUrl) {
+            console.log("❌ Missing domain URL configuration")
             throw new Error('Missing domain URL configuration')
         }
 
-        const subscriptionUrl = await getStripeSession({
-            customerId: databaseUser.stripeCustomerId,
-            domainUrl: domainUrl,
-            priceId: process.env.STRIPE_PRICE_ID as string,
-            successUrl: `${domainUrl}dashboard?payment=success`
-        })
+        // Validar que la URL sea válida
+        try {
+            const testUrl = new URL(domainUrl)
+            console.log("✅ Domain URL is valid:", testUrl.toString())
+        } catch (error) {
+            console.log("❌ Invalid domain URL:", error)
+            throw new Error(`Invalid domain URL: ${domainUrl}`)
+        }
 
-        return redirect(subscriptionUrl)
+        const successUrl = `${domainUrl}dashboard?payment=success`
+        console.log("🎯 Success URL:", successUrl)
+
+        // Validar que la success URL sea válida
+        try {
+            const testSuccessUrl = new URL(successUrl)
+            console.log("✅ Success URL is valid:", testSuccessUrl.toString())
+        } catch (error) {
+            console.log("❌ Invalid success URL:", error)
+            throw new Error(`Invalid success URL: ${successUrl}`)
+        }
+
+        console.log("💳 Creating Stripe session with parameters:")
+        console.log("  - customerId:", databaseUser.stripeCustomerId)
+        console.log("  - domainUrl:", domainUrl)
+        console.log("  - priceId:", process.env.STRIPE_PRICE_ID)
+        console.log("  - successUrl:", successUrl)
+
+        try {
+            const subscriptionUrl = await getStripeSession({
+                customerId: databaseUser.stripeCustomerId,
+                domainUrl: domainUrl,
+                priceId: process.env.STRIPE_PRICE_ID as string,
+                successUrl: successUrl
+            })
+
+            console.log("✅ Stripe session created successfully:", subscriptionUrl)
+            console.log("🔄 Redirecting to Stripe...")
+            
+            return redirect(subscriptionUrl)
+        } catch (error) {
+            console.log("❌ Error creating Stripe session:")
+            console.error(error)
+            throw error
+        }
     }
 
     async function createCustomerPortal(){
         "use server"
 
+        console.log("🏪 Starting createCustomerPortal function")
+        console.log("📊 authCheck:", JSON.stringify(authCheck, null, 2))
+
         if (!authCheck.userId) {
+            console.log("❌ No userId found, redirecting to sign-in")
             return redirect('sign-in?redirect_url=/pricing')
         }
 
@@ -111,12 +177,31 @@ export default async function Pricing() {
             ? (process.env.PRODUCTION_URL || 'https://invoice-saas-1bmqr0p72-joel-links-projects.vercel.app')
             : 'http://localhost:3000'
 
-        const customerPortalUrl = await stripe.billingPortal.sessions.create({
-            customer: subscription?.user.stripeCustomerId as string,
-            return_url: returnUrl.replace(/\/$/, '') // Remover trailing slash
-        })
+        console.log("🔙 Return URL:", returnUrl)
+        console.log("💳 Stripe Customer ID:", subscription?.user.stripeCustomerId)
 
-        return redirect(customerPortalUrl.url)
+        // Validar return URL
+        try {
+            const testReturnUrl = new URL(returnUrl.replace(/\/$/, ''))
+            console.log("✅ Return URL is valid:", testReturnUrl.toString())
+        } catch (error) {
+            console.log("❌ Invalid return URL:", error)
+            throw new Error(`Invalid return URL: ${returnUrl}`)
+        }
+
+        try {
+            const customerPortalUrl = await stripe.billingPortal.sessions.create({
+                customer: subscription?.user.stripeCustomerId as string,
+                return_url: returnUrl.replace(/\/$/, '') // Remover trailing slash
+            })
+
+            console.log("✅ Customer portal created:", customerPortalUrl.url)
+            return redirect(customerPortalUrl.url)
+        } catch (error) {
+            console.log("❌ Error creating customer portal:")
+            console.error(error)
+            throw error
+        }
     }
 
     const backLink = authCheck.isAuthenticated ? '/dashboard' : '/';
