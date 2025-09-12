@@ -6,6 +6,7 @@ import { redirect } from "next/navigation"
 import { currentUser } from "@clerk/nextjs/server"
 import Link from "next/link"
 import { checkAuthenticationAndSubscription } from "@/lib/checkAuthSubscription"
+import PricingCardClient from "./PricingCardClient" // Componente cliente separado
 
 async function getData(userId: string | null) {
     unstable_noStore()
@@ -37,7 +38,6 @@ export default async function Pricing() {
     
     const isSubscribed = subscription?.status === "active";
     
-  
 
     async function createSubscription() {
         "use server"
@@ -100,7 +100,6 @@ export default async function Pricing() {
         return redirect(subscriptionUrl)
     }
 
-
     async function createCustomerPortal(){
         "use server"
 
@@ -119,7 +118,7 @@ export default async function Pricing() {
     const backLink = authCheck.isAuthenticated ? '/dashboard' : '/';
 
     return (
-        <div className="py-16 px-4">
+        <div className="py-16 px-4 min-h-screen">
             <div className="max-w-4xl mx-auto">
                 <Link 
                     href={backLink} 
@@ -130,75 +129,17 @@ export default async function Pricing() {
                 </Link>
                 
                 <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-12 bg-clip-text text-transparent 
-                                bg-gradient-to-r from-white to-purple-200">
+                                bg-gradient-to-r from-white to-purple-200 text-center">
                     Subscription Plan
                 </h1>
                 
-                <div className="rounded-xl border border-purple-300/10 bg-black/30 shadow-[0_8px_30px_-12px]
-                                 shadow-purple-500/20 p-8 backdrop-blur-sm">
-                    <div className="space-y-6">
-                        <h2 className="text-3xl font-semibold tracking-tight border-b border-purple-300/20 pb-4">
-                            Full Access
-                        </h2>
-                        
-                        <div className="space-y-4">
-                            <p className="text-white/80 text-lg">Access to all features</p>
-                            <p className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-purple-200">
-                                $19.99/year
-                            </p>
-                            
-                            <ul className="space-y-2 text-white/70 py-4">
-                                <li className="flex items-center">
-                                    <span className="mr-2">✓</span> Unlimited PDF processing
-                                </li>
-                                <li className="flex items-center">
-                                    <span className="mr-2">✓</span> Advanced AI analysis
-                                </li>
-                                <li className="flex items-center">
-                                    <span className="mr-2">✓</span> Priority support
-                                </li>
-                            </ul>
-                            
-                            <div className="pt-4">
-                                {authCheck.isAuthenticated ? (
-                                    isSubscribed ? (
-                                        <form action={createCustomerPortal}>
-                                            <button 
-                                                type="submit"
-                                                className="group relative inline-flex w-full justify-center items-center gap-2 rounded-full bg-black px-6 py-3 text-white transition-all hover:bg-white/5"
-                                            >
-                                                <span className="absolute inset-0 rounded-full bg-gradient-to-r from-[#FF1E56]
-                                                 via-[#FF00FF] to-[#00FFFF] opacity-70 blur-sm transition-all group-hover:opacity-100" />
-                                                <span className="absolute inset-0.5 rounded-full bg-black/50" />
-                                                <span className="relative font-medium">Manage Subscription</span>
-                                            </button>
-                                        </form>
-                                    ) : (
-                                        <form action={createSubscription}>
-                                            <button 
-                                                type="submit"
-                                                className="group relative inline-flex w-full justify-center items-center gap-2 
-                                                            rounded-full bg-black px-6 py-3 text-white transition-all hover:bg-white/5"
-                                            >
-                                                <span className="absolute inset-0 rounded-full bg-gradient-to-r from-[#FF1E56]
-                                                 via-[#FF00FF] to-[#00FFFF] opacity-70 blur-sm transition-all group-hover:opacity-100" />
-                                                <span className="absolute inset-0.5 rounded-full bg-black/50" />
-                                                <span className="relative font-medium">Subscribe Now</span>
-                                            </button>
-                                        </form>
-                                    )
-                                ) : (
-                                       <a href="/sign-in?redirect_url=/pricing" 
-                                          className="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 rounded-lg transition-all duration-200 ease-in-out transform hover:scale-105 hover:shadow-lg">
-                                            Sign In to Subscribe
-                                        </a>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <PricingCardClient
+                    authCheck={authCheck}
+                    isSubscribed={isSubscribed}
+                    createSubscription={createSubscription}
+                    createCustomerPortal={createCustomerPortal}
+                />
             </div>
         </div>
     )
 }
-
