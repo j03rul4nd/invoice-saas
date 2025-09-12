@@ -542,6 +542,513 @@ export const setStoredLanguage = (language: Language): void => {
   localStorage.setItem('preferred-language', language);
 };
 
+// Traducciones para la página de pricing
+export const pricingTranslations: Record<Language, {
+  title: string;
+  back: string;
+  popularBadge: string;
+  activeBadge: string;
+  plan: {
+    title: string;
+    subtitle: string;
+    price: string;
+    period: string;
+    mainFeatures: {
+      invoicesTitle: string;
+      invoicesSubtitle: string;
+      promptsTitle: string;
+      promptsSubtitle: string;
+      earlyAccessTitle: string;
+      earlyAccessSubtitle: string;
+    };
+    button: {
+      subscribe: string;
+      manageSubscription: string;
+      signInToSubscribe: string;
+    };
+    securityText: string;
+    toggleDetails: {
+      show: string;
+      hide: string;
+    };
+    extendedStorage: {
+      title: string;
+      description: string;
+      subtitle: string;
+    };
+    premiumFeatures: {
+      title: string;
+      emailSend: {
+        title: string;
+        subtitle: string;
+      };
+      prioritySupport: {
+        title: string;
+        subtitle: string;
+      };
+    };
+    comingSoon: {
+      title: string;
+      qrTemplates: {
+        title: string;
+        subtitle: string;
+      };
+      stripePayment: {
+        title: string;
+        subtitle: string;
+      };
+    };
+    betaAccess: {
+      title: string;
+      api: {
+        title: string;
+        subtitle: string;
+      };
+      betaTesting: {
+        title: string;
+        subtitle: string;
+      };
+      exclusiveTemplates: {
+        title: string;
+        subtitle: string;
+      };
+    };
+  };
+}> = {
+  en: {
+    title: "Subscription Plan",
+    back: "Back",
+    popularBadge: "Most Popular Plan",
+    activeBadge: "Active",
+    plan: {
+      title: "Invoice Generator Pro",
+      subtitle: "Complete plan for professionals and small businesses",
+      price: "$19.99",
+      period: "/month",
+      mainFeatures: {
+        invoicesTitle: "100 invoices per month",
+        invoicesSubtitle: "vs 5 in free plan - 20x more capacity",
+        promptsTitle: "100 AI prompts per month", 
+        promptsSubtitle: "vs 10 in free plan - Total automation",
+        earlyAccessTitle: "Early Access",
+        earlyAccessSubtitle: "New features before anyone else"
+      },
+      button: {
+        subscribe: "🚀 Upgrade to Pro - $19.99/month",
+        manageSubscription: "Manage Subscription",
+        signInToSubscribe: "Sign In to Subscribe"
+      },
+      securityText: "✅ Cancel anytime • 💳 Secure payment with Stripe",
+      toggleDetails: {
+        show: "See all benefits",
+        hide: "Hide details"
+      },
+      extendedStorage: {
+        title: "Extended Storage",
+        description: "2-year storage",
+        subtitle: "vs 30 days in free plan"
+      },
+      premiumFeatures: {
+        title: "Premium Features",
+        emailSend: {
+          title: "Email sending",
+          subtitle: "Share invoices directly"
+        },
+        prioritySupport: {
+          title: "Priority support",
+          subtitle: "24h response guaranteed"
+        }
+      },
+      comingSoon: {
+        title: "Coming Soon",
+        qrTemplates: {
+          title: "QR templates",
+          subtitle: "Automatic QR codes"
+        },
+        stripePayment: {
+          title: "Stripe payment button",
+          subtitle: "Integrated collections"
+        }
+      },
+      betaAccess: {
+        title: "Early Access Beta",
+        api: {
+          title: "MCP API",
+          subtitle: "Advanced automation"
+        },
+        betaTesting: {
+          title: "Beta testing",
+          subtitle: "Features first"
+        },
+        exclusiveTemplates: {
+          title: "Exclusive templates",
+          subtitle: "Unique designs"
+        }
+      }
+    }
+  },
+  es: {
+    title: "Plan de Suscripción",
+    back: "Atrás",
+    popularBadge: "Plan Más Popular",
+    activeBadge: "Activo",
+    plan: {
+      title: "Invoice Generator Pro",
+      subtitle: "Plan completo para profesionales y pequeños negocios",
+      price: "€19.99",
+      period: "/mes",
+      mainFeatures: {
+        invoicesTitle: "100 facturas por mes",
+        invoicesSubtitle: "vs 5 en plan gratuito - 20x más capacidad",
+        promptsTitle: "100 prompts de IA por mes",
+        promptsSubtitle: "vs 10 en plan gratuito - Automatización total",
+        earlyAccessTitle: "Acceso Anticipado",
+        earlyAccessSubtitle: "Nuevas funciones antes que nadie"
+      },
+      button: {
+        subscribe: "🚀 Actualizar a Pro - €19.99/mes",
+        manageSubscription: "Gestionar Suscripción",
+        signInToSubscribe: "Iniciar Sesión para Suscribirse"
+      },
+      securityText: "✅ Cancela cuando quieras • 💳 Pago seguro con Stripe",
+      toggleDetails: {
+        show: "Ver todos los beneficios",
+        hide: "Ocultar detalles"
+      },
+      extendedStorage: {
+        title: "Almacenamiento Extendido",
+        description: "Almacenamiento 2 años",
+        subtitle: "vs 30 días en plan gratuito"
+      },
+      premiumFeatures: {
+        title: "Características Premium",
+        emailSend: {
+          title: "Envío por email",
+          subtitle: "Comparte facturas directamente"
+        },
+        prioritySupport: {
+          title: "Soporte prioritario",
+          subtitle: "Respuesta en 24h garantizada"
+        }
+      },
+      comingSoon: {
+        title: "Próximamente Disponible",
+        qrTemplates: {
+          title: "Plantillas con QR",
+          subtitle: "Códigos QR automáticos"
+        },
+        stripePayment: {
+          title: "Botón de pago Stripe",
+          subtitle: "Cobros integrados"
+        }
+      },
+      betaAccess: {
+        title: "Acceso Anticipado Beta",
+        api: {
+          title: "API MCP",
+          subtitle: "Automatización avanzada"
+        },
+        betaTesting: {
+          title: "Beta testing",
+          subtitle: "Funciones primero"
+        },
+        exclusiveTemplates: {
+          title: "Plantillas exclusivas",
+          subtitle: "Diseños únicos"
+        }
+      }
+    }
+  },
+  pt: {
+    title: "Plano de Assinatura",
+    back: "Voltar",
+    popularBadge: "Plano Mais Popular",
+    activeBadge: "Ativo",
+    plan: {
+      title: "Invoice Generator Pro",
+      subtitle: "Plano completo para profissionais e pequenas empresas",
+      price: "$19.99",
+      period: "/mês",
+      mainFeatures: {
+        invoicesTitle: "100 faturas por mês",
+        invoicesSubtitle: "vs 5 no plano gratuito - 20x mais capacidade",
+        promptsTitle: "100 prompts de IA por mês",
+        promptsSubtitle: "vs 10 no plano gratuito - Automação total",
+        earlyAccessTitle: "Acesso Antecipado",
+        earlyAccessSubtitle: "Novos recursos antes de todos"
+      },
+      button: {
+        subscribe: "🚀 Atualizar para Pro - $19.99/mês",
+        manageSubscription: "Gerenciar Assinatura",
+        signInToSubscribe: "Entrar para Assinar"
+      },
+      securityText: "✅ Cancele a qualquer momento • 💳 Pagamento seguro com Stripe",
+      toggleDetails: {
+        show: "Ver todos os benefícios",
+        hide: "Ocultar detalhes"
+      },
+      extendedStorage: {
+        title: "Armazenamento Estendido",
+        description: "Armazenamento de 2 anos",
+        subtitle: "vs 30 dias no plano gratuito"
+      },
+      premiumFeatures: {
+        title: "Recursos Premium",
+        emailSend: {
+          title: "Envio por email",
+          subtitle: "Compartilhe faturas diretamente"
+        },
+        prioritySupport: {
+          title: "Suporte prioritário",
+          subtitle: "Resposta em 24h garantida"
+        }
+      },
+      comingSoon: {
+        title: "Em Breve",
+        qrTemplates: {
+          title: "Modelos com QR",
+          subtitle: "Códigos QR automáticos"
+        },
+        stripePayment: {
+          title: "Botão de pagamento Stripe",
+          subtitle: "Cobranças integradas"
+        }
+      },
+      betaAccess: {
+        title: "Acesso Beta Antecipado",
+        api: {
+          title: "API MCP",
+          subtitle: "Automação avançada"
+        },
+        betaTesting: {
+          title: "Testes beta",
+          subtitle: "Recursos primeiro"
+        },
+        exclusiveTemplates: {
+          title: "Modelos exclusivos",
+          subtitle: "Designs únicos"
+        }
+      }
+    }
+  },
+  ja: {
+    title: "サブスクリプションプラン",
+    back: "戻る",
+    popularBadge: "最も人気のプラン",
+    activeBadge: "アクティブ",
+    plan: {
+      title: "Invoice Generator Pro",
+      subtitle: "プロフェッショナルと小規模企業向けの完全プラン",
+      price: "$19.99",
+      period: "/月",
+      mainFeatures: {
+        invoicesTitle: "月100枚の請求書",
+        invoicesSubtitle: "無料プランの5枚と比較 - 20倍の容量",
+        promptsTitle: "月100回のAIプロンプト",
+        promptsSubtitle: "無料プランの10回と比較 - 完全自動化",
+        earlyAccessTitle: "早期アクセス",
+        earlyAccessSubtitle: "誰よりも先に新機能を"
+      },
+      button: {
+        subscribe: "🚀 Proにアップグレード - $19.99/月",
+        manageSubscription: "サブスクリプション管理",
+        signInToSubscribe: "ログインして登録"
+      },
+      securityText: "✅ いつでもキャンセル可能 • 💳 Stripeによる安全な支払い",
+      toggleDetails: {
+        show: "すべてのメリットを見る",
+        hide: "詳細を隠す"
+      },
+      extendedStorage: {
+        title: "拡張ストレージ",
+        description: "2年間のストレージ",
+        subtitle: "無料プランの30日と比較"
+      },
+      premiumFeatures: {
+        title: "プレミアム機能",
+        emailSend: {
+          title: "メール送信",
+          subtitle: "請求書を直接共有"
+        },
+        prioritySupport: {
+          title: "優先サポート",
+          subtitle: "24時間以内の回答を保証"
+        }
+      },
+      comingSoon: {
+        title: "近日公開",
+        qrTemplates: {
+          title: "QRテンプレート",
+          subtitle: "自動QRコード"
+        },
+        stripePayment: {
+          title: "Stripe支払いボタン",
+          subtitle: "統合された請求"
+        }
+      },
+      betaAccess: {
+        title: "早期アクセスベータ",
+        api: {
+          title: "MCP API",
+          subtitle: "高度な自動化"
+        },
+        betaTesting: {
+          title: "ベータテスト",
+          subtitle: "機能を最初に"
+        },
+        exclusiveTemplates: {
+          title: "限定テンプレート",
+          subtitle: "ユニークなデザイン"
+        }
+      }
+    }
+  },
+  fr: {
+    title: "Plan d'Abonnement",
+    back: "Retour",
+    popularBadge: "Plan le Plus Populaire",
+    activeBadge: "Actif",
+    plan: {
+      title: "Invoice Generator Pro",
+      subtitle: "Plan complet pour professionnels et petites entreprises",
+      price: "$19.99",
+      period: "/mois",
+      mainFeatures: {
+        invoicesTitle: "100 factures par mois",
+        invoicesSubtitle: "vs 5 dans le plan gratuit - 20x plus de capacité",
+        promptsTitle: "100 prompts IA par mois",
+        promptsSubtitle: "vs 10 dans le plan gratuit - Automatisation totale",
+        earlyAccessTitle: "Accès Anticipé",
+        earlyAccessSubtitle: "Nouvelles fonctionnalités en premier"
+      },
+      button: {
+        subscribe: "🚀 Passer à Pro - $19.99/mois",
+        manageSubscription: "Gérer l'Abonnement",
+        signInToSubscribe: "Se Connecter pour S'abonner"
+      },
+      securityText: "✅ Annulez quand vous voulez • 💳 Paiement sécurisé avec Stripe",
+      toggleDetails: {
+        show: "Voir tous les avantages",
+        hide: "Masquer les détails"
+      },
+      extendedStorage: {
+        title: "Stockage Étendu",
+        description: "Stockage 2 ans",
+        subtitle: "vs 30 jours dans le plan gratuit"
+      },
+      premiumFeatures: {
+        title: "Fonctionnalités Premium",
+        emailSend: {
+          title: "Envoi par email",
+          subtitle: "Partagez les factures directement"
+        },
+        prioritySupport: {
+          title: "Support prioritaire",
+          subtitle: "Réponse en 24h garantie"
+        }
+      },
+      comingSoon: {
+        title: "Bientôt Disponible",
+        qrTemplates: {
+          title: "Modèles avec QR",
+          subtitle: "Codes QR automatiques"
+        },
+        stripePayment: {
+          title: "Bouton de paiement Stripe",
+          subtitle: "Collections intégrées"
+        }
+      },
+      betaAccess: {
+        title: "Accès Bêta Anticipé",
+        api: {
+          title: "API MCP",
+          subtitle: "Automatisation avancée"
+        },
+        betaTesting: {
+          title: "Tests bêta",
+          subtitle: "Fonctionnalités en premier"
+        },
+        exclusiveTemplates: {
+          title: "Modèles exclusifs",
+          subtitle: "Designs uniques"
+        }
+      }
+    }
+  },
+  de: {
+    title: "Abonnement-Plan",
+    back: "Zurück",
+    popularBadge: "Beliebtester Plan",
+    activeBadge: "Aktiv",
+    plan: {
+      title: "Invoice Generator Pro",
+      subtitle: "Kompletter Plan für Profis und kleine Unternehmen",
+      price: "$19.99",
+      period: "/Monat",
+      mainFeatures: {
+        invoicesTitle: "100 Rechnungen pro Monat",
+        invoicesSubtitle: "vs 5 im kostenlosen Plan - 20x mehr Kapazität",
+        promptsTitle: "100 KI-Prompts pro Monat",
+        promptsSubtitle: "vs 10 im kostenlosen Plan - Vollautomatisierung",
+        earlyAccessTitle: "Früher Zugang",
+        earlyAccessSubtitle: "Neue Funktionen vor allen anderen"
+      },
+      button: {
+        subscribe: "🚀 Auf Pro upgraden - $19.99/Monat",
+        manageSubscription: "Abonnement Verwalten",
+        signInToSubscribe: "Anmelden zum Abonnieren"
+      },
+      securityText: "✅ Jederzeit kündbar • 💳 Sichere Zahlung mit Stripe",
+      toggleDetails: {
+        show: "Alle Vorteile ansehen",
+        hide: "Details ausblenden"
+      },
+      extendedStorage: {
+        title: "Erweiterte Speicherung",
+        description: "2-Jahres-Speicherung",
+        subtitle: "vs 30 Tage im kostenlosen Plan"
+      },
+      premiumFeatures: {
+        title: "Premium-Funktionen",
+        emailSend: {
+          title: "E-Mail-Versand",
+          subtitle: "Rechnungen direkt teilen"
+        },
+        prioritySupport: {
+          title: "Prioritätssupport",
+          subtitle: "24h Antwort garantiert"
+        }
+      },
+      comingSoon: {
+        title: "Demnächst Verfügbar",
+        qrTemplates: {
+          title: "QR-Vorlagen",
+          subtitle: "Automatische QR-Codes"
+        },
+        stripePayment: {
+          title: "Stripe-Zahlungsbutton",
+          subtitle: "Integrierte Zahlungen"
+        }
+      },
+      betaAccess: {
+        title: "Früher Beta-Zugang",
+        api: {
+          title: "MCP API",
+          subtitle: "Erweiterte Automatisierung"
+        },
+        betaTesting: {
+          title: "Beta-Tests",
+          subtitle: "Funktionen zuerst"
+        },
+        exclusiveTemplates: {
+          title: "Exklusive Vorlagen",
+          subtitle: "Einzigartige Designs"
+        }
+      }
+    }
+  }
+};
+
 // Evento personalizado para comunicación entre componentes
 export const LANGUAGE_CHANGE_EVENT = 'languageChange';
 
@@ -566,4 +1073,9 @@ export const getPublicInvoiceTranslation = (language: Language) => {
 // **NUEVA FUNCIÓN HELPER PARA PROMPT USAGE**
 export const getPromptUsageTranslation = (language: Language) => {
   return promptUsageTranslations[language] || promptUsageTranslations.en;
+};
+
+// Función helper para obtener traducciones de pricing
+export const getPricingTranslation = (language: Language) => {
+  return pricingTranslations[language] || pricingTranslations.en;
 };

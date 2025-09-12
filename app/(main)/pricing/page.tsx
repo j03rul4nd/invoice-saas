@@ -232,24 +232,12 @@ export default async function Pricing() {
     return (
         <div className="py-16 px-4 min-h-screen">
             <div className="max-w-4xl mx-auto">
-                <Link 
-                    href={backLink} 
-                    className="text-white/70 hover:text-white inline-flex items-center mb-8 transition-all duration-300 
-                                    hover:shadow-[0_2px_8px_0] hover:shadow-purple-400/40 hover:rounded-md px-4 py-2"
-                >
-                    &larr; Back
-                </Link>
-                
-                <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-12 bg-clip-text text-transparent 
-                                bg-gradient-to-r from-white to-purple-200 text-center">
-                    Subscription Plan
-                </h1>
-                
                 <PricingCardClient
                     authCheck={authCheck}
                     isSubscribed={isSubscribed}
                     createSubscription={createSubscription}
                     createCustomerPortal={createCustomerPortal}
+                    backLink={backLink}
                 />
             </div>
         </div>
