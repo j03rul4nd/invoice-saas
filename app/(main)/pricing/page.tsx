@@ -125,7 +125,7 @@ export default async function Pricing() {
             throw new Error(`Invalid domain URL: ${domainUrl}`)
         }
 
-        const successUrl = `${domainUrl}dashboard?payment=success`
+        const successUrl = `${domainUrl}/dashboard?payment=success`
         console.log("🎯 Success URL:", successUrl)
 
         // Validar que la success URL sea válida
