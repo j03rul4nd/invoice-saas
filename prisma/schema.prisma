@@ -1,33 +1,31 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id                    String        @id @unique
-  email                 String        @unique
-  stripeCustomerId      String?       @unique
-  name                  String?
-  subscription          Subscription?
-  invoices              Invoice[]     // Relación con facturas
-  preferredCurrency     String        @default("EUR")  // Nueva campo para moneda preferida
-  preferredLanguage     String        @default("es")   // ✅ NUEVO: Idioma preferido del usuario
-  preferredInvoiceLanguage String @default("es")
-
-  // Campos para límite de prompts
-  monthlyPromptLimit    Int           @default(10)  // Límite mensual de prompts (por defecto 10)
-  currentPromptUsage    Int           @default(0)   // Uso actual de prompts en el mes
-  lastPromptReset       DateTime      @default(now()) // Fecha del último reset mensual
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
+  id                       String        @id @unique
+  email                    String        @unique
+  stripeCustomerId         String?       @unique
+  name                     String?
+  monthlyPromptLimit       Int           @default(10)
+  currentPromptUsage       Int           @default(0)
+  lastPromptReset          DateTime      @default(now())
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
+  preferredCurrency        String        @default("EUR")
+  preferredLanguage        String        @default("es")
+  preferredInvoiceLanguage String        @default("es")
+  monthlyInvoiceLimit      Int           @default(5)
+  currentInvoiceUsage      Int           @default(0)
+  lastInvoiceReset         DateTime      @default(now()) @db.Timestamp(6)
+  invoices                 Invoice[]
+  subscription             Subscription?
 }
 
 model Subscription {
@@ -44,43 +42,30 @@ model Subscription {
 }
 
 model Invoice {
-  id            String   @id @default(cuid())
-  userId        String
-  invoiceNumber String
-  date          String
-  dueDate       String
-  
-  // Información de la empresa (JSON)
-  companyData   Json
-  
-  // Información del cliente (JSON)
-  clientData    Json
-  
-  // Items de la factura (JSON array)
-  items         Json
-  
-  currency      String   @default("EUR")
-  language      String   @default("es")     // ✅ NUEVO: Idioma de la factura (es, en, fr, de, etc.)
-  
-  notes         String?
-  subtotal      Float
-  tax           Float
-  taxRate       Float
-  total         Float
-  
-  // ✅ NUEVOS CAMPOS para enlaces públicos
-  publicToken     String?  @unique  // Token único para el enlace público
-  isPublic        Boolean  @default(false)  // Si la factura es pública
-  publicExpiresAt DateTime?  // Fecha de expiración del enlace (opcional)
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  // Relación con usuario
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id              String    @id @default(cuid())
+  userId          String
+  invoiceNumber   String
+  date            String
+  dueDate         String
+  companyData     Json
+  clientData      Json
+  items           Json
+  notes           String?
+  subtotal        Float
+  tax             Float
+  taxRate         Float
+  total           Float
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  currency        String    @default("EUR")
+  isPublic        Boolean   @default(false)
+  publicExpiresAt DateTime?
+  publicToken     String?   @unique
+  language        String    @default("es")
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([userId, createdAt])
-  @@index([publicToken])  // ✅ NUEVO ÍNDICE para búsquedas rápidas
-  @@index([language])     // ✅ NUEVO ÍNDICE para filtrar por idioma
+  @@index([publicToken])
+  @@index([language])
 }

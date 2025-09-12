@@ -4,8 +4,8 @@ import { PrismaClient, Prisma } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Tipos derivados del esquema de Prisma para campos JSON
-type InvoiceItem = Prisma.JsonValue & {
+// Tipos para campos JSON
+type InvoiceItem = {
   id: string;
   description: string;
   quantity: number;
@@ -13,14 +13,14 @@ type InvoiceItem = Prisma.JsonValue & {
   total: number;
 };
 
-type ClientInfo = Prisma.JsonValue & {
+type ClientInfo = {
   name: string;
   email: string;
   phone: string;
   address: string;
 };
 
-type CompanyInfo = Prisma.JsonValue & {
+type CompanyInfo = {
   name: string;
   email: string;
   phone: string;
@@ -30,7 +30,6 @@ type CompanyInfo = Prisma.JsonValue & {
 
 type InvoiceLanguageCode = 'es' | 'en' | 'fr' | 'de' | 'it' | 'pt' | 'ca' | 'ja' | 'zh' | 'ar';
 
-// Tipo para los datos de entrada de la solicitud POST/PUT
 interface InvoiceDataInput {
   invoiceNumber: string;
   date: string;
@@ -47,11 +46,51 @@ interface InvoiceDataInput {
   total: number;
 }
 
-// GET - Obtener todas las facturas del usuario
+// Helper para el límite dinámico
+async function getInvoiceLimitStatus(userId: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error('Usuario no encontrado');
+
+  const now = new Date();
+  let currentUsage = user.currentInvoiceUsage ?? 0;
+  let lastReset = user.lastInvoiceReset ?? new Date(0);
+
+  // Reseteo mensual
+  if (
+    now.getMonth() !== lastReset.getMonth() ||
+    now.getFullYear() !== lastReset.getFullYear()
+  ) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        currentInvoiceUsage: 0,
+        lastInvoiceReset: now,
+      },
+    });
+    currentUsage = 0;
+    lastReset = now;
+  }
+
+  return {
+    limit: user.monthlyInvoiceLimit,
+    usage: currentUsage,
+    canCreateInvoice: currentUsage < user.monthlyInvoiceLimit,
+    remaining: user.monthlyInvoiceLimit - currentUsage,
+  };
+}
+
+// Incrementar consumo
+async function consumeInvoiceLimit(userId: string) {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { currentInvoiceUsage: { increment: 1 } },
+  });
+}
+
+// GET - Obtener facturas
 export async function GET() {
   try {
-    const { userId } = await auth();
-
+    const { userId } = await auth(); // `auth()` es síncrono en Clerk v4
     if (!userId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -59,10 +98,9 @@ export async function GET() {
     const invoices = await prisma.invoice.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
-      take: 5,
+      take: 10,
     });
 
-    // Transformar los datos para el frontend con tipado seguro
     const formattedInvoices = invoices.map(invoice => ({
       id: invoice.id,
       invoiceNumber: invoice.invoiceNumber,
@@ -70,7 +108,7 @@ export async function GET() {
       dueDate: invoice.dueDate,
       company: invoice.companyData as CompanyInfo,
       currency: invoice.currency,
-      language: invoice.language,
+      language: invoice.language as InvoiceLanguageCode,
       client: invoice.clientData as ClientInfo,
       items: invoice.items as InvoiceItem[],
       notes: invoice.notes,
@@ -89,18 +127,17 @@ export async function GET() {
   }
 }
 
-// POST - Crear nueva factura
+// POST - Crear factura
 export async function POST(request: Request) {
   try {
-    const { userId } = await auth();
-
+    const { userId } = await auth(); // corregido: no necesita await
     if (!userId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
     const invoiceData: InvoiceDataInput = await request.json();
 
-    // Validar datos requeridos
+    // Validación básica
     if (!invoiceData.invoiceNumber || !invoiceData.currency) {
       return NextResponse.json(
         { error: 'Datos de factura incompletos' },
@@ -108,23 +145,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const existingInvoicesCount = await prisma.invoice.count({
-      where: { userId },
-    });
-
-    if (existingInvoicesCount >= 5) {
+    // Check límite
+    const limitStatus = await getInvoiceLimitStatus(userId);
+    if (!limitStatus.canCreateInvoice) {
       return NextResponse.json(
-        { error: 'Has alcanzado el límite máximo de 5 facturas guardadas' },
+        { error: `Has alcanzado el límite máximo de ${limitStatus.limit} facturas este mes` },
         { status: 400 }
       );
     }
 
-    // Verificar que no exista una factura con el mismo número para este usuario
+    // Verificar duplicados
     const existingInvoice = await prisma.invoice.findFirst({
-      where: {
-        userId,
-        invoiceNumber: invoiceData.invoiceNumber,
-      },
+      where: { userId, invoiceNumber: invoiceData.invoiceNumber },
     });
 
     if (existingInvoice) {
@@ -134,6 +166,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // Crear factura
     const invoice = await prisma.invoice.create({
       data: {
         userId,
@@ -153,6 +186,9 @@ export async function POST(request: Request) {
       },
     });
 
+    // Incrementar consumo
+    await consumeInvoiceLimit(userId);
+
     return NextResponse.json({
       message: 'Factura guardada exitosamente',
       invoice: {
@@ -163,11 +199,11 @@ export async function POST(request: Request) {
         language: invoice.language,
         total: invoice.total,
       },
+      remainingInvoices: limitStatus.remaining - 1,
     });
   } catch (error) {
     console.error('Error al guardar factura:', error);
-    
-    // Manejar errores específicos de Prisma
+
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === 'P2002') {
         return NextResponse.json(
@@ -176,7 +212,6 @@ export async function POST(request: Request) {
         );
       }
     }
-
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

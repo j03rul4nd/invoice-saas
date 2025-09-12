@@ -37,6 +37,8 @@ import {
   INVOICE_TRANSLATIONS 
 } from '@/utils/invoice-translations';
 
+import { useInvoiceLimits } from '@/hooks/useInvoiceLimits';
+
 import { 
    InvoiceLanguageCode, 
   useInvoiceLanguage } from '@/hooks/useInvoiceLanguage';
@@ -569,6 +571,13 @@ export default function InvoiceGenerator() {
   refreshInvoices 
 } = useInvoices();
 
+const {
+  invoiceLimitStatus,
+  loading: invoiceLimitsLoading,
+  error: invoiceLimitsError,
+  refreshLimits: refreshInvoiceLimits
+} = useInvoiceLimits();
+
   const {
       publicLinks,
       generatePublicLink,
@@ -805,9 +814,10 @@ const handleSaveOrUpdateInvoice = useCallback(async () => {
     const success = await saveInvoice(invoiceData);
     if (success) {
       // Opcional: limpiar formulario o mantener datos
+      await refreshInvoiceLimits();
     }
   }
-}, [editingInvoiceId, handleUpdateInvoice, saveInvoice, invoiceData]);
+}, [editingInvoiceId, handleUpdateInvoice, saveInvoice, invoiceData, refreshInvoiceLimits]);
 
 // ✅ Handler para cancelar edición
 const handleCancelEdit = useCallback(() => {
@@ -1000,7 +1010,7 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
             )}
             </h3>
             <span className="text-sm text-gray-400">
-            {invoices.length}/5 facturas
+            {invoices.length}/{invoiceLimitStatus?.limit || 5} facturas
             </span>
         </div>
         
@@ -1019,7 +1029,7 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
             {/* Botón Guardar/Actualizar Inteligente */}
             <button
             onClick={handleValidateAndSave}
-            disabled={(saving || updating) || invoices.length >= 5 && !editingInvoiceId}
+            disabled={(saving || updating) || (invoices.length >= (invoiceLimitStatus?.limit || 5) && !editingInvoiceId)}
             className="flex items-center gap-2 px-4 py-2 bg-green-600/20 hover:bg-green-600/30 
                     border border-green-400/20 rounded-lg text-green-200 transition-all 
                     disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1055,12 +1065,16 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
         </div>
         
         {/* Mensaje de límite */}
-        {invoices.length >= 5 && !editingInvoiceId && (
-            <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-400/20 rounded-lg">
+        {invoices.length >= (invoiceLimitStatus?.limit || 5) && !editingInvoiceId && (
+          <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-400/20 rounded-lg">
             <p className="text-sm text-yellow-300">
-                Has alcanzado el límite de 5 facturas. Elimina alguna o edita una existente.
+              Has alcanzado el límite de {invoiceLimitStatus?.limit || 5} facturas. 
+              {(invoiceLimitStatus?.limit || 5) === 5 
+                ? "Suscríbete para obtener hasta 100 facturas mensuales." 
+                : "Elimina alguna o edita una existente."
+              }
             </p>
-            </div>
+          </div>
         )}
         </div>
 

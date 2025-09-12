@@ -4,6 +4,7 @@ import Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { addPromptsToLimit } from '@/lib/promptLimits'
+import { setPremiumLimits } from '@/lib/invoiceLimits'
 
 export async function POST(req: Request) {
   console.log('🔵 [WEBHOOK] Iniciando procesamiento del webhook de Stripe')
@@ -126,7 +127,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     console.log('✅ [CHECKOUT] Usuario actualizado en la base de datos')
 
     console.log('🔵 [CHECKOUT] Buscando usuario para actualizar límites...')
-    // Obtener el usuario para actualizar sus límites de prompts
+    // Obtener el usuario para actualizar sus límites
     const user = await prisma.user.findUnique({
       where: { stripeCustomerId: session.customer as string },
       select: { id: true }
@@ -134,12 +135,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
     if (user) {
       console.log('✅ [CHECKOUT] Usuario encontrado:', user.id)
+      
       try {
-        // Añadir 10 prompts adicionales al límite mensual
-        await addPromptsToLimit(user.id, 10)
-        console.log(`✅ [CHECKOUT] Se añadieron 10 prompts al usuario ${user.id} después del checkout exitoso`)
+        // Establecer límites premium: 100 prompts y 100 facturas al mes
+        await setPremiumLimits(user.id)
+        console.log(`✅ [CHECKOUT] Límites premium establecidos para el usuario ${user.id}: 100 prompts y 100 facturas mensuales`)
       } catch (error) {
-        console.error(`❌ [CHECKOUT] Error añadiendo prompts al usuario ${user.id}:`, error)
+        console.error(`❌ [CHECKOUT] Error estableciendo límites premium para el usuario ${user.id}:`, error)
       }
     } else {
       console.warn('⚠️ [CHECKOUT] No se encontró el usuario con stripeCustomerId:', session.customer)
@@ -171,6 +173,26 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       }
     })
     console.log('✅ [SUBSCRIPTION_UPDATED] Suscripción actualizada en la base de datos')
+
+    // Si la suscripción está activa, mantener los límites premium
+    if (subscription.status === 'active') {
+      console.log('🔵 [SUBSCRIPTION_UPDATED] Suscripción activa, manteniendo límites premium')
+      
+      // Buscar el usuario asociado a esta suscripción
+      const subscriptionRecord = await prisma.subscription.findUnique({
+        where: { stripeSubscriptionId: subscription.id },
+        select: { userId: true }
+      })
+
+      if (subscriptionRecord) {
+        try {
+          await setPremiumLimits(subscriptionRecord.userId)
+          console.log(`✅ [SUBSCRIPTION_UPDATED] Límites premium mantenidos para el usuario ${subscriptionRecord.userId}`)
+        } catch (error) {
+          console.error(`❌ [SUBSCRIPTION_UPDATED] Error manteniendo límites premium:`, error)
+        }
+      }
+    }
   } catch (error) {
     console.error('❌ [SUBSCRIPTION_UPDATED] Error actualizando suscripción:', error)
     throw error
@@ -182,6 +204,23 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   console.log('🔵 [SUBSCRIPTION_DELETED] Subscription ID:', subscription.id)
 
   try {
+    // Buscar el usuario antes de eliminar la suscripción para revertir a límites gratuitos
+    const subscriptionRecord = await prisma.subscription.findUnique({
+      where: { stripeSubscriptionId: subscription.id },
+      select: { userId: true }
+    })
+
+    if (subscriptionRecord) {
+      try {
+        // Importar la función para revertir a límites gratuitos
+        const { setFreeTierLimits } = await import('@/lib/invoiceLimits')
+        await setFreeTierLimits(subscriptionRecord.userId)
+        console.log(`✅ [SUBSCRIPTION_DELETED] Límites revertidos a tier gratuito para el usuario ${subscriptionRecord.userId}: 5 facturas, 10 prompts`)
+      } catch (error) {
+        console.error(`❌ [SUBSCRIPTION_DELETED] Error revirtiendo límites para el usuario ${subscriptionRecord.userId}:`, error)
+      }
+    }
+
     await prisma.subscription.delete({
       where: { stripeSubscriptionId: subscription.id }
     })
@@ -234,12 +273,13 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 
     if (subscriptionRecord) {
       console.log('✅ [PAYMENT_SUCCESS] Registro de suscripción encontrado, usuario:', subscriptionRecord.userId)
+      
       try {
-        // Añadir 10 prompts adicionales al límite mensual por cada pago exitoso
-        await addPromptsToLimit(subscriptionRecord.userId, 10)
-        console.log(`✅ [PAYMENT_SUCCESS] Se añadieron 10 prompts al usuario ${subscriptionRecord.userId} después del pago exitoso`)
+        // Renovar límites premium en cada pago exitoso
+        await setPremiumLimits(subscriptionRecord.userId)
+        console.log(`✅ [PAYMENT_SUCCESS] Límites premium renovados para el usuario ${subscriptionRecord.userId} después del pago exitoso: 100 prompts y 100 facturas`)
       } catch (error) {
-        console.error(`❌ [PAYMENT_SUCCESS] Error añadiendo prompts al usuario ${subscriptionRecord.userId}:`, error)
+        console.error(`❌ [PAYMENT_SUCCESS] Error renovando límites premium para el usuario ${subscriptionRecord.userId}:`, error)
       }
     } else {
       console.warn('⚠️ [PAYMENT_SUCCESS] No se encontró registro de suscripción para:', subscription.id)
