@@ -107,9 +107,13 @@ export default async function Pricing() {
             return redirect('sign-in?redirect_url=/pricing')
         }
 
+        const returnUrl = process.env.NODE_ENV === 'production' 
+            ? (process.env.PRODUCTION_URL || 'https://invoice-saas-1bmqr0p72-joel-links-projects.vercel.app')
+            : 'http://localhost:3000'
+
         const customerPortalUrl = await stripe.billingPortal.sessions.create({
             customer: subscription?.user.stripeCustomerId as string,
-            return_url: process.env.NODE_ENV === 'production' ? (process.env.PRODUCTION_URL as string) : 'http://localhost:3000'
+            return_url: returnUrl.replace(/\/$/, '') // Remover trailing slash
         })
 
         return redirect(customerPortalUrl.url)
