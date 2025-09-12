@@ -29,7 +29,7 @@ import {
   Save, 
   Archive
 } from 'lucide-react';
-
+import { useInvoiceGeneratorTranslation } from '@/hooks/useLanguage';
 import { 
   useInvoiceTranslations, 
   getInvoiceTexts, 
@@ -55,7 +55,7 @@ import CurrencySelector from '@/components/CurrencySelector';
 import { SignedIn } from "@clerk/nextjs";
 
 // Textos para internacionalización
-const TEXTS = {
+const old_TEXTS = {
   // Títulos principales
   mainTitle: "Generador de Facturas",
   loading: "Cargando...",
@@ -500,32 +500,32 @@ const useInvoiceAPI = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`${TEXTS.api.serverError} ${response.status}: ${response.statusText}`);
+        throw new Error(`${old_TEXTS.api.serverError} ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
 
       return data;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : TEXTS.api.unknownError;
+      const errorMessage = err instanceof Error ? err.message : old_TEXTS.api.unknownError;
       setError(errorMessage);
-      console.error(TEXTS.api.generatingError, err);
+      console.error(old_TEXTS.api.generatingError, err);
       
       // Simulación de respuesta para desarrollo
-      console.log(TEXTS.api.simulatingResponse, prompt);
+      console.log(old_TEXTS.api.simulatingResponse, prompt);
       return {
         client: {
-          name: TEXTS.simulation.clientName,
-          email: TEXTS.simulation.clientEmail
+          name: old_TEXTS.simulation.clientName,
+          email: old_TEXTS.simulation.clientEmail
         },
         items: [
           {
-            description: TEXTS.simulation.serviceDescription,
+            description: old_TEXTS.simulation.serviceDescription,
             quantity: 1,
             price: 100.00
           }
         ],
-        notes: TEXTS.simulation.invoiceNotes
+        notes: old_TEXTS.simulation.invoiceNotes
       };
     } finally {
       setIsLoading(false);
@@ -620,6 +620,7 @@ const {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
 
+ const { t: TEXTS  } = useInvoiceGeneratorTranslation();
 
 
   // Efecto para inicializar datos que dependen del cliente
@@ -728,7 +729,7 @@ const {
   }, [applyAPIResponse, updateInvoiceData, handleCurrencyChange, currentCurrency.code, handleInvoiceLanguageChange, currentInvoiceLanguage]);
   
   const handleDeleteInvoice = useCallback(async (invoiceId: string, invoiceNumber: string) => {
-  if (confirm(`¿Estás seguro de que quieres eliminar la factura ${invoiceNumber}?`)) {
+  if (confirm(`${TEXTS.confirmDeleteInvoice} ${invoiceNumber}?`)) {
     await deleteInvoice(invoiceId);
   }
   }, [deleteInvoice]);
@@ -795,7 +796,7 @@ const handleEditInvoice = useCallback(async (invoiceId: string) => {
 }, [getInvoice, applyAPIResponse, updateInvoiceData, handleCurrencyChange, currentCurrency.code, handleInvoiceLanguageChange, currentInvoiceLanguage]);
 // ✅ Handler para duplicar factura
 const handleDuplicateInvoice = useCallback(async (invoiceId: string, invoiceNumber: string) => {
-  if (confirm(`¿Duplicar la factura ${invoiceNumber}?`)) {
+  if (confirm(`${TEXTS.confirmDuplicateInvoice} ${invoiceNumber}?`)) {
     const success = await duplicateInvoice(invoiceId);
     if (success) {
       await refreshInvoices();
@@ -838,15 +839,15 @@ const handleValidateAndSave = useCallback(async () => {
   const errors: string[] = [];
   
   if (!invoiceData.invoiceNumber.trim()) {
-    errors.push('Número de factura es requerido');
+    errors.push(TEXTS.validation.invoiceNumberRequired);
   }
   
   if (!invoiceData.client.name.trim()) {
-    errors.push('Nombre del cliente es requerido');
+    errors.push(TEXTS.validation.clientNameRequired);
   }
   
   if (invoiceData.items.some(item => !item.description.trim())) {
-    errors.push('Todos los items deben tener descripción');
+    errors.push(TEXTS.validation.itemDescriptionRequired);
   }
   
   if (errors.length > 0) {
@@ -856,7 +857,7 @@ const handleValidateAndSave = useCallback(async () => {
   
   // Si pasa la validación local, proceder a guardar/actualizar
   await handleSaveOrUpdateInvoice();
-}, [invoiceData, handleSaveOrUpdateInvoice]);
+}, [invoiceData, handleSaveOrUpdateInvoice, TEXTS]);
 
 
   const invoiceTexts = useInvoiceTranslations(invoiceData.language);
@@ -874,7 +875,7 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
   }, [copyPublicLink]);
 
   const handleRemovePublicLink = useCallback(async (invoiceId: string, invoiceNumber: string) => {
-    if (confirm(`¿Eliminar el enlace público de la factura ${invoiceNumber}?`)) {
+    if (confirm(`${TEXTS.confirmRemovePublicLink} ${invoiceNumber}?`)) {
       await removePublicLink(invoiceId);
     }
   }, [removePublicLink]);
@@ -1001,16 +1002,16 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
         <div className="p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30">
         <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold text-purple-200 flex items-center">
-            <Archive className="h-5 w-5 mr-2" />
-            Facturas Guardadas
-            {editingInvoiceId && (
+              <Archive className="h-5 w-5 mr-2" />
+              {TEXTS.savedInvoices.title}
+              {editingInvoiceId && (
                 <span className="ml-2 px-2 py-1 bg-yellow-500/20 border border-yellow-400/20 rounded text-xs text-yellow-200">
-                Editando
+                  {TEXTS.savedInvoices.editing}
                 </span>
-            )}
+              )}
             </h3>
             <span className="text-sm text-gray-400">
-            {invoices.length}/{invoiceLimitStatus?.limit || 5} facturas
+            {invoices.length}/{invoiceLimitStatus?.limit || 5} {TEXTS.invoicesCount}
             </span>
         </div>
         
@@ -1036,8 +1037,8 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
             >
             <Save className="h-4 w-4" />
             {editingInvoiceId 
-                ? (updating ? 'Actualizando...' : 'Actualizar Factura')
-                : (saving ? 'Guardando...' : 'Guardar Factura')
+              ? (updating ? TEXTS.savedInvoices.updating : TEXTS.savedInvoices.update)
+              : (saving ? TEXTS.savedInvoices.saving : TEXTS.savedInvoices.save)
             }
             </button>
             
@@ -1049,7 +1050,7 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                         border border-gray-400/20 rounded-lg text-gray-200 transition-all"
             >
                 <X className="h-4 w-4" />
-                Cancelar Edición
+                {TEXTS.savedInvoices.cancel}
             </button>
             )}
             
@@ -1060,7 +1061,7 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                     border border-blue-400/20 rounded-lg text-blue-200 transition-all"
             >
             <Archive className="h-4 w-4" />
-            {showSavedInvoices ? 'Ocultar' : 'Ver'} Facturas ({invoices.length})
+            {showSavedInvoices ? TEXTS.savedInvoices.hide : TEXTS.savedInvoices.view} {TEXTS.savedInvoices.title} ({invoices.length})
             </button>
         </div>
         
@@ -1068,10 +1069,10 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
         {invoices.length >= (invoiceLimitStatus?.limit || 5) && !editingInvoiceId && (
           <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-400/20 rounded-lg">
             <p className="text-sm text-yellow-300">
-              Has alcanzado el límite de {invoiceLimitStatus?.limit || 5} facturas. 
+              {TEXTS.subscriptionLimit} {invoiceLimitStatus?.limit || 5} {TEXTS.invoicesCount}. 
               {(invoiceLimitStatus?.limit || 5) === 5 
-                ? "Suscríbete para obtener hasta 100 facturas mensuales." 
-                : "Elimina alguna o edita una existente."
+                ? TEXTS.subscriptionMessage
+                : TEXTS.freeLimit
               }
             </p>
           </div>
@@ -1081,17 +1082,17 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
         {/* Lista de Facturas Guardadas - VERSIÓN MEJORADA */}
         {showSavedInvoices && (
           <div className="p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30">
-            <h4 className="text-lg font-semibold text-purple-200 mb-4">Facturas Guardadas</h4>
+          <h4 className="text-lg font-semibold text-purple-200 mb-4">{TEXTS.savedInvoices.title}</h4>
             
             {loadingInvoices ? (
               <div className="text-center py-4 text-gray-400">
                 <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-                Cargando facturas...
+                {TEXTS.loadingInvoicesMessage}
               </div>
             ) : invoices.length === 0 ? (
               <div className="text-center py-8 text-gray-400">
                 <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>No tienes facturas guardadas</p>
+                <p>{TEXTS.noInvoicesMessage}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -1116,14 +1117,14 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                               {invoice.invoiceNumber}
                               {editingInvoiceId === invoice.id && (
                                 <span className="px-1 py-0.5 bg-yellow-500/20 rounded text-xs text-yellow-200">
-                                  Editando
+                                  {TEXTS.editingStatus}
                                 </span>
                               )}
                               {/* ✅ Indicador de enlace público */}
                               {hasLink && (
                                 <span className="px-1 py-0.5 bg-green-500/20 border border-green-400/20 rounded text-xs text-green-200 flex items-center gap-1">
                                   <Globe className="h-3 w-3" />
-                                  Público
+                                  {TEXTS.public}
                                 </span>
                               )}
                             </p>
@@ -1134,14 +1135,15 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                               {new Date(invoice.createdAt).toLocaleDateString()}
                               {invoice.updatedAt !== invoice.createdAt && (
                                 <span className="ml-2">
-                                  (Actualizada: {new Date(invoice.updatedAt).toLocaleDateString()})
+      ({TEXTS.updated} {new Date(invoice.updatedAt).toLocaleDateString()})
                                 </span>
                               )}
                             </p>
                             {/* ✅ Mostrar URL pública si existe */}
                             {hasLink && publicLinkData && (
                               <p className="text-xs text-blue-400 mt-1 font-mono">
-                                🔗 {publicLinkData.publicUrl}
+                                  {TEXTS.publicLinkUrl} {publicLinkData.publicUrl}
+
                               </p>
                             )}
                           </div>
@@ -1153,7 +1155,8 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                         <button
                           onClick={() => handleLoadInvoice(invoice)}
                           className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors"
-                          title="Cargar factura para ver"
+                          title={TEXTS.tooltips.load}
+
                         >
                           <Eye className="h-4 w-4" />
                         </button>
@@ -1162,7 +1165,7 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                           onClick={() => handleEditInvoice(invoice.id)}
                           disabled={editingInvoiceId === invoice.id}
                           className="p-2 text-green-400 hover:bg-green-500/10 rounded-md transition-colors disabled:opacity-50"
-                          title="Editar factura"
+                          title={TEXTS.tooltips.edit}
                         >
                           <Edit className="h-4 w-4" />
                         </button>
@@ -1170,7 +1173,7 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                         <button
                           onClick={() => handleDuplicateInvoice(invoice.id, invoice.invoiceNumber)}
                           className="p-2 text-purple-400 hover:bg-purple-500/10 rounded-md transition-colors"
-                          title="Duplicar factura"
+                          title={TEXTS.tooltips.duplicate}
                         >
                           <Copy className="h-4 w-4" />
                         </button>
@@ -1183,7 +1186,7 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                               onClick={() => handleCopyPublicLink(invoice.id, publicLinkData!.publicUrl)}
                               disabled={isCopying(invoice.id)}
                               className="p-2 text-cyan-400 hover:bg-cyan-500/10 rounded-md transition-colors disabled:opacity-50"
-                              title="Copiar enlace público"
+                              title={TEXTS.tooltips.copyPublicLink}
                             >
                               {isCopying(invoice.id) ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -1196,7 +1199,7 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                             <button
                               onClick={() => openPublicLink(publicLinkData!.publicUrl)}
                               className="p-2 text-emerald-400 hover:bg-emerald-500/10 rounded-md transition-colors"
-                              title="Abrir enlace público"
+                              title={TEXTS.tooltips.openPublicLink}
                             >
                               <ExternalLink className="h-4 w-4" />
                             </button>
@@ -1206,7 +1209,7 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                               onClick={() => handleRemovePublicLink(invoice.id, invoice.invoiceNumber)}
                               disabled={isRemoving(invoice.id)}
                               className="p-2 text-orange-400 hover:bg-orange-500/10 rounded-md transition-colors disabled:opacity-50"
-                              title="Eliminar enlace público"
+                              title={TEXTS.tooltips.removePublicLink}
                             >
                               {isRemoving(invoice.id) ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -1221,7 +1224,7 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                             onClick={() => handleGeneratePublicLink(invoice.id, invoice.invoiceNumber)}
                             disabled={isGenerating(invoice.id)}
                             className="p-2 text-teal-400 hover:bg-teal-500/10 rounded-md transition-colors disabled:opacity-50"
-                            title="Generar enlace público"
+                            title={TEXTS.tooltips.generatePublicLink}
                           >
                             {isGenerating(invoice.id) ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
@@ -1235,7 +1238,7 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                         <button
                           onClick={() => handleDeleteInvoice(invoice.id, invoice.invoiceNumber)}
                           className="p-2 text-red-400 hover:bg-red-500/10 rounded-md transition-colors"
-                          title="Eliminar factura"
+                          title={TEXTS.tooltips.delete}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -1575,7 +1578,7 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
     {isExporting ? (
       <>
         <Loader2 className="h-5 w-5 animate-spin" />
-        Generando PDF...
+        {TEXTS.generatingPdf}
       </>
     ) : (
       <>
@@ -1594,7 +1597,7 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
                 className="w-full px-4 py-3 bg-gray-600/20 hover:bg-gray-600/30 border border-gray-400/20 
                         rounded-xl text-gray-200 transition-all"
                 >
-                {editingInvoiceId ? 'Cancelar y Nueva Factura' : TEXTS.actions.newInvoice}
+                {editingInvoiceId ? TEXTS.savedInvoices.cancelAndNew : TEXTS.actions.newInvoice}
               </button>
             </div>
           </div>

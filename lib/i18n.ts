@@ -1079,3 +1079,1163 @@ export const getPromptUsageTranslation = (language: Language) => {
 export const getPricingTranslation = (language: Language) => {
   return pricingTranslations[language] || pricingTranslations.en;
 };
+
+export const invoiceGeneratorTranslations: Record<Language, {
+  // Títulos principales
+  mainTitle: string;
+  loading: string;
+  
+  // Sección de IA
+  aiSection: {
+    title: string;
+    placeholder: string;
+    generating: string;
+    generate: string;
+    errorPrefix: string;
+  };
+  
+  // Vista previa
+  preview: {
+    show: string;
+    hide: string;
+    title: string;
+  };
+  
+  // Información de factura
+  invoiceInfo: {
+    title: string;
+    number: string;
+    date: string;
+    dueDate: string;
+  };
+  
+  // Información de empresa
+  company: {
+    title: string;
+    name: string;
+    email: string;
+    phone: string;
+    taxId: string;
+    address: string;
+  };
+  
+  // Información de cliente
+  client: {
+    title: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+  };
+
+  // Moneda
+  currency: {
+    title: string;
+    selector: string;
+    current: string;
+    change: string;
+    updateError: string;
+    updateSuccess: string;
+  };
+  
+  // Items de factura
+  items: {
+    title: string;
+    add: string;
+    clear: string;
+    description: string;
+    quantity: string;
+    price: string;
+    total: string;
+    taxRate: string;
+    defaultDescription: string;
+  };
+  
+  // Notas
+  notes: {
+    title: string;
+    placeholder: string;
+    previewTitle: string;
+  };
+  
+  // Acciones
+  actions: {
+    downloadPdf: string;
+    newInvoice: string;
+    pdfComingSoon: string;
+  };
+  
+  // Mensajes de error y API
+  api: {
+    networkError: string;
+    serverError: string;
+    unknownError: string;
+    simulatingResponse: string;
+    generatingError: string;
+  };
+  
+  // Datos de ejemplo para simulación
+  simulation: {
+    clientName: string;
+    clientEmail: string;
+    serviceDescription: string;
+    invoiceNotes: string;
+  };
+
+  // Gestión de facturas guardadas
+  savedInvoices: {
+    title: string;
+    editing: string;
+    save: string;
+    update: string;
+    saving: string;
+    updating: string;
+    cancel: string;
+    view: string;
+    hide: string;
+    load: string;
+    edit: string;
+    duplicate: string;
+    delete: string;
+    confirmDelete: string;
+    confirmDuplicate: string;
+    cancelAndNew: string;
+    limitReached: string;
+    limitMessage: string;
+    subscribeMessage: string;
+    noInvoices: string;
+    loadingInvoices: string;
+    publicLink: string;
+    generateLink: string;
+    copyLink: string;
+    removeLink: string;
+    confirmRemoveLink: string;
+    openLink: string;
+  };
+
+  // Validación
+  validation: {
+    invoiceNumberRequired: string;
+    clientNameRequired: string;
+    itemDescriptionRequired: string;
+  };
+
+  invoicesCount: string;
+  editingStatus: string;
+  activeStatus: string;
+  public: string;
+  updated: string;
+  confirmDeleteInvoice: string;
+  confirmDuplicateInvoice: string;
+  confirmRemovePublicLink: string;
+  generatingPdf: string;
+  invoicesLimit: string;
+  subscriptionLimit: string;
+  subscriptionMessage: string;
+  freeLimit: string;
+  validationErrors: string;
+  noInvoicesMessage: string;
+  loadingInvoicesMessage: string;
+  showDetails: string;
+  hideDetails: string;
+  manageInvoices: string;
+  invoicesList: string;
+  createdAt: string;
+  publicLinkUrl: string;
+  tooltips: {
+    load: string;
+    edit: string;
+    duplicate: string;
+    delete: string;
+    generatePublicLink: string;
+    copyPublicLink: string;
+    openPublicLink: string;
+    removePublicLink: string;
+  };
+
+}> = {
+  en: {
+    mainTitle: "Invoice Generator",
+    loading: "Loading...",
+    
+    aiSection: {
+      title: "Generate Invoice with AI",
+      placeholder: "Describe your invoice details (e.g., Invoice for John Doe for web design services, 3 hours at $50/hour)",
+      generating: "Generating...",
+      generate: "Generate",
+      errorPrefix: "Error: "
+    },
+    
+    preview: {
+      show: "Show Preview",
+      hide: "Hide Preview",
+      title: "Preview"
+    },
+    
+    invoiceInfo: {
+      title: "Invoice Information",
+      number: "Invoice Number",
+      date: "Date",
+      dueDate: "Due Date"
+    },
+    
+    company: {
+      title: "Your Company",
+      name: "Company name",
+      email: "email@company.com",
+      phone: "Phone",
+      taxId: "Tax ID",
+      address: "Complete address"
+    },
+    
+    client: {
+      title: "Client",
+      name: "Client name",
+      email: "email@client.com",
+      phone: "Phone",
+      address: "Client address"
+    },
+
+    currency: {
+      title: "Currency",
+      selector: "Select Currency",
+      current: "Current Currency",
+      change: "Change Currency",
+      updateError: "Error updating currency",
+      updateSuccess: "Currency updated successfully"
+    },
+    
+    items: {
+      title: "Services/Products",
+      add: "Add",
+      clear: "Clear",
+      description: "Service/product description",
+      quantity: "Qty.",
+      price: "Price",
+      total: "Total",
+      taxRate: "VAT (%)",
+      defaultDescription: "Product/Service"
+    },
+    
+    notes: {
+      title: "Additional Notes",
+      placeholder: "Payment terms, additional information, etc.",
+      previewTitle: "Notes:"
+    },
+    
+    actions: {
+      downloadPdf: "Download Invoice PDF",
+      newInvoice: "New Invoice",
+      pdfComingSoon: "PDF export function - Coming soon"
+    },
+    
+    api: {
+      networkError: "Network error",
+      serverError: "Server error",
+      unknownError: "Unknown error",
+      simulatingResponse: "Simulating API response for prompt:",
+      generatingError: "Error generating invoice with AI:"
+    },
+    
+    simulation: {
+      clientName: "Example Client",
+      clientEmail: "client@example.com",
+      serviceDescription: "Consulting service",
+      invoiceNotes: "Invoice generated with AI"
+    },
+
+    savedInvoices: {
+      title: "Saved Invoices",
+      editing: "Editing",
+      save: "Save Invoice",
+      update: "Update Invoice",
+      saving: "Saving...",
+      updating: "Updating...",
+      cancel: "Cancel Edit",
+      view: "View",
+      hide: "Hide",
+      load: "Load invoice to view",
+      edit: "Edit invoice",
+      duplicate: "Duplicate invoice",
+      delete: "Delete invoice",
+      confirmDelete: "Are you sure you want to delete invoice",
+      confirmDuplicate: "Duplicate invoice",
+      cancelAndNew: "Cancel and New Invoice",
+      limitReached: "Limit reached",
+      limitMessage: "You have reached the limit of",
+      subscribeMessage: "Subscribe to get up to 100 monthly invoices.",
+      noInvoices: "You have no saved invoices",
+      loadingInvoices: "Loading invoices...",
+      publicLink: "Public",
+      generateLink: "Generate public link",
+      copyLink: "Copy public link",
+      removeLink: "Remove public link",
+      confirmRemoveLink: "Remove public link from invoice",
+      openLink: "Open public link"
+    },
+
+    validation: {
+      invoiceNumberRequired: "Invoice number is required",
+      clientNameRequired: "Client name is required",
+      itemDescriptionRequired: "All items must have description"
+    },
+    invoicesCount: "invoices",
+    editingStatus: "Editing",
+    activeStatus: "Active", 
+    public: "Public",
+    updated: "Updated:",
+    
+    confirmDeleteInvoice: "Are you sure you want to delete invoice",
+    confirmDuplicateInvoice: "Duplicate invoice",
+    confirmRemovePublicLink: "Remove public link from invoice",
+    
+    generatingPdf: "Generating PDF...",
+    
+    invoicesLimit: "invoices",
+    subscriptionLimit: "You have reached the limit of",
+    subscriptionMessage: "Subscribe to get up to 100 monthly invoices.",
+    freeLimit: "Delete some or edit an existing one.",
+    
+    validationErrors: "Validation errors:",
+    
+    noInvoicesMessage: "You have no saved invoices",
+    loadingInvoicesMessage: "Loading invoices...",
+    
+    showDetails: "See all benefits", 
+    hideDetails: "Hide details",
+    manageInvoices: "Saved Invoices Management",
+    invoicesList: "Saved Invoices List",
+    
+    createdAt: "Created:",
+    publicLinkUrl: "🔗",
+    
+    tooltips: {
+      load: "Load invoice to view",
+      edit: "Edit invoice",
+      duplicate: "Duplicate invoice", 
+      delete: "Delete invoice",
+      generatePublicLink: "Generate public link",
+      copyPublicLink: "Copy public link",
+      openPublicLink: "Open public link",
+      removePublicLink: "Remove public link"
+    }
+  },
+  es: {
+    mainTitle: "Generador de Facturas",
+    loading: "Cargando...",
+    
+    aiSection: {
+      title: "Generar Factura con IA",
+      placeholder: "Describe los detalles de tu factura (ej: Factura para Juan Pérez por servicios de diseño web, 3 horas a 50€/hora)",
+      generating: "Generando...",
+      generate: "Generar",
+      errorPrefix: "Error: "
+    },
+    
+    preview: {
+      show: "Mostrar Vista Previa",
+      hide: "Ocultar Vista Previa",
+      title: "Vista Previa"
+    },
+    
+    invoiceInfo: {
+      title: "Información de la Factura",
+      number: "Número de Factura",
+      date: "Fecha",
+      dueDate: "Fecha de Vencimiento"
+    },
+    
+    company: {
+      title: "Tu Empresa",
+      name: "Nombre de la empresa",
+      email: "email@empresa.com",
+      phone: "Teléfono",
+      taxId: "NIF/CIF",
+      address: "Dirección completa"
+    },
+    
+    client: {
+      title: "Cliente",
+      name: "Nombre del cliente",
+      email: "email@cliente.com",
+      phone: "Teléfono",
+      address: "Dirección del cliente"
+    },
+
+    currency: {
+      title: "Moneda",
+      selector: "Seleccionar Moneda",
+      current: "Moneda Actual",
+      change: "Cambiar Moneda",
+      updateError: "Error al actualizar la moneda",
+      updateSuccess: "Moneda actualizada correctamente"
+    },
+    
+    items: {
+      title: "Servicios/Productos",
+      add: "Añadir",
+      clear: "Limpiar",
+      description: "Descripción del servicio/producto",
+      quantity: "Cant.",
+      price: "Precio",
+      total: "Total",
+      taxRate: "IVA (%)",
+      defaultDescription: "Producto/Servicio"
+    },
+    
+    notes: {
+      title: "Notas Adicionales",
+      placeholder: "Términos de pago, información adicional, etc.",
+      previewTitle: "Notas:"
+    },
+    
+    actions: {
+      downloadPdf: "Descargar Factura PDF",
+      newInvoice: "Nueva Factura",
+      pdfComingSoon: "Función de exportación a PDF - Próximamente disponible"
+    },
+    
+    api: {
+      networkError: "Error de conexión",
+      serverError: "Error del servidor",
+      unknownError: "Error desconocido",
+      simulatingResponse: "Simulando respuesta de API para prompt:",
+      generatingError: "Error generating invoice with AI:"
+    },
+    
+    simulation: {
+      clientName: "Cliente Ejemplo",
+      clientEmail: "cliente@ejemplo.com",
+      serviceDescription: "Servicio de consultoría",
+      invoiceNotes: "Factura generada con IA"
+    },
+
+    savedInvoices: {
+      title: "Facturas Guardadas",
+      editing: "Editando",
+      save: "Guardar Factura",
+      update: "Actualizar Factura",
+      saving: "Guardando...",
+      updating: "Actualizando...",
+      cancel: "Cancelar Edición",
+      view: "Ver",
+      hide: "Ocultar",
+      load: "Cargar factura para ver",
+      edit: "Editar factura",
+      duplicate: "Duplicar factura",
+      delete: "Eliminar factura",
+      confirmDelete: "¿Estás seguro de que quieres eliminar la factura",
+      confirmDuplicate: "¿Duplicar la factura",
+      cancelAndNew: "Cancelar y Nueva Factura",
+      limitReached: "Límite alcanzado",
+      limitMessage: "Has alcanzado el límite de",
+      subscribeMessage: "Suscríbete para obtener hasta 100 facturas mensuales.",
+      noInvoices: "No tienes facturas guardadas",
+      loadingInvoices: "Cargando facturas...",
+      publicLink: "Público",
+      generateLink: "Generar enlace público",
+      copyLink: "Copiar enlace público",
+      removeLink: "Eliminar enlace público",
+      confirmRemoveLink: "¿Eliminar el enlace público de la factura",
+      openLink: "Abrir enlace público"
+    },
+
+    validation: {
+      invoiceNumberRequired: "Número de factura es requerido",
+      clientNameRequired: "Nombre del cliente es requerido",
+      itemDescriptionRequired: "Todos los items deben tener descripción"
+    },
+
+    invoicesCount: "facturas",
+    editingStatus: "Editando",
+    activeStatus: "Activo",
+    public: "Público",
+    updated: "Actualizada:",
+    
+    // Mensajes de confirmación
+    confirmDeleteInvoice: "¿Estás seguro de que quieres eliminar la factura",
+    confirmDuplicateInvoice: "¿Duplicar la factura",
+    confirmRemovePublicLink: "¿Eliminar el enlace público de la factura",
+    
+    // Estados de carga
+    generatingPdf: "Generando PDF...",
+    
+    // Límites y suscripciones
+    invoicesLimit: "facturas",
+    subscriptionLimit: "Has alcanzado el límite de",
+    subscriptionMessage: "Suscríbete para obtener hasta 100 facturas mensuales.",
+    freeLimit: "Elimina alguna o edita una existente.",
+    
+    // Errores de validación
+    validationErrors: "Errores de validación:",
+    
+    // Estados de las facturas guardadas
+    noInvoicesMessage: "No tienes facturas guardadas",
+    loadingInvoicesMessage: "Cargando facturas...",
+    
+    // Botones y acciones
+    showDetails: "Ver todos los beneficios",
+    hideDetails: "Ocultar detalles",
+    manageInvoices: "Gestión de Facturas Guardadas",
+    invoicesList: "Lista de Facturas Guardadas",
+    
+    // Fechas
+    createdAt: "Creada:",
+    
+    // Enlaces públicos
+    publicLinkUrl: "🔗",
+    
+    // Tooltips
+    tooltips: {
+      load: "Cargar factura para ver",
+      edit: "Editar factura", 
+      duplicate: "Duplicar factura",
+      delete: "Eliminar factura",
+      generatePublicLink: "Generar enlace público",
+      copyPublicLink: "Copiar enlace público",
+      openPublicLink: "Abrir enlace público",
+      removePublicLink: "Eliminar enlace público"
+    }
+  },
+  pt: {
+    mainTitle: "Gerador de Faturas",
+    loading: "Carregando...",
+
+    aiSection: {
+      title: "Gerar Fatura com IA",
+      placeholder: "Descreva os detalhes da sua fatura (ex: Fatura para João Silva por serviços de design web, 3 horas a 50€/hora)",
+      generating: "Gerando...",
+      generate: "Gerar",
+      errorPrefix: "Erro: "
+    },
+
+    preview: {
+      show: "Mostrar Pré-visualização",
+      hide: "Ocultar Pré-visualização",
+      title: "Pré-visualização"
+    },
+
+    invoiceInfo: {
+      title: "Informações da Fatura",
+      number: "Número da Fatura",
+      date: "Data",
+      dueDate: "Data de Vencimento"
+    },
+
+    company: {
+      title: "Sua Empresa",
+      name: "Nome da empresa",
+      email: "email@empresa.com",
+      phone: "Telefone",
+      taxId: "NIF",
+      address: "Endereço completo"
+    },
+
+    client: {
+      title: "Cliente",
+      name: "Nome do cliente",
+      email: "email@cliente.com",
+      phone: "Telefone",
+      address: "Endereço do cliente"
+    },
+
+    currency: {
+      title: "Moeda",
+      selector: "Selecionar Moeda",
+      current: "Moeda Atual",
+      change: "Alterar Moeda",
+      updateError: "Erro ao atualizar a moeda",
+      updateSuccess: "Moeda atualizada com sucesso"
+    },
+
+    items: {
+      title: "Serviços/Produtos",
+      add: "Adicionar",
+      clear: "Limpar",
+      description: "Descrição do serviço/produto",
+      quantity: "Qtd.",
+      price: "Preço",
+      total: "Total",
+      taxRate: "IVA (%)",
+      defaultDescription: "Produto/Serviço"
+    },
+
+    notes: {
+      title: "Notas Adicionais",
+      placeholder: "Condições de pagamento, informações adicionais, etc.",
+      previewTitle: "Notas:"
+    },
+
+    actions: {
+      downloadPdf: "Baixar Fatura PDF",
+      newInvoice: "Nova Fatura",
+      pdfComingSoon: "Função de exportação PDF - Em breve"
+    },
+
+    api: {
+      networkError: "Erro de rede",
+      serverError: "Erro do servidor",
+      unknownError: "Erro desconhecido",
+      simulatingResponse: "Simulando resposta da API para prompt:",
+      generatingError: "Erro ao gerar fatura com IA:"
+    },
+
+    simulation: {
+      clientName: "Cliente Exemplo",
+      clientEmail: "cliente@exemplo.com",
+      serviceDescription: "Serviço de consultoria",
+      invoiceNotes: "Fatura gerada com IA"
+    },
+
+    savedInvoices: {
+      title: "Faturas Salvas",
+      editing: "Editando",
+      save: "Salvar Fatura",
+      update: "Atualizar Fatura",
+      saving: "Salvando...",
+      updating: "Atualizando...",
+      cancel: "Cancelar Edição",
+      view: "Ver",
+      hide: "Ocultar",
+      load: "Carregar fatura para ver",
+      edit: "Editar fatura",
+      duplicate: "Duplicar fatura",
+      delete: "Excluir fatura",
+      confirmDelete: "Tem certeza que deseja excluir a fatura",
+      confirmDuplicate: "Duplicar fatura",
+      cancelAndNew: "Cancelar e Nova Fatura",
+      limitReached: "Limite atingido",
+      limitMessage: "Você atingiu o limite de",
+      subscribeMessage: "Assine para gerar até 100 faturas mensais.",
+      noInvoices: "Você não tem faturas salvas",
+      loadingInvoices: "Carregando faturas...",
+      publicLink: "Público",
+      generateLink: "Gerar link público",
+      copyLink: "Copiar link público",
+      removeLink: "Remover link público",
+      confirmRemoveLink: "Remover link público da fatura",
+      openLink: "Abrir link público"
+    },
+
+    validation: {
+      invoiceNumberRequired: "Número da fatura é obrigatório",
+      clientNameRequired: "Nome do cliente é obrigatório",
+      itemDescriptionRequired: "Todos os itens devem ter descrição"
+    },
+    invoicesCount: "faturas",
+    editingStatus: "Editando",
+    activeStatus: "Ativo",
+    public: "Público",
+    updated: "Atualizada:",
+    confirmDeleteInvoice: "Tem certeza que deseja excluir a fatura",
+    confirmDuplicateInvoice: "Duplicar fatura",
+    confirmRemovePublicLink: "Remover link público da fatura",
+    generatingPdf: "Gerando PDF...",
+    invoicesLimit: "faturas",
+    subscriptionLimit: "Você atingiu o limite de",
+    subscriptionMessage: "Assine para gerar até 100 faturas mensais.",
+    freeLimit: "Exclua algumas ou edite uma existente.",
+    validationErrors: "Erros de validação:",
+    noInvoicesMessage: "Você não tem faturas salvas",
+    loadingInvoicesMessage: "Carregando faturas...",
+    showDetails: "Ver todos os benefícios",
+    hideDetails: "Ocultar detalhes",
+    manageInvoices: "Gestão de Faturas Salvas",
+    invoicesList: "Lista de Faturas Salvas",
+    createdAt: "Criada:",
+    publicLinkUrl: "🔗",
+
+    tooltips: {
+      load: "Carregar fatura para ver",
+      edit: "Editar fatura",
+      duplicate: "Duplicar fatura",
+      delete: "Excluir fatura",
+      generatePublicLink: "Gerar link público",
+      copyPublicLink: "Copiar link público",
+      openPublicLink: "Abrir link público",
+      removePublicLink: "Remover link público"
+    }
+  },
+  ja: {
+    mainTitle: "請求書ジェネレーター",
+    loading: "読み込み中...",
+
+    aiSection: {
+      title: "AIで請求書を作成",
+      placeholder: "請求書の詳細を入力してください（例: 山田太郎へのWebデザインサービスの請求書、3時間、1時間あたり¥5000）",
+      generating: "生成中...",
+      generate: "生成",
+      errorPrefix: "エラー: "
+    },
+
+    preview: {
+      show: "プレビューを表示",
+      hide: "プレビューを非表示",
+      title: "プレビュー"
+    },
+
+    invoiceInfo: {
+      title: "請求書情報",
+      number: "請求書番号",
+      date: "日付",
+      dueDate: "支払期限"
+    },
+
+    company: {
+      title: "あなたの会社",
+      name: "会社名",
+      email: "email@company.com",
+      phone: "電話番号",
+      taxId: "法人番号",
+      address: "住所"
+    },
+
+    client: {
+      title: "顧客",
+      name: "顧客名",
+      email: "email@client.com",
+      phone: "電話番号",
+      address: "顧客の住所"
+    },
+
+    currency: {
+      title: "通貨",
+      selector: "通貨を選択",
+      current: "現在の通貨",
+      change: "通貨を変更",
+      updateError: "通貨の更新に失敗しました",
+      updateSuccess: "通貨が正常に更新されました"
+    },
+
+    items: {
+      title: "サービス/商品",
+      add: "追加",
+      clear: "クリア",
+      description: "サービス/商品の説明",
+      quantity: "数量",
+      price: "価格",
+      total: "合計",
+      taxRate: "消費税 (%)",
+      defaultDescription: "商品/サービス"
+    },
+
+    notes: {
+      title: "追加のメモ",
+      placeholder: "支払条件、追加情報など",
+      previewTitle: "メモ:"
+    },
+
+    actions: {
+      downloadPdf: "請求書PDFをダウンロード",
+      newInvoice: "新しい請求書",
+      pdfComingSoon: "PDFエクスポート機能 - 近日公開"
+    },
+
+    api: {
+      networkError: "ネットワークエラー",
+      serverError: "サーバーエラー",
+      unknownError: "不明なエラー",
+      simulatingResponse: "APIレスポンスをシミュレーション中:",
+      generatingError: "AIによる請求書生成エラー:"
+    },
+
+    simulation: {
+      clientName: "サンプル顧客",
+      clientEmail: "client@example.com",
+      serviceDescription: "コンサルティングサービス",
+      invoiceNotes: "AIで生成された請求書"
+    },
+
+    savedInvoices: {
+      title: "保存された請求書",
+      editing: "編集中",
+      save: "請求書を保存",
+      update: "請求書を更新",
+      saving: "保存中...",
+      updating: "更新中...",
+      cancel: "編集をキャンセル",
+      view: "表示",
+      hide: "非表示",
+      load: "請求書を読み込む",
+      edit: "請求書を編集",
+      duplicate: "請求書を複製",
+      delete: "請求書を削除",
+      confirmDelete: "請求書を削除してもよろしいですか",
+      confirmDuplicate: "請求書を複製しますか",
+      cancelAndNew: "キャンセルして新しい請求書",
+      limitReached: "上限に達しました",
+      limitMessage: "上限に達しました:",
+      subscribeMessage: "月100件まで請求書を作成するには購読してください。",
+      noInvoices: "保存された請求書はありません",
+      loadingInvoices: "請求書を読み込み中...",
+      publicLink: "公開リンク",
+      generateLink: "公開リンクを生成",
+      copyLink: "公開リンクをコピー",
+      removeLink: "公開リンクを削除",
+      confirmRemoveLink: "請求書から公開リンクを削除しますか",
+      openLink: "公開リンクを開く"
+    },
+
+    validation: {
+      invoiceNumberRequired: "請求書番号は必須です",
+      clientNameRequired: "顧客名は必須です",
+      itemDescriptionRequired: "すべての項目に説明が必要です"
+    },
+    invoicesCount: "件の請求書",
+    editingStatus: "編集中",
+    activeStatus: "アクティブ",
+    public: "公開",
+    updated: "更新日:",
+    confirmDeleteInvoice: "請求書を削除してもよろしいですか",
+    confirmDuplicateInvoice: "請求書を複製しますか",
+    confirmRemovePublicLink: "請求書から公開リンクを削除しますか",
+    generatingPdf: "PDFを生成中...",
+    invoicesLimit: "件の請求書",
+    subscriptionLimit: "上限に達しました:",
+    subscriptionMessage: "月100件まで請求書を作成するには購読してください。",
+    freeLimit: "一部を削除するか、既存のものを編集してください。",
+    validationErrors: "検証エラー:",
+    noInvoicesMessage: "保存された請求書はありません",
+    loadingInvoicesMessage: "請求書を読み込み中...",
+    showDetails: "すべての利点を表示",
+    hideDetails: "詳細を非表示",
+    manageInvoices: "保存された請求書の管理",
+    invoicesList: "保存された請求書リスト",
+    createdAt: "作成日:",
+    publicLinkUrl: "🔗",
+
+    tooltips: {
+      load: "請求書を読み込む",
+      edit: "請求書を編集",
+      duplicate: "請求書を複製",
+      delete: "請求書を削除",
+      generatePublicLink: "公開リンクを生成",
+      copyPublicLink: "公開リンクをコピー",
+      openPublicLink: "公開リンクを開く",
+      removePublicLink: "公開リンクを削除"
+    }
+  },
+  fr: {
+    mainTitle: "Générateur de Factures",
+    loading: "Chargement...",
+
+    aiSection: {
+      title: "Générer une facture avec l'IA",
+      placeholder: "Décrivez les détails de votre facture (ex: Facture pour Jean Dupont pour des services de conception web, 3 heures à 50€/heure)",
+      generating: "Génération...",
+      generate: "Générer",
+      errorPrefix: "Erreur: "
+    },
+
+    preview: {
+      show: "Afficher l’Aperçu",
+      hide: "Masquer l’Aperçu",
+      title: "Aperçu"
+    },
+
+    invoiceInfo: {
+      title: "Informations de la Facture",
+      number: "Numéro de Facture",
+      date: "Date",
+      dueDate: "Date d’Échéance"
+    },
+
+    company: {
+      title: "Votre Entreprise",
+      name: "Nom de l’entreprise",
+      email: "email@entreprise.com",
+      phone: "Téléphone",
+      taxId: "Numéro TVA",
+      address: "Adresse complète"
+    },
+
+    client: {
+      title: "Client",
+      name: "Nom du client",
+      email: "email@client.com",
+      phone: "Téléphone",
+      address: "Adresse du client"
+    },
+
+    currency: {
+      title: "Devise",
+      selector: "Sélectionner la Devise",
+      current: "Devise Actuelle",
+      change: "Changer de Devise",
+      updateError: "Erreur lors de la mise à jour de la devise",
+      updateSuccess: "Devise mise à jour avec succès"
+    },
+
+    items: {
+      title: "Services/Produits",
+      add: "Ajouter",
+      clear: "Effacer",
+      description: "Description du service/produit",
+      quantity: "Qté.",
+      price: "Prix",
+      total: "Total",
+      taxRate: "TVA (%)",
+      defaultDescription: "Produit/Service"
+    },
+
+    notes: {
+      title: "Notes Supplémentaires",
+      placeholder: "Conditions de paiement, informations supplémentaires, etc.",
+      previewTitle: "Notes:"
+    },
+
+    actions: {
+      downloadPdf: "Télécharger la Facture PDF",
+      newInvoice: "Nouvelle Facture",
+      pdfComingSoon: "Fonction d’export PDF - Bientôt disponible"
+    },
+
+    api: {
+      networkError: "Erreur réseau",
+      serverError: "Erreur serveur",
+      unknownError: "Erreur inconnue",
+      simulatingResponse: "Simulation de la réponse API pour prompt:",
+      generatingError: "Erreur lors de la génération de la facture avec l’IA:"
+    },
+
+    simulation: {
+      clientName: "Client Exemple",
+      clientEmail: "client@exemple.com",
+      serviceDescription: "Service de conseil",
+      invoiceNotes: "Facture générée avec IA"
+    },
+
+    savedInvoices: {
+      title: "Factures Enregistrées",
+      editing: "En cours d’édition",
+      save: "Enregistrer la Facture",
+      update: "Mettre à jour la Facture",
+      saving: "Enregistrement...",
+      updating: "Mise à jour...",
+      cancel: "Annuler l’édition",
+      view: "Voir",
+      hide: "Masquer",
+      load: "Charger la facture pour voir",
+      edit: "Modifier la facture",
+      duplicate: "Dupliquer la facture",
+      delete: "Supprimer la facture",
+      confirmDelete: "Êtes-vous sûr de vouloir supprimer la facture",
+      confirmDuplicate: "Dupliquer la facture",
+      cancelAndNew: "Annuler et Nouvelle Facture",
+      limitReached: "Limite atteinte",
+      limitMessage: "Vous avez atteint la limite de",
+      subscribeMessage: "Abonnez-vous pour générer jusqu’à 100 factures mensuelles.",
+      noInvoices: "Vous n’avez aucune facture enregistrée",
+      loadingInvoices: "Chargement des factures...",
+      publicLink: "Lien public",
+      generateLink: "Générer un lien public",
+      copyLink: "Copier le lien public",
+      removeLink: "Supprimer le lien public",
+      confirmRemoveLink: "Supprimer le lien public de la facture",
+      openLink: "Ouvrir le lien public"
+    },
+
+    validation: {
+      invoiceNumberRequired: "Le numéro de facture est requis",
+      clientNameRequired: "Le nom du client est requis",
+      itemDescriptionRequired: "Tous les articles doivent avoir une description"
+    },
+    invoicesCount: "factures",
+    editingStatus: "En cours d'édition",
+    activeStatus: "Actif",
+    public: "Public",
+    updated: "Mise à jour:",
+    confirmDeleteInvoice: "Êtes-vous sûr de vouloir supprimer la facture",
+    confirmDuplicateInvoice: "Dupliquer la facture",
+    confirmRemovePublicLink: "Supprimer le lien public de la facture",
+    generatingPdf: "Génération du PDF...",
+    invoicesLimit: "factures",
+    subscriptionLimit: "Vous avez atteint la limite de",
+    subscriptionMessage: "Abonnez-vous pour générer jusqu'à 100 factures mensuelles.",
+    freeLimit: "Supprimez-en quelques-unes ou modifiez une existante.",
+    validationErrors: "Erreurs de validation:",
+    noInvoicesMessage: "Vous n'avez aucune facture enregistrée",
+    loadingInvoicesMessage: "Chargement des factures...",
+    showDetails: "Voir tous les avantages",
+    hideDetails: "Masquer les détails",
+    manageInvoices: "Gestion des Factures Enregistrées",
+    invoicesList: "Liste des Factures Enregistrées",
+    createdAt: "Créée:",
+    publicLinkUrl: "🔗",
+
+    tooltips: {
+      load: "Charger la facture pour voir",
+      edit: "Modifier la facture",
+      duplicate: "Dupliquer la facture",
+      delete: "Supprimer la facture",
+      generatePublicLink: "Générer un lien public",
+      copyPublicLink: "Copier le lien public",
+      openPublicLink: "Ouvrir le lien public",
+      removePublicLink: "Supprimer le lien public"
+    }
+  },
+  de: {
+    mainTitle: "Rechnungsgenerator",
+    loading: "Wird geladen...",
+
+    aiSection: {
+      title: "Rechnung mit KI erstellen",
+      placeholder: "Beschreiben Sie die Details Ihrer Rechnung (z. B. Rechnung für Max Mustermann für Webdesign-Dienstleistungen, 3 Stunden à 50€/Stunde)",
+      generating: "Wird generiert...",
+      generate: "Generieren",
+      errorPrefix: "Fehler: "
+    },
+
+    preview: {
+      show: "Vorschau anzeigen",
+      hide: "Vorschau ausblenden",
+      title: "Vorschau"
+    },
+
+    invoiceInfo: {
+      title: "Rechnungsinformationen",
+      number: "Rechnungsnummer",
+      date: "Datum",
+      dueDate: "Fälligkeitsdatum"
+    },
+
+    company: {
+      title: "Ihr Unternehmen",
+      name: "Firmenname",
+      email: "email@unternehmen.com",
+      phone: "Telefon",
+      taxId: "Steuernummer",
+      address: "Vollständige Adresse"
+    },
+
+    client: {
+      title: "Kunde",
+      name: "Kundenname",
+      email: "email@kunde.com",
+      phone: "Telefon",
+      address: "Kundenadresse"
+    },
+
+    currency: {
+      title: "Währung",
+      selector: "Währung auswählen",
+      current: "Aktuelle Währung",
+      change: "Währung ändern",
+      updateError: "Fehler beim Aktualisieren der Währung",
+      updateSuccess: "Währung erfolgreich aktualisiert"
+    },
+
+    items: {
+      title: "Dienstleistungen/Produkte",
+      add: "Hinzufügen",
+      clear: "Löschen",
+      description: "Beschreibung der Dienstleistung/des Produkts",
+      quantity: "Menge",
+      price: "Preis",
+      total: "Gesamt",
+      taxRate: "MwSt (%)",
+      defaultDescription: "Produkt/Dienstleistung"
+    },
+
+    notes: {
+      title: "Zusätzliche Notizen",
+      placeholder: "Zahlungsbedingungen, zusätzliche Informationen usw.",
+      previewTitle: "Notizen:"
+    },
+
+    actions: {
+      downloadPdf: "Rechnung als PDF herunterladen",
+      newInvoice: "Neue Rechnung",
+      pdfComingSoon: "PDF-Exportfunktion - Demnächst verfügbar"
+    },
+
+    api: {
+      networkError: "Netzwerkfehler",
+      serverError: "Serverfehler",
+      unknownError: "Unbekannter Fehler",
+      simulatingResponse: "Simulation der API-Antwort für Eingabe:",
+      generatingError: "Fehler beim Generieren der Rechnung mit KI:"
+    },
+
+    simulation: {
+      clientName: "Beispielkunde",
+      clientEmail: "kunde@beispiel.com",
+      serviceDescription: "Beratungsdienstleistung",
+      invoiceNotes: "Mit KI generierte Rechnung"
+    },
+
+    savedInvoices: {
+      title: "Gespeicherte Rechnungen",
+      editing: "Bearbeitung",
+      save: "Rechnung speichern",
+      update: "Rechnung aktualisieren",
+      saving: "Wird gespeichert...",
+      updating: "Wird aktualisiert...",
+      cancel: "Bearbeitung abbrechen",
+      view: "Ansehen",
+      hide: "Ausblenden",
+      load: "Rechnung laden",
+      edit: "Rechnung bearbeiten",
+      duplicate: "Rechnung duplizieren",
+      delete: "Rechnung löschen",
+      confirmDelete: "Möchten Sie die Rechnung wirklich löschen",
+      confirmDuplicate: "Rechnung duplizieren",
+      cancelAndNew: "Abbrechen und neue Rechnung",
+      limitReached: "Limit erreicht",
+      limitMessage: "Sie haben das Limit von",
+      subscribeMessage: "Abonnieren Sie, um bis zu 100 Rechnungen pro Monat zu erstellen.",
+      noInvoices: "Sie haben keine gespeicherten Rechnungen",
+      loadingInvoices: "Rechnungen werden geladen...",
+      publicLink: "Öffentlich",
+      generateLink: "Öffentlichen Link generieren",
+      copyLink: "Öffentlichen Link kopieren",
+      removeLink: "Öffentlichen Link entfernen",
+      confirmRemoveLink: "Öffentlichen Link aus der Rechnung entfernen",
+      openLink: "Öffentlichen Link öffnen"
+    },
+
+    validation: {
+      invoiceNumberRequired: "Rechnungsnummer ist erforderlich",
+      clientNameRequired: "Kundenname ist erforderlich",
+      itemDescriptionRequired: "Alle Positionen müssen eine Beschreibung haben"
+    },
+    invoicesCount: "Rechnungen",
+    editingStatus: "Bearbeitung",
+    activeStatus: "Aktiv",
+    public: "Öffentlich",
+    updated: "Aktualisiert:",
+    confirmDeleteInvoice: "Möchten Sie die Rechnung wirklich löschen",
+    confirmDuplicateInvoice: "Rechnung duplizieren",
+    confirmRemovePublicLink: "Öffentlichen Link aus der Rechnung entfernen",
+    generatingPdf: "PDF wird generiert...",
+    invoicesLimit: "Rechnungen",
+    subscriptionLimit: "Sie haben das Limit von",
+    subscriptionMessage: "Abonnieren Sie, um bis zu 100 Rechnungen pro Monat zu erstellen.",
+    freeLimit: "Löschen Sie einige oder bearbeiten Sie eine vorhandene.",
+    validationErrors: "Validierungsfehler:",
+    noInvoicesMessage: "Sie haben keine gespeicherten Rechnungen",
+    loadingInvoicesMessage: "Rechnungen werden geladen...",
+    showDetails: "Alle Vorteile anzeigen",
+    hideDetails: "Details ausblenden",
+    manageInvoices: "Verwaltung gespeicherter Rechnungen",
+    invoicesList: "Liste gespeicherter Rechnungen",
+    createdAt: "Erstellt:",
+    publicLinkUrl: "🔗",
+
+    tooltips: {
+      load: "Rechnung laden zum Anzeigen",
+      edit: "Rechnung bearbeiten",
+      duplicate: "Rechnung duplizieren",
+      delete: "Rechnung löschen",
+      generatePublicLink: "Öffentlichen Link generieren",
+      copyPublicLink: "Öffentlichen Link kopieren",
+      openPublicLink: "Öffentlichen Link öffnen",
+      removePublicLink: "Öffentlichen Link entfernen"
+    }
+  }
+};
+
+// Helper function
+export const getInvoiceGeneratorTranslation = (language: Language) => {
+  return invoiceGeneratorTranslations[language] || invoiceGeneratorTranslations.en;
+};
