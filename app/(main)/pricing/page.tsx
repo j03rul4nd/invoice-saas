@@ -8,6 +8,22 @@ import Link from "next/link"
 import { checkAuthenticationAndSubscription } from "@/lib/checkAuthSubscription"
 import PricingCardClient from "./PricingCardClient" // Componente cliente separado
 
+// Helper function to ensure valid URL format
+function ensureValidUrl(url: string): string {
+    // Si ya tiene protocolo, devolverla tal como está
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+    }
+    
+    // Si es localhost, usar http
+    if (url.includes('localhost') || url.includes('127.0.0.1')) {
+        return `http://${url}`;
+    }
+    
+    // Para todos los demás casos, usar https
+    return `https://${url}`;
+}
+
 async function getData(userId: string | null) {
     unstable_noStore()
 
@@ -104,17 +120,21 @@ export default async function Pricing() {
         console.log("  - PRODUCTION_URL:", process.env.PRODUCTION_URL)
         console.log("  - STRIPE_PRICE_ID:", process.env.STRIPE_PRICE_ID)
 
-        const domainUrl = process.env.NEXT_PUBLIC_URL || 
+        // Use helper function to ensure valid URL
+        const rawDomainUrl = process.env.NEXT_PUBLIC_URL || 
             (process.env.NODE_ENV === 'production' 
                 ? process.env.PRODUCTION_URL 
-                : 'http://localhost:3000')
+                : 'localhost:3000')
 
-        console.log("🌐 Determined domain URL:", domainUrl)
+        console.log("🌐 Raw domain URL:", rawDomainUrl)
 
-        if (!domainUrl) {
+        if (!rawDomainUrl) {
             console.log("❌ Missing domain URL configuration")
             throw new Error('Missing domain URL configuration')
         }
+
+        const domainUrl = ensureValidUrl(rawDomainUrl)
+        console.log("✅ Corrected domain URL:", domainUrl)
 
         // Validar que la URL sea válida
         try {
@@ -173,11 +193,14 @@ export default async function Pricing() {
             return redirect('sign-in?redirect_url=/pricing')
         }
 
-        const returnUrl = process.env.NODE_ENV === 'production' 
-            ? (process.env.PRODUCTION_URL || 'https://invoice-saas-1bmqr0p72-joel-links-projects.vercel.app')
-            : 'http://localhost:3000'
+        // Use helper function for return URL as well
+        const rawReturnUrl = process.env.NODE_ENV === 'production' 
+            ? (process.env.PRODUCTION_URL || 'invoice-saas-1bmqr0p72-joel-links-projects.vercel.app')
+            : 'localhost:3000'
 
-        console.log("🔙 Return URL:", returnUrl)
+        const returnUrl = ensureValidUrl(rawReturnUrl)
+        console.log("🔙 Raw return URL:", rawReturnUrl)
+        console.log("✅ Corrected return URL:", returnUrl)
         console.log("💳 Stripe Customer ID:", subscription?.user.stripeCustomerId)
 
         // Validar return URL
