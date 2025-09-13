@@ -2235,7 +2235,70 @@ export const invoiceGeneratorTranslations: Record<Language, {
   }
 };
 
+export const invoiceLanguageSelectorTranslations: Record<Language, {
+  title: string;
+  compactTitle: string;
+  currentLanguage: string;
+  updating: string;
+  error: string;
+  selectLanguage: string;
+}> = {
+  en: {
+    title: "Invoice Language",
+    compactTitle: "Invoice language",
+    currentLanguage: "Invoice in:",
+    updating: "Updating...",
+    error: "Error",
+    selectLanguage: "Select invoice language"
+  },
+  es: {
+    title: "Idioma Factura",
+    compactTitle: "Idioma de la factura",
+    currentLanguage: "Factura en:",
+    updating: "Actualizando...",
+    error: "Error",
+    selectLanguage: "Seleccionar idioma de factura"
+  },
+  pt: {
+    title: "Idioma Fatura",
+    compactTitle: "Idioma da fatura",
+    currentLanguage: "Fatura em:",
+    updating: "Atualizando...",
+    error: "Erro",
+    selectLanguage: "Selecionar idioma da fatura"
+  },
+  ja: {
+    title: "請求書言語",
+    compactTitle: "請求書の言語",
+    currentLanguage: "請求書:",
+    updating: "更新中...",
+    error: "エラー",
+    selectLanguage: "請求書の言語を選択"
+  },
+  fr: {
+    title: "Langue Facture",
+    compactTitle: "Langue de la facture",
+    currentLanguage: "Facture en:",
+    updating: "Mise à jour...",
+    error: "Erreur",
+    selectLanguage: "Sélectionner la langue de la facture"
+  },
+  de: {
+    title: "Rechnungssprache",
+    compactTitle: "Sprache der Rechnung",
+    currentLanguage: "Rechnung in:",
+    updating: "Wird aktualisiert...",
+    error: "Fehler",
+    selectLanguage: "Rechnungssprache auswählen"
+  }
+};
+
+
 // Helper function
 export const getInvoiceGeneratorTranslation = (language: Language) => {
   return invoiceGeneratorTranslations[language] || invoiceGeneratorTranslations.en;
+};
+
+export const getInvoiceLanguageSelectorTranslation = (language: Language) => {
+  return invoiceLanguageSelectorTranslations[language] || invoiceLanguageSelectorTranslations.en;
 };

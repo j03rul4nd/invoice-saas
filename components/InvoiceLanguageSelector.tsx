@@ -4,6 +4,8 @@
 
 import React from 'react';
 import { Languages, FileText } from 'lucide-react';
+import { useInvoiceLanguageSelectorTranslation } from '@/hooks/useLanguage';
+
 import { 
   InvoiceLanguageCode, 
   InvoiceLanguage, 
@@ -27,6 +29,8 @@ const InvoiceLanguageSelector: React.FC<InvoiceLanguageSelectorProps> = ({
   className = '',
   compact = false
 }) => {
+  const { t } = useInvoiceLanguageSelectorTranslation();
+
   const handleLanguageChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newLanguageCode = e.target.value as InvoiceLanguageCode;
     await onInvoiceLanguageChange(newLanguageCode);
@@ -44,7 +48,7 @@ const InvoiceLanguageSelector: React.FC<InvoiceLanguageSelectorProps> = ({
                    px-2 py-1 text-white text-sm focus:border-purple-400 
                    focus:outline-none transition-colors min-w-[90px]
                    disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Idioma de la factura"
+          title={t.selectLanguage}
         >
           {AVAILABLE_INVOICE_LANGUAGES.map((language) => (
             <option key={language.code} value={language.code} className="bg-gray-800">
@@ -71,7 +75,7 @@ const InvoiceLanguageSelector: React.FC<InvoiceLanguageSelectorProps> = ({
         <label className="text-xs text-gray-400 mb-1 flex items-center gap-1">
           <FileText className="h-3 w-3" />
           <Languages className="h-3 w-3" />
-          Idioma Factura
+          {t.title}
         </label>
         
         <select
@@ -95,7 +99,7 @@ const InvoiceLanguageSelector: React.FC<InvoiceLanguageSelectorProps> = ({
           <div className="absolute -bottom-5 right-0">
             <div className="text-xs text-blue-400 flex items-center gap-1">
               <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-              Actualizando...
+              {t.updating}
             </div>
           </div>
         )}
@@ -112,7 +116,7 @@ const InvoiceLanguageSelector: React.FC<InvoiceLanguageSelectorProps> = ({
       
       {/* Información actual */}
       <div className="mt-2 text-xs text-gray-500 text-right">
-        Factura en: {currentInvoiceLanguage.flag} {currentInvoiceLanguage.nativeName}
+        {t.currentLanguage} {currentInvoiceLanguage.flag} {currentInvoiceLanguage.nativeName}
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ import {
   getHeroTranslation,
   getPublicInvoiceTranslation,
   getInvoiceGeneratorTranslation, // ← Nueva importación
+  getInvoiceLanguageSelectorTranslation,
   getPromptUsageTranslation       // ← Nueva importación
 } from '../lib/i18n';
 
@@ -112,6 +113,17 @@ export const usePromptUsageTranslation = () => {
 
   return {
     t: getPromptUsageTranslation(language),
+    language,
+    changeLanguage,
+    isClient
+  };
+};
+
+export const useInvoiceLanguageSelectorTranslation = () => {
+  const { language, changeLanguage, isClient } = useLanguage();
+
+  return {
+    t: getInvoiceLanguageSelectorTranslation(language),
     language,
     changeLanguage,
     isClient
