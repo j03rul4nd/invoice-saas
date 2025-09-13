@@ -2302,3 +2302,292 @@ export const getInvoiceGeneratorTranslation = (language: Language) => {
 export const getInvoiceLanguageSelectorTranslation = (language: Language) => {
   return invoiceLanguageSelectorTranslations[language] || invoiceLanguageSelectorTranslations.en;
 };
+
+export const landingTranslations: Record<Language, {
+  // Social proof section
+  socialProof: {
+    trustedBy: string;
+  };
+  
+  // Hero section
+  hero: {
+    title: string;
+    titleHighlight: string;
+    subtitle: string;
+    generateButton: string;
+  };
+  
+  // Features
+  features: {
+    aiPowered: string;
+    multiLanguage: string;
+    instantSharing: string;
+    pdfReady: string;
+  };
+  
+  // Floating cards
+  floatingCards: {
+    generatedIn: string;
+    currencies: string;
+    languages: string;
+  };
+  
+  // Phone screens
+  phoneScreens: {
+    aiGenerator: string;
+    placeholder: string;
+    generating: string;
+    generate: string;
+    invoiceTitle: string;
+    from: string;
+    to: string;
+    yourCompany: string;
+    clientName: string;
+    webDesignProject: string;
+    total: string;
+    shareLink: string;
+    downloadPdf: string;
+    invoiceSent: string;
+    generatedInTime: string;
+  };
+}> = {
+  en: {
+    socialProof: {
+      trustedBy: "Trusted by growing businesses"
+    },
+    hero: {
+      title: "Generate Professional\nInvoices in",
+      titleHighlight: "Seconds",
+      subtitle: "AI-powered invoice generation for freelancers and SMBs. Create, customize, and share invoices instantly with multi-language and multi-currency support.",
+      generateButton: "Generate Invoice Free"
+    },
+    features: {
+      aiPowered: "AI-powered generation",
+      multiLanguage: "Multi-language support", 
+      instantSharing: "Instant web sharing",
+      pdfReady: "PDF export ready"
+    },
+    floatingCards: {
+      generatedIn: "Generated in 2.3s",
+      currencies: "25+ Currencies",
+      languages: "12 Languages"
+    },
+    phoneScreens: {
+      aiGenerator: "AI Invoice Generator",
+      placeholder: "Create invoice for web design project, $2,500, due in 30 days",
+      generating: "Generating...",
+      generate: "Generate",
+      invoiceTitle: "INVOICE #001",
+      from: "From:",
+      to: "To:",
+      yourCompany: "Your Company",
+      clientName: "Client Name",
+      webDesignProject: "Web Design Project",
+      total: "Total",
+      shareLink: "Share Link",
+      downloadPdf: "Download PDF", 
+      invoiceSent: "Invoice sent to client!",
+      generatedInTime: "Generated in 2.3s"
+    }
+  },
+  es: {
+    socialProof: {
+      trustedBy: "Confiado por empresas en crecimiento"
+    },
+    hero: {
+      title: "Genera Facturas\nProfesionales en",
+      titleHighlight: "Segundos", 
+      subtitle: "Generación de facturas con IA para freelancers y PyMEs. Crea, personaliza y comparte facturas al instante con soporte multi-idioma y multi-moneda.",
+      generateButton: "Generar Factura Gratis"
+    },
+    features: {
+      aiPowered: "Generación con IA",
+      multiLanguage: "Soporte multi-idioma",
+      instantSharing: "Compartir web instantáneo", 
+      pdfReady: "Exportación PDF lista"
+    },
+    floatingCards: {
+      generatedIn: "Generada en 2.3s",
+      currencies: "25+ Monedas",
+      languages: "12 Idiomas"
+    },
+    phoneScreens: {
+      aiGenerator: "Generador de Facturas IA",
+      placeholder: "Crear factura para proyecto diseño web, €2,290, vence en 30 días",
+      generating: "Generando...",
+      generate: "Generar",
+      invoiceTitle: "FACTURA #001",
+      from: "De:",
+      to: "Para:",
+      yourCompany: "Tu Empresa",
+      clientName: "Nombre Cliente",
+      webDesignProject: "Proyecto Diseño Web",
+      total: "Total",
+      shareLink: "Compartir Enlace",
+      downloadPdf: "Descargar PDF",
+      invoiceSent: "¡Factura enviada al cliente!",
+      generatedInTime: "Generada en 2.3s"
+    }
+  },
+  pt: {
+    socialProof: {
+      trustedBy: "Confiado por empresas em crescimento"
+    },
+    hero: {
+      title: "Gere Faturas\nProfissionais em",
+      titleHighlight: "Segundos",
+      subtitle: "Geração de faturas com IA para freelancers e PMEs. Crie, personalize e compartilhe faturas instantaneamente com suporte multi-idioma e multi-moeda.",
+      generateButton: "Gerar Fatura Grátis"
+    },
+    features: {
+      aiPowered: "Geração com IA",
+      multiLanguage: "Suporte multi-idioma",
+      instantSharing: "Compartilhamento web instantâneo",
+      pdfReady: "Exportação PDF pronta"
+    },
+    floatingCards: {
+      generatedIn: "Gerada em 2.3s",
+      currencies: "25+ Moedas",
+      languages: "12 Idiomas"
+    },
+    phoneScreens: {
+      aiGenerator: "Gerador de Faturas IA",
+      placeholder: "Criar fatura para projeto design web, $2,500, vence em 30 dias",
+      generating: "Gerando...",
+      generate: "Gerar",
+      invoiceTitle: "FATURA #001",
+      from: "De:",
+      to: "Para:",
+      yourCompany: "Sua Empresa",
+      clientName: "Nome Cliente",
+      webDesignProject: "Projeto Design Web",
+      total: "Total",
+      shareLink: "Compartilhar Link",
+      downloadPdf: "Baixar PDF",
+      invoiceSent: "Fatura enviada ao cliente!",
+      generatedInTime: "Gerada em 2.3s"
+    }
+  },
+  ja: {
+    socialProof: {
+      trustedBy: "成長企業に信頼されています"
+    },
+    hero: {
+      title: "プロフェッショナルな\n請求書を",
+      titleHighlight: "秒で",
+      subtitle: "フリーランサーと中小企業のためのAI搭載請求書生成。多言語・多通貨対応で請求書を瞬時に作成、カスタマイズ、共有。",
+      generateButton: "無料で請求書を生成"
+    },
+    features: {
+      aiPowered: "AI搭載生成",
+      multiLanguage: "多言語サポート",
+      instantSharing: "即座のWeb共有",
+      pdfReady: "PDF出力対応"
+    },
+    floatingCards: {
+      generatedIn: "2.3秒で生成",
+      currencies: "25以上の通貨",
+      languages: "12言語"
+    },
+    phoneScreens: {
+      aiGenerator: "AI請求書ジェネレーター",
+      placeholder: "Webデザインプロジェクトの請求書を作成、¥250,000、30日後期限",
+      generating: "生成中...",
+      generate: "生成",
+      invoiceTitle: "請求書 #001",
+      from: "差出人:",
+      to: "宛先:",
+      yourCompany: "あなたの会社",
+      clientName: "クライアント名",
+      webDesignProject: "Webデザインプロジェクト",
+      total: "合計",
+      shareLink: "リンク共有",
+      downloadPdf: "PDF ダウンロード",
+      invoiceSent: "請求書がクライアントに送信されました！",
+      generatedInTime: "2.3秒で生成"
+    }
+  },
+  fr: {
+    socialProof: {
+      trustedBy: "Approuvé par les entreprises en croissance"
+    },
+    hero: {
+      title: "Générez des Factures\nProfessionnelles en",
+      titleHighlight: "Secondes",
+      subtitle: "Génération de factures alimentée par l'IA pour freelancers et PME. Créez, personnalisez et partagez des factures instantanément avec support multi-langues et multi-devises.",
+      generateButton: "Générer Facture Gratuite"
+    },
+    features: {
+      aiPowered: "Génération IA",
+      multiLanguage: "Support multi-langues",
+      instantSharing: "Partage web instantané",
+      pdfReady: "Export PDF prêt"
+    },
+    floatingCards: {
+      generatedIn: "Généré en 2.3s",
+      currencies: "25+ Devises",
+      languages: "12 Langues"
+    },
+    phoneScreens: {
+      aiGenerator: "Générateur de Factures IA",
+      placeholder: "Créer facture pour projet design web, €2,290, échéance 30 jours",
+      generating: "Génération...",
+      generate: "Générer",
+      invoiceTitle: "FACTURE #001",
+      from: "De:",
+      to: "À:",
+      yourCompany: "Votre Entreprise",
+      clientName: "Nom Client",
+      webDesignProject: "Projet Design Web",
+      total: "Total",
+      shareLink: "Partager Lien",
+      downloadPdf: "Télécharger PDF",
+      invoiceSent: "Facture envoyée au client!",
+      generatedInTime: "Généré en 2.3s"
+    }
+  },
+  de: {
+    socialProof: {
+      trustedBy: "Vertraut von wachsenden Unternehmen"
+    },
+    hero: {
+      title: "Erstellen Sie professionelle\nRechnungen in",
+      titleHighlight: "Sekunden",
+      subtitle: "KI-gestützte Rechnungserstellung für Freelancer und KMUs. Erstellen, anpassen und teilen Sie Rechnungen sofort mit Multi-Sprach- und Multi-Währungsunterstützung.",
+      generateButton: "Rechnung Kostenlos Erstellen"
+    },
+    features: {
+      aiPowered: "KI-gestützte Erstellung",
+      multiLanguage: "Multi-Sprach-Support",
+      instantSharing: "Sofortiges Web-Sharing",
+      pdfReady: "PDF-Export bereit"
+    },
+    floatingCards: {
+      generatedIn: "Erstellt in 2.3s",
+      currencies: "25+ Währungen",
+      languages: "12 Sprachen"
+    },
+    phoneScreens: {
+      aiGenerator: "KI Rechnungs-Generator",
+      placeholder: "Rechnung für Webdesign-Projekt erstellen, €2,290, fällig in 30 Tagen",
+      generating: "Wird erstellt...",
+      generate: "Erstellen",
+      invoiceTitle: "RECHNUNG #001",
+      from: "Von:",
+      to: "An:",
+      yourCompany: "Ihr Unternehmen",
+      clientName: "Kundenname",
+      webDesignProject: "Webdesign-Projekt",
+      total: "Gesamt",
+      shareLink: "Link Teilen",
+      downloadPdf: "PDF Herunterladen",
+      invoiceSent: "Rechnung an Kunden gesendet!",
+      generatedInTime: "Erstellt in 2.3s"
+    }
+  }
+};
+
+// Helper function to get landing translations
+export const getLandingTranslation = (language: Language) => {
+  return landingTranslations[language] || landingTranslations.en;
+};

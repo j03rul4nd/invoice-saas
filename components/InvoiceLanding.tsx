@@ -2,6 +2,7 @@
 import type React from "react"
 import { useState, useEffect, useCallback } from "react"
 import { Zap, Globe, Smartphone, FileText, Check, RotateCw, type LucideIcon } from "lucide-react"
+import { useLandingTranslation } from "@/hooks/useLanguage"
 
 // Tipos para las divisas soportadas
 type SupportedCurrency = "USD" | "EUR" | "GBP"
@@ -31,6 +32,7 @@ interface FloatingCardProps {
 type ScreenState = 0 | 1 | 2
 
 const InvoiceLanding: React.FC = () => {
+  const { t: landingT } = useLandingTranslation()
   const [counter, setCounter] = useState<number>(0)
   const [typingText, setTypingText] = useState<string>("")
   const [currentScreen, setCurrentScreen] = useState<ScreenState>(0)
@@ -38,7 +40,7 @@ const InvoiceLanding: React.FC = () => {
   const [selectedCurrency, setSelectedCurrency] = useState<SupportedCurrency>("USD")
   const [animationStep, setAnimationStep] = useState<number>(0)
 
-  const fullText: string = "Create invoice for web design project, $2,500, due in 30 days"
+  const fullText: string = landingT.phoneScreens.placeholder 
 
   const currencies: CurrencyMap = {
     USD: "$2,500.00",
@@ -48,10 +50,10 @@ const InvoiceLanding: React.FC = () => {
 
   // Lista de características con tipos explícitos
   const features: Feature[] = [
-    { icon: Zap, text: "AI-powered generation" },
-    { icon: Globe, text: "Multi-language support" },
-    { icon: Smartphone, text: "Instant web sharing" },
-    { icon: FileText, text: "PDF export ready" },
+    { icon: Zap, text: landingT.features.aiPowered },
+    { icon: Globe, text: landingT.features.multiLanguage },
+    { icon: Smartphone, text: landingT.features.instantSharing },
+    { icon: FileText, text: landingT.features.pdfReady },
   ] as const
 
   // Componente Avatar tipado
@@ -307,7 +309,7 @@ const InvoiceLanding: React.FC = () => {
                   animationStep >= 1 ? "animate-slide-up-1" : "opacity-0"
                 }`}
               >
-                <span>Trusted by growing businesses</span>
+                <span>{landingT.socialProof.trustedBy}</span>
                 <div className="flex gap-1 ml-2">
                   {Array.from({ length: 5 }, (_, i) => (
                     <span key={i} className="text-orange-500 animate-pulse" style={{ animationDelay: `${i * 0.1}s` }}>
@@ -322,9 +324,7 @@ const InvoiceLanding: React.FC = () => {
                   animationStep >= 2 ? "animate-slide-up-2" : "opacity-0"
                 }`}
               >
-                Generate Professional
-                <br />
-                Invoices in <span className="font-extrabold text-shimmer">Seconds</span>
+                {landingT.hero.title} <span className="font-extrabold text-shimmer">{landingT.hero.titleHighlight}</span>
               </h1>
 
               {/* Subtext */}
@@ -332,9 +332,8 @@ const InvoiceLanding: React.FC = () => {
                 className={`text-xl text-zinc-400 leading-relaxed max-w-lg mb-10 ${
                   animationStep >= 3 ? "animate-slide-up-3" : "opacity-0"
                 }`}
-              >
-                AI-powered invoice generation for freelancers and SMBs. Create, customize, and share invoices instantly
-                with multi-language and multi-currency support.
+              > 
+              {landingT.hero.subtitle}                
               </p>
 
               <div
@@ -346,7 +345,7 @@ const InvoiceLanding: React.FC = () => {
                   type="button"
                   className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-400 text-white font-semibold rounded-xl button-hover relative overflow-hidden group"
                 >
-                  <span className="relative z-10">Generate Invoice Free</span>
+                  <span className="relative z-10">{landingT.hero.generateButton}</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-orange-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </button>
               </div>
@@ -374,7 +373,7 @@ const InvoiceLanding: React.FC = () => {
                 delay={0}
               >
                 <span className="flex items-center gap-2">
-                  ⚡ <span className="font-medium">Generated in 2.3s</span>
+                  ⚡ <span className="font-medium">{landingT.floatingCards.generatedIn}</span>
                 </span>
               </FloatingCard>
 
@@ -383,7 +382,7 @@ const InvoiceLanding: React.FC = () => {
                 delay={1}
               >
                 <span className="flex items-center gap-2">
-                  💱 <span className="font-medium">25+ Currencies</span>
+                  💱 <span className="font-medium">{landingT.floatingCards.currencies}</span>
                 </span>
               </FloatingCard>
 
@@ -392,7 +391,7 @@ const InvoiceLanding: React.FC = () => {
                 delay={2}
               >
                 <span className="flex items-center gap-2">
-                  🌍 <span className="font-medium">12 Languages</span>
+                  🌍 <span className="font-medium">{landingT.floatingCards.languages}</span>
                 </span>
               </FloatingCard>
 
@@ -406,7 +405,7 @@ const InvoiceLanding: React.FC = () => {
                         : "opacity-0 translate-x-full scale-95"
                     }`}
                   >
-                    <h3 className="text-white mb-4 font-semibold">AI Invoice Generator</h3>
+                    <h3 className="text-white mb-4 font-semibold">{landingT.phoneScreens.aiGenerator}</h3>
                     <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-sm text-zinc-400 mb-5 min-h-[120px] hover:border-zinc-600 transition-colors duration-300">
                       {typingText}
                       {currentScreen === 0 && <span className="animate-pulse text-orange-500">|</span>}
@@ -418,10 +417,10 @@ const InvoiceLanding: React.FC = () => {
                       {isGenerating ? (
                         <span className="flex items-center justify-center gap-2">
                           <RotateCw size={16} className="animate-spin" />
-                          Generating...
+                          {landingT.phoneScreens.generating}                          
                         </span>
                       ) : (
-                        "Generate"
+                        landingT.phoneScreens.generate
                       )}
                     </button>
                   </div>
@@ -436,24 +435,24 @@ const InvoiceLanding: React.FC = () => {
                   >
                     {/* ... existing invoice screen code ... */}
                     <div className="bg-white text-black p-4 rounded-lg text-xs mb-4 flex-1 hover:shadow-lg transition-shadow duration-300">
-                      <h4 className="font-bold mb-3">INVOICE #001</h4>
+                      <h4 className="font-bold mb-3">{landingT.phoneScreens.invoiceTitle}</h4>
                       <div className="mb-2 text-[11px]">
                         <div>
-                          <strong>From:</strong> Your Company
+                          <strong>{landingT.phoneScreens.from}</strong>{landingT.phoneScreens.yourCompany}
                         </div>
                         <div>
-                          <strong>To:</strong> Client Name
+                          <strong>{landingT.phoneScreens.to}</strong>{landingT.phoneScreens.clientName} 
                         </div>
                       </div>
                       <div className="border-t border-gray-200 pt-2 mt-2">
                         <div className="flex justify-between">
-                          <span>Web Design Project</span>
+                          <span>{landingT.phoneScreens.webDesignProject}</span>
                           <span>$2,500.00</span>
                         </div>
                       </div>
                       <div className="border-t border-gray-200 pt-2 mt-2 font-bold">
                         <div className="flex justify-between">
-                          <span>Total</span>
+                          <span>{landingT.phoneScreens.total}</span>
                           <span>{currencies[selectedCurrency]}</span>
                         </div>
                       </div>
@@ -481,13 +480,13 @@ const InvoiceLanding: React.FC = () => {
                         type="button"
                         className="flex-1 px-3 py-2 text-xs border border-zinc-700 text-white rounded hover:border-zinc-600 hover:bg-zinc-800 transition-all duration-300"
                       >
-                        Share Link
+                        {landingT.phoneScreens.shareLink}
                       </button>
                       <button
                         type="button"
                         className="flex-1 px-3 py-2 text-xs border border-zinc-700 text-white rounded hover:border-zinc-600 hover:bg-zinc-800 transition-all duration-300"
                       >
-                        Download PDF
+                        {landingT.phoneScreens.downloadPdf}
                       </button>
                     </div>
                   </div>
@@ -503,8 +502,8 @@ const InvoiceLanding: React.FC = () => {
                     <div className="text-5xl text-green-500 mb-4 animate-bounce">
                       <Check size={48} className="animate-pulse" />
                     </div>
-                    <h3 className="text-white font-semibold mb-2">Invoice sent to client!</h3>
-                    <p className="text-zinc-400 text-sm">Generated in 2.3s</p>
+                    <h3 className="text-white font-semibold mb-2">{landingT.phoneScreens.invoiceSent}</h3>
+                    <p className="text-zinc-400 text-sm">{landingT.phoneScreens.generatedInTime}</p>
                   </div>
                 </div>
               </div>
