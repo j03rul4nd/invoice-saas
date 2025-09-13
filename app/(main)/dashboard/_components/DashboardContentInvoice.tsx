@@ -952,13 +952,13 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
         </SignedIn>
         
         {/* Generación con IA */}
-        <div className="p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30">
-          <h3 className="text-xl font-semibold text-purple-200 mb-4 flex items-center">
-            <Sparkles className="h-5 w-5 mr-2" />
+        <div className="p-4 sm:p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30">
+          <h3 className="text-lg sm:text-xl font-semibold text-purple-200 mb-4 flex items-center">
+            <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
             {TEXTS.aiSection.title}
           </h3>
           
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             <input
               type="text"
               placeholder={TEXTS.aiSection.placeholder}
@@ -966,33 +966,33 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
               onChange={(e) => setAiPrompt(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && !isLoading && handleAIGeneration()}
               disabled={isLoading}
-              className="flex-1 px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg 
-                       text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors
-                       disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-3 sm:px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg 
+                      text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors
+                      disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
             />
             <button
               onClick={handleAIGeneration}
               disabled={isLoading || !aiPrompt.trim()}
-              className="px-6 py-3 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-400/20 
-                       rounded-lg text-purple-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed
-                       flex items-center gap-2"
+              className="px-4 sm:px-6 py-3 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-400/20 
+                      rounded-lg text-purple-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed
+                      flex items-center justify-center gap-2 text-sm sm:text-base min-w-[120px] sm:min-w-auto"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {TEXTS.aiSection.generating}
+                  <span className="hidden xs:inline">{TEXTS.aiSection.generating}</span>
                 </>
               ) : (
                 <>
                   <Send className="h-4 w-4" />
-                  {TEXTS.aiSection.generate}
+                  <span className="hidden xs:inline">{TEXTS.aiSection.generate}</span>
                 </>
               )}
             </button>
           </div>
           
           {error && (
-            <div className="mt-4 p-3 bg-red-500/10 border border-red-400/20 rounded-lg text-red-300 text-sm">
+            <div className="mt-4 p-3 bg-red-500/10 border border-red-400/20 rounded-lg text-red-300 text-xs sm:text-sm">
               {TEXTS.aiSection.errorPrefix}{error}
             </div>
           )}
@@ -1401,66 +1401,86 @@ const handleGeneratePublicLink = useCallback(async (invoiceId: string, invoiceNu
           <div className="space-y-6">
             
             {/* Información de la Factura */}
-            <div className="p-6 rounded-2xl border border-purple-300/10 bg-black/30 shadow-[0_4px_20px_-10px] shadow-purple-200/30">
-              <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-purple-200 flex items-center">
-                    <Hash className="h-5 w-5 mr-2" />
+            <div className="p-4 sm:p-6 lg:p-8 rounded-2xl border border-purple-300/20 
+                            bg-gradient-to-br from-black/40 via-purple-950/20 to-black/30 
+                            backdrop-blur-sm shadow-2xl shadow-purple-500/10 
+                            hover:shadow-purple-500/20 transition-all duration-300">
+              
+              {/* Header Section */}
+              <div className="flex flex-col space-y-4 lg:space-y-0 lg:flex-row lg:items-center lg:justify-between mb-6">
+                <div className="flex items-center">
+                  <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 
+                                  bg-purple-500/20 rounded-lg mr-3 sm:mr-4">
+                    <Hash className="h-4 w-4 sm:h-5 sm:w-5 text-purple-300" />
+                  </div>
+                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-white">
                     {TEXTS.invoiceInfo.title}
-                    </h3>
-
+                  </h3>
+                </div>
+                
+                {/* Selectors Container */}
+                <div className="flex flex-col xs:flex-row gap-3 sm:gap-4">
+                  <div className="flex-1 xs:flex-none xs:min-w-[140px]">
                     <InvoiceLanguageSelector
                       currentInvoiceLanguage={currentInvoiceLanguage}
                       onInvoiceLanguageChange={handleInvoiceLanguageChange}
                       isLoading={languageLoading}
                       error={languageError}
                     />
-
-                    {/* Nuevo selector de moneda */}
+                  </div>
+                  
+                  <div className="flex-1 xs:flex-none xs:min-w-[120px]">
                     <CurrencySelector
-                    currentCurrency={currentCurrency}
-                    onCurrencyChange={handleCurrencyChange}
-                    isLoading={currencyLoading}
-                    error={currencyError}
+                      currentCurrency={currentCurrency}
+                      onCurrencyChange={handleCurrencyChange}
+                      isLoading={currencyLoading}
+                      error={currencyError}
                     />
-               </div>
+                  </div>
+                </div>
+              </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                     {TEXTS.invoiceInfo.number}
                   </label>
                   <input
                     type="text"
                     value={invoiceData.invoiceNumber}
                     onChange={(e) => updateInvoiceData({ invoiceNumber: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg 
-                             text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors"
+                    className="w-full px-3 sm:px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg
+                              text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none transition-colors
+                              text-sm sm:text-base"
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                     {TEXTS.invoiceInfo.date}
                   </label>
                   <input
                     type="date"
                     value={invoiceData.date}
                     onChange={(e) => updateInvoiceData({ date: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg 
-                             text-white focus:border-purple-400 focus:outline-none transition-colors"
+                    className="w-full px-3 sm:px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg
+                              text-white focus:border-purple-400 focus:outline-none transition-colors
+                              text-sm sm:text-base"
                   />
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                <div className="sm:col-span-2 lg:col-span-1">
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                     {TEXTS.invoiceInfo.dueDate}
                   </label>
                   <input
                     type="date"
                     value={invoiceData.dueDate}
                     onChange={(e) => updateInvoiceData({ dueDate: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg 
-                             text-white focus:border-purple-400 focus:outline-none transition-colors"
+                    className="w-full px-3 sm:px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg
+                              text-white focus:border-purple-400 focus:outline-none transition-colors
+                              text-sm sm:text-base"
                   />
                 </div>
               </div>
