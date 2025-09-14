@@ -1,5 +1,6 @@
 "use client"
 import type React from "react"
+import Link from "next/link"
 import { useState, useEffect, useCallback } from "react"
 import { Zap, Globe, Smartphone, FileText, Check, RotateCw, type LucideIcon } from "lucide-react"
 import { useLandingTranslation } from "@/hooks/useLanguage"
@@ -341,13 +342,14 @@ const InvoiceLanding: React.FC = () => {
                   animationStep >= 4 ? "animate-slide-up-4" : "opacity-0"
                 }`}
               >
-                <button
-                  type="button"
-                  className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-400 text-white font-semibold rounded-xl button-hover relative overflow-hidden group"
+                
+                <Link
+                  href="./dashboard/"
+                  className="inline-block px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-400 text-white font-semibold rounded-xl button-hover relative overflow-hidden group"
                 >
                   <span className="relative z-10">{landingT.hero.generateButton}</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-orange-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                </button>
+                </Link>
               </div>
 
               <div className={`flex flex-wrap gap-6 ${animationStep >= 5 ? "animate-slide-up-5" : "opacity-0"}`}>
