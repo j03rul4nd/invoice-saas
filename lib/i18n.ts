@@ -1255,7 +1255,7 @@ export const invoiceGeneratorTranslations: Record<Language, {
 
 }> = {
   en: {
-    mainTitle: "Invoice Generator",
+    mainTitle: "Rapid Invoice",
     loading: "Loading...",
     
     aiSection: {

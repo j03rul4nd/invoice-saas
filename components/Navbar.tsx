@@ -164,7 +164,7 @@ const Navbar = () => {
                   <FileText className="w-4 h-4 text-black" />
                 </div>
                 <span className="text-lg font-semibold text-white tracking-tight">
-                  Invoice Generator
+                  Rapid Invoice
                 </span>
               </div>
             </div>
@@ -200,7 +200,7 @@ const Navbar = () => {
                   <FileText className="w-5 h-5 text-black" />
                 </div>
                 <span className="text-xl font-bold text-white tracking-tight group-hover:text-white/90 transition-colors duration-300">
-                  Invoice Generator
+                  Rapid Invoice
                 </span>
               </Link>
             </div>
