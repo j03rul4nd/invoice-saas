@@ -15,26 +15,26 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Rapid Invoice - Generador de Facturas Rápido y Automático | SaaS de Facturación",
+    default: "Rapid Invoice - Fast & Automatic Invoice Generator | Billing SaaS",
     template: "%s | Rapid Invoice"
   },
-  description: "Genera facturas profesionales en segundos con IA. Generador automático de facturas con prompts, multidivisa, multilenguaje y exportación PDF. Perfecto para freelancers y PYMEs que quieren ahorrar tiempo.",
+  description: "Generate professional invoices in seconds with AI. Automatic invoice generator with prompts, multi-currency, multi-language and PDF export. Perfect for freelancers and SMEs looking to save time.",
   
   keywords: [
-    "generador de facturas",
-    "facturación automática",
+    "invoice generator",
+    "automatic invoicing",
     "rapid invoice",
-    "facturas con IA",
-    "generador facturas PDF",
-    "facturación freelancers",
-    "facturación PYMEs",
-    "facturas multidivisa",
-    "facturas multilenguaje",
-    "SaaS facturación",
-    "crear facturas rápido",
-    "enlace público facturas",
-    "facturas online",
-    "automatizar facturación"
+    "AI invoices",
+    "PDF invoice generator",
+    "freelancer billing",
+    "SME invoicing",
+    "multi-currency invoices",
+    "multi-language invoices",
+    "billing SaaS",
+    "create invoices fast",
+    "public invoice link",
+    "online invoices",
+    "automate invoicing"
   ],
 
   authors: [{ name: "Rapid Invoice" }],
@@ -55,25 +55,25 @@ export const metadata: Metadata = {
 
   openGraph: {
     type: 'website',
-    locale: 'es_ES',
+    locale: 'en_US',
     url: 'https://rapidinvoice.eu',
     siteName: 'Rapid Invoice',
-    title: 'Rapid Invoice - Generador de Facturas Rápido y Automático',
-    description: 'Genera facturas profesionales en segundos con IA. Perfecto para freelancers y PYMEs. Multidivisa, multilenguaje y exportación PDF.',
+    title: 'Rapid Invoice - Fast & Automatic Invoice Generator',
+    description: 'Generate professional invoices in seconds with AI. Perfect for freelancers and SMEs. Multi-currency, multi-language and PDF export.',
     images: [
       {
         url: 'https://rapidinvoice.eu/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Rapid Invoice - Generador de Facturas con IA',
+        alt: 'Rapid Invoice - AI Invoice Generator',
       },
     ],
   },
 
   twitter: {
     card: 'summary_large_image',
-    title: 'Rapid Invoice - Generador de Facturas Rápido y Automático',
-    description: 'Genera facturas profesionales en segundos con IA. Multidivisa, multilenguaje y exportación PDF.',
+    title: 'Rapid Invoice - Fast & Automatic Invoice Generator',
+    description: 'Generate professional invoices in seconds with AI. Multi-currency, multi-language and PDF export.',
     images: ['https://rapidinvoice.eu/twitter-image.jpg'],
     creator: '@rapidinvoice',
   },
@@ -89,8 +89,8 @@ export const metadata: Metadata = {
   },
 
   verification: {
-    google: 'tu-codigo-de-verificacion-google',
-    // Añade otros códigos de verificación cuando los tengas
+    google: 'your-google-verification-code',
+    // Add other verification codes when you have them
   },
 
   category: 'technology',
@@ -109,8 +109,8 @@ export default function RootLayout({
       <html lang="en" className="dark">
         <head>
           {/* Favicon */}
-          <link rel="icon" href="./favicon.ico" sizes="32x32" />
-          <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+          <link rel="icon" href="/favicon.ico" sizes="32x32" />
+          <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
           {/* <link rel="apple-touch-icon" href="/apple-touch-icon.png" /> */}
         </head>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased relative min-h-screen`}>
