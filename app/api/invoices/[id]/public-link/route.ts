@@ -21,9 +21,9 @@ function getBaseUrl(): string {
   
   // ✅ Limpiar URL duplicadas y normalizar
   // Si la URL contiene el dominio duplicado, limpiarlo
-  if (baseUrl.includes('invoice-saas-delta.vercel.app/invoice-saas-delta.vercel.app')) {
-    baseUrl = baseUrl.replace('/invoice-saas-delta.vercel.app/invoice/public/', '/invoice/public/');
-    baseUrl = 'https://invoice-saas-delta.vercel.app';
+  if (baseUrl.includes('rapidinvoice.eu/rapidinvoice.eu')) {
+    baseUrl = baseUrl.replace('/rapidinvoice.eu/invoice/public/', '/invoice/public/');
+    baseUrl = 'https://rapidinvoice.eu';
   }
   
   // ✅ Asegurarse de que tenga https:// al inicio si es production
