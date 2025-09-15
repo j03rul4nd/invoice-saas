@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import DashboardContent from "./_components/DashboardContentInvoice"
+import AuthRequiredPopup from "@/components/AuthRequiredPopup"
 import { Toaster } from 'sonner';
-//taosster msg
 
 // Componente de loading opcional
 function DashboardLoading() {
@@ -19,9 +19,12 @@ function DashboardLoading() {
 
 export default function Dashboard() {   
   return (     
-    
     <div className="font-sans p-4">       
-    <Toaster position="top-right" />
+      <Toaster position="top-right" />
+      
+      {/* Popup de autenticación requerida */}
+      <AuthRequiredPopup showDelay={1500} />
+      
       <Suspense fallback={<DashboardLoading />}>
         <DashboardContent />     
       </Suspense>
