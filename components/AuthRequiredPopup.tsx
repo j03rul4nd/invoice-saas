@@ -65,7 +65,7 @@ export default function AuthRequiredPopup({ showDelay = 2000 }: AuthRequiredPopu
         {/* Description */}
         <p className="mb-6 text-center text-gray-600 leading-relaxed">
           To access all dashboard features and functionality, you need to sign in to your account. 
-          Without authentication, the dashboard features won't work properly.
+          Without authentication, the dashboard features won&apos;t work properly.
         </p>
 
         {/* Action buttons */}
@@ -89,7 +89,7 @@ export default function AuthRequiredPopup({ showDelay = 2000 }: AuthRequiredPopu
         {/* Additional info */}
         <div className="mt-4 text-center">
           <p className="text-xs text-gray-500">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/sign-up" className="text-blue-600 hover:underline font-medium">
               Sign up here
             </Link>
