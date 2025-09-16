@@ -1,4 +1,4 @@
-// lib/hubspot.ts - VERSIÓN CORREGIDA CON MANEJO ADECUADO DE IDIOMAS
+// lib/hubspot.ts - VERSIÓN CORREGIDA CON FILTRADO MEJORADO
 import { BlogPost } from "@/types/blog"
 
 export class HubSpotBlogService {
@@ -52,7 +52,7 @@ export class HubSpotBlogService {
     }
   }
 
-  // Obtener posts con paginación y filtrado mejorado
+  // CORREGIDO: Obtener posts con paginación y filtrado mejorado
   async getPostsByLanguage(
     language: string, 
     limit = 10, 
@@ -62,22 +62,23 @@ export class HubSpotBlogService {
       // Obtener todos los posts primero
       const allPosts = await this.getAllPosts(100);
       
-      // Filtrar por idioma basándose en el slug o propiedades del post
+      // LÓGICA DE FILTRADO CORREGIDA
       const filteredPosts = allPosts.filter(post => {
-        // Lógica de filtrado por idioma mejorada
+        // Prioritario: usar la propiedad language si está disponible
+        if (post.language && post.language === language) {
+          return true;
+        }
+        
+        // Secundario: filtrar por slug
         if (language === 'en') {
-          // Para inglés: posts que empiecen con "en/" o no tengan prefijo
+          // Para inglés: SOLO posts que empiecen con "en/" O que no tengan language definido y no sean claramente de otro idioma
           return post.slug.startsWith('en/') || 
-                 (!post.slug.startsWith('es/') && 
-                  !post.slug.startsWith('fr/') &&
-                  !post.slug.includes('/es/') &&
-                  !post.slug.includes('/fr/')) ||
-                 post.language === 'en';
+                 post.slug.includes('/en/') ||
+                 (!post.language && !post.slug.startsWith('es/') && !post.slug.startsWith('fr/') && !post.slug.includes('/es/') && !post.slug.includes('/fr/'));
         } else {
-          // Para otros idiomas: posts que contengan el prefijo del idioma O que tengan el language correcto
+          // Para otros idiomas: posts que contengan el prefijo del idioma
           return post.slug.startsWith(`${language}/`) || 
-                 post.slug.includes(`/${language}/`) ||
-                 post.language === language;
+                 post.slug.includes(`/${language}/`);
         }
       });
 
@@ -125,10 +126,10 @@ export class HubSpotBlogService {
     }
   }
 
-  // CORREGIDO: Buscar post por slug CON PRIORIDAD DE IDIOMA
+  // Buscar post por slug CON PRIORIDAD DE IDIOMA
   async getPostBySlug(slug: string, language: string): Promise<BlogPost | null> {
     try {
-      // IMPORTANTE: Decodificar el slug de la URL
+      // Decodificar el slug de la URL
       const decodedSlug = decodeURIComponent(slug);
       
       console.log(`Searching for slug: "${slug}" (decoded: "${decodedSlug}") in language: "${language}"`);
