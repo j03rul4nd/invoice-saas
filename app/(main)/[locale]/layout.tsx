@@ -128,7 +128,8 @@ export async function generateMetadata({
     alternates: {
       canonical: currentUrl,
       languages: {
-        'en-US': `${baseUrl}/en`,
+        'x-default': `${baseUrl}`,
+        'en-US': `${baseUrl}`,
         'es-ES': `${baseUrl}/es`,
         'pt-BR': `${baseUrl}/pt`,
         'ja-JP': `${baseUrl}/ja`,

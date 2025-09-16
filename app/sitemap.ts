@@ -1,26 +1,39 @@
 // app/sitemap.ts
 import { MetadataRoute } from 'next'
 
+// Mismos locales que en tu layout
+const locales = ['en', 'es', 'pt', 'ja', 'fr', 'de'] as const;
+const baseUrl = 'https://rapidinvoice.eu';
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: 'https://rapidinvoice.eu',
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 1,
-    },
-    {
-      url: 'https://rapidinvoice.eu/pricing',
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: 'https://rapidinvoice.eu/dashboard',
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    // Agrega todas tus páginas principales
-  ]
+  const routes = ['', '/pricing', '/dashboard']; // Añade todas tus rutas principales
+  
+  const sitemapEntries: MetadataRoute.Sitemap = [];
+
+  // Generar URLs para cada idioma
+  locales.forEach((locale) => {
+    routes.forEach((route) => {
+      // URL base para inglés vs otros idiomas
+      const localePrefix = locale === 'en' ? '' : `/${locale}`;
+      const url = `${baseUrl}${localePrefix}${route}`;
+      
+      sitemapEntries.push({
+        url,
+        lastModified: new Date(),
+        changeFrequency: route === '' ? 'weekly' : 'monthly',
+        priority: route === '' ? 1 : 0.8,
+        // Opcional: añadir alternates para hreflang en sitemap
+        alternates: {
+          languages: Object.fromEntries(
+            locales.map(lang => [
+              lang === 'en' ? 'x-default' : lang,
+              lang === 'en' ? `${baseUrl}${route}` : `${baseUrl}/${lang}${route}`
+            ])
+          )
+        }
+      });
+    });
+  });
+
+  return sitemapEntries;
 }
