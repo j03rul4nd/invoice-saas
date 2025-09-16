@@ -1,4 +1,5 @@
 import HeroSectionInovice from "@/components/HeroSectionInovice";
+import Navbar from "@/components/Navbar";
 
 import Aurora from '../../components/aurora';
 import DigitalTransformation from '@/components/DigitalTransformation';
@@ -8,6 +9,7 @@ export default function Home() {
   return (
     <div className="font-sans">
        {/* <HeroSectionInovice /> */}
+       <Navbar />
        <InvoiceLanding />
        {/* <DigitalTransformation /> */}
     </div>

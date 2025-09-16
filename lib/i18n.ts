@@ -13,6 +13,7 @@ export const languageNames: Record<Language, string> = {
 // Traducciones del navbar
 export const navTranslations: Record<Language, {
   home: string;
+  blog: string;
   pricing: string;
   dashboard: string;
   signIn: string;
@@ -21,7 +22,8 @@ export const navTranslations: Record<Language, {
 }> = {
   en: {
     home: "Home",
-    pricing: "Pricing", 
+    blog: "Blog",
+    pricing: "Pricing",
     dashboard: "Dashboard",
     signIn: "Sign In",
     signOut: "Sign Out",
@@ -29,6 +31,7 @@ export const navTranslations: Record<Language, {
   },
   es: {
     home: "Inicio",
+    blog: "Blog",
     pricing: "Precios",
     dashboard: "Panel",
     signIn: "Iniciar Sesión",
@@ -37,6 +40,7 @@ export const navTranslations: Record<Language, {
   },
   pt: {
     home: "Início",
+    blog: "Blog",
     pricing: "Preços",
     dashboard: "Painel",
     signIn: "Entrar",
@@ -45,6 +49,7 @@ export const navTranslations: Record<Language, {
   },
   ja: {
     home: "ホーム",
+    blog: "ブログ",
     pricing: "料金",
     dashboard: "ダッシュボード", 
     signIn: "ログイン",
@@ -53,6 +58,7 @@ export const navTranslations: Record<Language, {
   },
   fr: {
     home: "Accueil",
+    blog: "Blog",
     pricing: "Tarifs",
     dashboard: "Tableau de bord",
     signIn: "Se connecter",
@@ -61,6 +67,7 @@ export const navTranslations: Record<Language, {
   },
   de: {
     home: "Startseite",
+    blog: "Blog",
     pricing: "Preise", 
     dashboard: "Dashboard",
     signIn: "Anmelden",

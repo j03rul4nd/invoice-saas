@@ -4,9 +4,10 @@
 import Link from "next/link";
 import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
-import { FileText, Menu, X, Home, DollarSign, LayoutDashboard, Globe, ChevronDown } from "lucide-react";
+import { FileText, Menu, X, Home, DollarSign, LayoutDashboard, Globe, ChevronDown, BookOpen } from "lucide-react";
 import { useNavTranslation } from "../hooks/useLanguage";
 import { languageNames, Language } from "../lib/i18n";
+import { usePathname } from 'next/navigation';
 //import GlassSurface from '../components/GlassSurface'
 
 // Tipos para los componentes de navegación
@@ -27,6 +28,39 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const { t, language, changeLanguage, isClient } = useNavTranslation();
+  const pathname = usePathname();
+
+  // Función para obtener el locale actual desde la URL
+  const getCurrentLocale = () => {
+    // Si estamos en la raíz (/) o no hay locale en la URL, usar el idioma actual del hook
+    if (pathname === '/' || !pathname.startsWith('/')) {
+      return language;
+    }
+    
+    // Extraer el locale de la URL (ej: /en/something -> 'en')
+    const segments = pathname.split('/');
+    const possibleLocale = segments[1];
+    
+    // Verificar si es un locale válido
+    if (Object.keys(languageNames).includes(possibleLocale)) {
+      return possibleLocale as Language;
+    }
+    
+    return language;
+  };
+
+  // Función para generar URLs con el locale correcto
+  const getLocalizedUrl = (path: string) => {
+    const currentLocale = getCurrentLocale();
+    
+    // Si estamos en la home page (sin locale en URL), añadir el locale
+    if (pathname === '/') {
+      return `/${currentLocale}${path}`;
+    }
+    
+    // Si ya hay un locale en la URL, reemplazarlo o mantenerlo
+    return `/${currentLocale}${path}`;
+  };
 
   useEffect(() => {
     // Aplicar modo oscuro por defecto al montar
@@ -211,6 +245,9 @@ const Navbar = () => {
                 <NavLink href="/" icon={Home}>{t.home}</NavLink>
                 <NavLink href="/pricing" icon={DollarSign}>{t.pricing}</NavLink>
                 <NavLink href="/dashboard" icon={LayoutDashboard}>{t.dashboard}</NavLink>
+                <NavLink href={getLocalizedUrl("/blog")} icon={BookOpen}>
+                  {t.blog || "Blog"}
+                </NavLink>
               </div>
             </div>
 
@@ -259,13 +296,16 @@ const Navbar = () => {
         {/* Mobile Navigation con glass */}
         <div className={`
           md:hidden transition-all duration-500 ease-out overflow-hidden
-          ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}
+          ${isOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'}
         `}>
           <div className="mt-2 border-t border-white/20 bg-gradient-to-b from-black/40 to-black/50 backdrop-blur-2xl rounded-b-2xl">
             <div className="py-2">
               <MobileNavLink href="/" icon={Home}>{t.home}</MobileNavLink>
               <MobileNavLink href="/pricing" icon={DollarSign}>{t.pricing}</MobileNavLink>
               <MobileNavLink href="/dashboard" icon={LayoutDashboard}>{t.dashboard}</MobileNavLink>
+              <MobileNavLink href={getLocalizedUrl("/blog")} icon={BookOpen}>
+                {t.blog || "Blog"}
+              </MobileNavLink>
               
               <div className="border-t border-white/10 mt-2 pt-4">
                 <SignedOut>

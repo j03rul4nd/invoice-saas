@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
-import { FileText, Menu, X, Home, DollarSign, LayoutDashboard, Globe, ChevronDown } from "lucide-react";
+import { FileText, Menu, X, Home, DollarSign, LayoutDashboard, Globe, ChevronDown, BookOpen } from "lucide-react";
 import { useNavTranslation } from "@/hooks/useLanguage";
 import { languageNames, Language } from "@/lib/i18n";
-//import GlassSurface from '../components/GlassSurface'
 
 // Tipos para los componentes de navegación
 interface NavLinkProps {
@@ -57,6 +56,11 @@ const Navbar = ({ initialLocale }: NavbarProps) => {
       document.removeEventListener('click', handleClickOutside);
     };
   }, []);
+
+  // ✅ NUEVO: Función para generar la URL del blog con el idioma correcto
+  const getBlogUrl = () => {
+    return `/${language}/blog`;
+  };
 
   const NavLink = ({ href, children, icon: Icon }: NavLinkProps) => (
     <Link
@@ -211,12 +215,13 @@ const Navbar = ({ initialLocale }: NavbarProps) => {
               </Link>
             </div>
 
-            {/* Desktop Navigation con glass */}
+            {/* Desktop Navigation con glass - ✅ AÑADIDO BLOG */}
             <div className="hidden md:flex items-center space-x-2">
               <div className="flex items-center space-x-1 px-2 py-1 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10">
                 <NavLink href="/" icon={Home}>{t.home}</NavLink>
                 <NavLink href="/pricing" icon={DollarSign}>{t.pricing}</NavLink>
                 <NavLink href="/dashboard" icon={LayoutDashboard}>{t.dashboard}</NavLink>
+                <NavLink href={getBlogUrl()} icon={BookOpen}>{t.blog || 'Blog'}</NavLink>
               </div>
             </div>
 
@@ -262,7 +267,7 @@ const Navbar = ({ initialLocale }: NavbarProps) => {
           </div>
         </div>
 
-        {/* Mobile Navigation con glass */}
+        {/* Mobile Navigation con glass - ✅ AÑADIDO BLOG */}
         <div className={`
           md:hidden transition-all duration-500 ease-out overflow-hidden
           ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}
@@ -270,6 +275,7 @@ const Navbar = ({ initialLocale }: NavbarProps) => {
           <div className="mt-2 border-t border-white/20 bg-gradient-to-b from-black/40 to-black/50 backdrop-blur-2xl rounded-b-2xl">
             <div className="py-2">
               <MobileNavLink href="/" icon={Home}>{t.home}</MobileNavLink>
+              <MobileNavLink href={getBlogUrl()} icon={BookOpen}>{t.blog || 'Blog'}</MobileNavLink>
               <MobileNavLink href="/pricing" icon={DollarSign}>{t.pricing}</MobileNavLink>
               <MobileNavLink href="/dashboard" icon={LayoutDashboard}>{t.dashboard}</MobileNavLink>
               
