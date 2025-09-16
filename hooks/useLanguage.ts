@@ -19,7 +19,7 @@ import {
   getPromptUsageTranslation       // ← Nueva importación
 } from '../lib/i18n';
 
-export const useLanguage = () => {
+export const old_useLanguage = () => {
   const [language, setLanguage] = useState<Language>('en');
   const [isClient, setIsClient] = useState(false);
 
@@ -61,7 +61,7 @@ export const useLanguage = () => {
 };
 
 // Hook específico para traducciones del navbar
-export const useNavTranslation = () => {
+export const old_useNavTranslation = () => {
   const { language, changeLanguage, isClient } = useLanguage();
 
   return {
@@ -136,6 +136,74 @@ export const useLandingTranslation = () => {
 
   return {
     t: getLandingTranslation(language),
+    language,
+    changeLanguage,
+    isClient
+  };
+};
+
+// ✅ NUEVO: Hook base que puede recibir un idioma inicial
+export const useLanguage = (initialLanguage?: Language) => {
+  const [language, setLanguage] = useState<Language>('en');
+  const [isClient, setIsClient] = useState(false);
+ 
+  useEffect(() => {
+    setIsClient(true);
+ 
+    // ✅ MODIFICADO: Priorizar idioma inicial, luego almacenado, luego detectado
+    let detectedLang: Language;
+    
+    if (initialLanguage) {
+      // Si se proporciona idioma inicial (desde URL), usarlo
+      detectedLang = initialLanguage;
+    } else {
+      // Si no, usar la lógica anterior
+      const storedLang = getStoredLanguage();
+      detectedLang = storedLang || detectBrowserLanguage();
+    }
+    
+    setLanguage(detectedLang);
+    
+    // ✅ NUEVO: Si hay idioma inicial y es diferente al almacenado, actualizarlo
+    if (initialLanguage && initialLanguage !== getStoredLanguage()) {
+      setStoredLanguage(initialLanguage);
+    }
+  }, [initialLanguage]);
+ 
+  useEffect(() => {
+    if (!isClient) return;
+ 
+    // Escuchar cambios de idioma desde otros componentes
+    const handleLanguageChange = (event: CustomEvent<Language>) => {
+      setLanguage(event.detail);
+    };
+ 
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange as EventListener);
+ 
+    return () => {
+      window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange as EventListener);
+    };
+  }, [isClient]);
+ 
+  const changeLanguage = (newLanguage: Language) => {
+    setLanguage(newLanguage);
+    setStoredLanguage(newLanguage);
+    dispatchLanguageChange(newLanguage);
+  };
+ 
+  return {
+    language,
+    changeLanguage,
+    isClient
+  };
+};
+
+// ✅ MODIFICADO: Hook específico para traducciones del navbar con idioma inicial
+export const useNavTranslation = (initialLanguage?: Language) => {
+  const { language, changeLanguage, isClient } = useLanguage(initialLanguage);
+ 
+  return {
+    t: getNavTranslation(language),
     language,
     changeLanguage,
     isClient
