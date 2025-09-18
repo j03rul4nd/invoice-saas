@@ -2,7 +2,7 @@
 import type React from "react"
 import Link from "next/link"
 import { useState, useEffect, useCallback } from "react"
-import { Zap, Globe, Smartphone, FileText, Check, RotateCw, type LucideIcon } from "lucide-react"
+import { ArrowRight, Zap, Globe, Smartphone, FileText, Check, RotateCw, type LucideIcon } from "lucide-react"
 import { useLandingTranslation } from "@/hooks/useLanguage"
 
 // Tipos para las divisas soportadas

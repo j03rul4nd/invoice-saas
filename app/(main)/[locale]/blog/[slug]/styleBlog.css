@@ -1,0 +1,291 @@
+/* Estilos para el contenido del blog */
+.blog-content {
+  color: #d1d5db;
+  line-height: 1.625;
+}
+
+/* Párrafos */
+.blog-content p {
+  margin-bottom: 1.5rem;
+  font-size: 1.125rem;
+  line-height: 1.625;
+}
+
+/* Encabezados */
+.blog-content h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  margin-top: 3rem;
+  background: linear-gradient(to right, #ffffff, #d1d5db, #9ca3af);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.blog-content h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  margin-top: 3rem;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.blog-content h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  margin-top: 2.5rem;
+  color: #e5e7eb;
+}
+
+.blog-content h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
+  color: #d1d5db;
+}
+
+.blog-content h5 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
+  color: #9ca3af;
+}
+
+.blog-content h6 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
+  color: #6b7280;
+}
+
+/* Enlaces */
+.blog-content a {
+  color: #60a5fa;
+  text-decoration: underline;
+  text-decoration-color: rgba(96, 165, 250, 0.5);
+  transition: color 0.2s ease;
+}
+
+.blog-content a:hover {
+  color: #93c5fd;
+  text-decoration-color: #93c5fd;
+}
+
+/* Texto en negrita */
+.blog-content strong {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* Texto en cursiva */
+.blog-content em {
+  font-style: italic;
+  color: #e5e7eb;
+}
+
+/* Listas */
+.blog-content ul {
+  margin-bottom: 1.5rem;
+  margin-left: 1.5rem;
+}
+
+.blog-content ol {
+  margin-bottom: 1.5rem;
+  margin-left: 1.5rem;
+  list-style-type: decimal;
+}
+
+.blog-content li {
+  font-size: 1.125rem;
+  line-height: 1.625;
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.blog-content ul li {
+  list-style: none;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.blog-content ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: linear-gradient(to right, #60a5fa, #a855f7);
+  border-radius: 50%;
+}
+
+.blog-content ol li {
+  padding-left: 0.5rem;
+}
+
+/* Listas anidadas */
+.blog-content li ul,
+.blog-content li ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Blockquotes */
+.blog-content blockquote {
+  border-left: 4px solid #60a5fa;
+  padding-left: 1.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+  background-color: rgba(17, 24, 39, 0.5);
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-style: italic;
+  color: #d1d5db;
+}
+
+/* Código inline */
+.blog-content code {
+  background-color: #1f2937;
+  color: #93c5fd;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+/* Bloques de código */
+.blog-content pre {
+  background-color: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+}
+
+.blog-content pre code {
+  background-color: transparent;
+  color: #d1d5db;
+  padding: 0;
+}
+
+/* Tablas */
+.blog-content table {
+  width: 100%;
+  margin-bottom: 2rem;
+  border-collapse: collapse;
+}
+
+.blog-content th {
+  background-color: #1f2937;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 1rem;
+  text-align: left;
+  border: 1px solid #374151;
+}
+
+.blog-content td {
+  padding: 1rem;
+  border: 1px solid #374151;
+  color: #d1d5db;
+}
+
+.blog-content tbody tr:nth-child(even) {
+  background-color: rgba(17, 24, 39, 0.3);
+}
+
+.blog-content tbody tr:hover {
+  background-color: rgba(31, 41, 55, 0.3);
+  transition: background-color 0.2s ease;
+}
+
+/* Líneas horizontales */
+.blog-content hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #4b5563, transparent);
+  margin: 3rem 0;
+}
+
+/* Imágenes */
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #1f2937;
+}
+
+/* Contenido específico para testimonios/citas */
+.blog-content p strong:first-child {
+  color: #93c5fd;
+}
+
+.blog-content ul li em {
+  color: #9ca3af;
+  font-size: 1rem;
+}
+
+/* Estilos para listas de características/comparaciones */
+.blog-content ul li strong {
+  color: #fbbf24;
+}
+
+/* Mejora para párrafos que contienen solo texto en cursiva (como el final del artículo) */
+.blog-content p:last-child em {
+  color: #9ca3af;
+  text-align: center;
+  display: block;
+  margin-top: 2rem;
+}
+
+/* Espaciado especial para secciones */
+.blog-content h2 + p {
+  font-size: 1.25rem;
+  color: #9ca3af;
+  margin-bottom: 2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .blog-content h1 {
+    font-size: 2rem;
+  }
+  
+  .blog-content h2 {
+    font-size: 1.5rem;
+  }
+  
+  .blog-content h3 {
+    font-size: 1.25rem;
+  }
+  
+  .blog-content p {
+    font-size: 1rem;
+  }
+  
+  .blog-content li {
+    font-size: 1rem;
+  }
+  
+  .blog-content table {
+    font-size: 0.875rem;
+  }
+  
+  .blog-content th,
+  .blog-content td {
+    padding: 0.5rem;
+  }
+
+  .blog-content h1 {
+    font-size: 1.875rem;
+  }
+}

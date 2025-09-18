@@ -3,6 +3,7 @@ import { HubSpotBlogService } from '@/lib/hubspot';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Metadata } from 'next';
+import "./styleBlog.css";
 
 const hubspot = new HubSpotBlogService();
 
@@ -34,7 +35,6 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       type: 'article',
       publishedTime: post.publishDate,
     },
-    // JSON-LD para artículos
     other: {
       'script:ld+json': JSON.stringify({
         '@context': 'https://schema.org',
@@ -64,83 +64,139 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     notFound();
   }
 
-  console.log(`[BlogPost] Rendering post: "${post.name}" (${post.language})`);
+  console.log(`[BlogPost] JBD:"${post.postBody}" Rendering post: "${post.name}" (${post.language})`);
   
   return (
-    <article className="container mx-auto px-4 py-8 max-w-4xl">
-      {post.featuredImage && (
-        <img 
-          src={post.featuredImage} 
-          alt={post.name}
-          className="w-full h-64 object-cover rounded-lg mb-8"
-        />
-      )}
-      
-      <header className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">{post.name}</h1>
-        <div className="flex items-center text-gray-600 mb-6 space-x-4">
-          <time dateTime={post.publishDate}>
-            {new Date(post.publishDate).toLocaleDateString(locale, {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}
-          </time>
-          
-          {/* Badge de idioma para debugging - puedes removerlo en producción */}
-          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-            {post.language}
-          </span>
-          
-          {/* Información de slug para debugging - remover en producción */}
-          <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded font-mono">
-            {post.slug}
-          </span>
-        </div>
-      </header>
-      
-      {/* Contenido del post */}
-      <div 
-        className="prose prose-lg max-w-none prose-headings:font-semibold prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline"
-        dangerouslySetInnerHTML={{ __html: post.postBody }}
-      />
-      
-      {/* Navegación y metadata adicional */}
-      <footer className="mt-12 pt-8 border-t border-gray-200">
-        <div className="flex justify-between items-center">
-          <Link 
-            href={`/${locale}/blog`}
-            className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Blog
-          </Link>
-          
-          {/* Información adicional */}
-          <div className="text-sm text-gray-500">
-            Published on {new Date(post.publishDate).toLocaleDateString(locale)}
+    <div className="min-h-screen text-white">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        
+        
+        {/* Featured Image Background */}
+        {/* {post.featuredImage && (
+          <div className="absolute inset-0 opacity-10">
+            <img 
+              src={post.featuredImage} 
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )} */}
+        
+        {/* Content */}
+        <div className="relative">
+          <div className="container mx-auto px-4 py-24 max-w-4xl">
+            {/* Navigation */}
+            <nav className="mb-12">
+              <Link 
+                href={`/${locale}/blog`}
+                className="inline-flex items-center text-gray-400 hover:text-white transition-colors duration-200 group"
+              >
+                <svg className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Blog
+              </Link>
+            </nav>
+
+            {/* Header */}
+            <header className="mb-16">
+              <div className="flex items-center text-sm text-gray-400 mb-6 space-x-4">
+                <time dateTime={post.publishDate} className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {new Date(post.publishDate).toLocaleDateString(locale, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </time>
+                
+                {/* Badge de idioma - remover en producción */}
+                <span className="px-2 py-1 text-xs bg-gray-800 text-gray-300 rounded-full border border-gray-700">
+                  {post.language}
+                </span>
+              </div>
+              
+              <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent leading-tight">
+                {post.name}
+              </h1>
+              
+              {post.metaDescription && (
+                <p className="text-xl text-gray-400 leading-relaxed max-w-3xl">
+                  {post.metaDescription}
+                </p>
+              )}
+            </header>
           </div>
         </div>
-        
-        {/* Tags si están disponibles */}
-        {post.tags && post.tags.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">Tags:</h3>
-            <div className="flex flex-wrap gap-2">
-              {post.tags.map((tag, index) => (
-                <span 
-                  key={index}
-                  className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded"
-                >
-                  {tag}
-                </span>
-              ))}
+      </div>
+
+      {/* Article Content */}
+      <article className="relative">
+        <div className="container mx-auto px-4 py-16 max-w-4xl">
+          {/* Featured Image in content */}
+          {post.featuredImage && (
+            <div className="mb-16 rounded-2xl overflow-hidden border border-gray-800">
+              <img 
+                src={post.featuredImage} 
+                alt={post.name}
+                className="w-full h-auto"
+              />
+            </div>
+          )}
+          
+          {/* Blog Content with Custom Styles */}
+          <div 
+            className="blog-content"
+            dangerouslySetInnerHTML={{ __html: post.postBody }}
+          />
+        </div>
+      </article>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-800 bg-gray-950/50">
+        <div className="container mx-auto px-4 py-16 max-w-4xl">
+          {/* Tags */}
+          {post.tags && post.tags.length > 0 && (
+            <div className="mb-12">
+              <h3 className="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">
+                Tagged in
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {post.tags.map((tag, index) => (
+                  <span 
+                    key={index}
+                    className="px-3 py-1 text-sm bg-gray-800 text-gray-300 rounded-full border border-gray-700 hover:border-gray-600 transition-colors duration-200"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Bottom Navigation */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <Link 
+              href={`/${locale}/blog`}
+              className="inline-flex items-center px-6 py-3 bg-white text-black rounded-lg hover:bg-gray-200 transition-colors duration-200 font-medium group"
+            >
+              <svg className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to All Posts
+            </Link>
+            
+            <div className="text-sm text-gray-500">
+              Published on {new Date(post.publishDate).toLocaleDateString(locale)}
             </div>
           </div>
-        )}
+        </div>
       </footer>
-    </article>
+
+
+    </div>
   );
 }
