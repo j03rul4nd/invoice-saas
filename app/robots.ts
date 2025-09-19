@@ -1,4 +1,3 @@
-// app/robots.ts
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
@@ -7,12 +6,19 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        // Opcional: bloquear rutas que no quieras indexar
-        disallow: ['/api/', '/admin/', '/_next/', '/dashboard/private/']
+        disallow: [
+          '/api/',
+          '/admin/',
+          '/_next/',
+          '/dashboard/private/',
+          // Añadir estas si existen y no quieres que se indexen:
+          '/auth/',
+          '/login',
+          '/register'
+        ]
       }
     ],
     sitemap: 'https://rapidinvoice.eu/sitemap.xml',
-    // Opcional: añadir más información
-    host: 'https://rapidinvoice.eu',
+    host: 'https://rapidinvoice.eu'
   }
 }
