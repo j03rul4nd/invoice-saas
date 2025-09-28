@@ -1,4 +1,6 @@
 # 🚀 Clear Invoices AI - Plantilla SaaS con Next.js
+![cover](./cover.png)
+
 
 Una plantilla SaaS completa construida con Next.js que permite a los usuarios subir PDFs (por ejemplo, recibos, órdenes de compra, datos contables) y generar / procesar facturas inteligentes usando IA.
 
