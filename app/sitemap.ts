@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next'
+export const contentType = "application/xml";
 
 const locales = ['en', 'es', 'pt', 'ja', 'fr', 'de'] as const;
 const baseUrl = 'https://rapidinvoice.eu';
