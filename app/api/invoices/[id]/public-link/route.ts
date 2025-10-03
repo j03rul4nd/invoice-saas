@@ -23,7 +23,7 @@ function getBaseUrl(): string {
   // Si la URL contiene el dominio duplicado, limpiarlo
   if (baseUrl.includes('rapidinvoice.eu/rapidinvoice.eu')) {
     baseUrl = baseUrl.replace('/rapidinvoice.eu/invoice/public/', '/invoice/public/');
-    baseUrl = 'https://rapidinvoice.eu';
+    baseUrl = 'https://www.rapidinvoice.eu';
   }
   
   // ✅ Asegurarse de que tenga https:// al inicio si es production

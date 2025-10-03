@@ -18,7 +18,7 @@ export default function robots(): MetadataRoute.Robots {
         ]
       }
     ],
-    sitemap: 'https://rapidinvoice.eu/sitemap.xml',
-    host: 'https://rapidinvoice.eu'
+    sitemap: 'https://www.rapidinvoice.eu/sitemap.xml',
+    host: 'https://www.rapidinvoice.eu'
   }
 }

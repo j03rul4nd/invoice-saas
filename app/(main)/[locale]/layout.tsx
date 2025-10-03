@@ -62,7 +62,7 @@ export async function generateMetadata({
   const { locale } = await params; // ✅ Await params
   const localeTyped = locale as Locale;
   const translations = metadataTranslations[localeTyped] || metadataTranslations.en;
-  const baseUrl = 'https://rapidinvoice.eu';
+  const baseUrl = 'https://www.rapidinvoice.eu';
   const currentUrl = localeTyped === 'en' ? baseUrl : `${baseUrl}/${localeTyped}`;
 
   // Mapeo de locales a códigos de Open Graph

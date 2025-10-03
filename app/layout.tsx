@@ -56,13 +56,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://rapidinvoice.eu',
+    url: 'https://www.rapidinvoice.eu',
     siteName: 'Rapid Invoice',
     title: 'Rapid Invoice - Fast & Automatic Invoice Generator',
     description: 'Generate professional invoices in seconds with AI. Perfect for freelancers and SMEs. Multi-currency, multi-language and PDF export.',
     images: [
       {
-        url: 'https://rapidinvoice.eu/og-image.png',
+        url: 'https://www.rapidinvoice.eu/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Rapid Invoice - AI Invoice Generator',
@@ -74,17 +74,17 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Rapid Invoice - Fast & Automatic Invoice Generator',
     description: 'Generate professional invoices in seconds with AI. Multi-currency, multi-language and PDF export.',
-    images: ['https://rapidinvoice.eu/twitter-image.jpg'],
+    images: ['https://www.rapidinvoice.eu/twitter-image.jpg'],
     creator: '@rapidinvoice',
   },
 
   alternates: {
-    canonical: 'https://rapidinvoice.eu',
+    canonical: 'https://www.rapidinvoice.eu',
     languages: {
-      'es-ES': 'https://rapidinvoice.eu/es',
-      'en-US': 'https://rapidinvoice.eu/en',
-      'fr-FR': 'https://rapidinvoice.eu/fr',
-      'de-DE': 'https://rapidinvoice.eu/de',
+      'es-ES': 'https://www.rapidinvoice.eu/es',
+      'en-US': 'https://www.rapidinvoice.eu/en',
+      'fr-FR': 'https://www.rapidinvoice.eu/fr',
+      'de-DE': 'https://www.rapidinvoice.eu/de',
     },
   },
 
@@ -96,7 +96,7 @@ export const metadata: Metadata = {
   category: 'technology',
   classification: 'Business Software',
 
-  metadataBase: new URL('https://rapidinvoice.eu'),
+  metadataBase: new URL('https://www.rapidinvoice.eu'),
 };
 
 export default function RootLayout({

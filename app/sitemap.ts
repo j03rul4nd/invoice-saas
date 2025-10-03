@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 export const contentType = "application/xml";
 
 const locales = ['en', 'es', 'pt', 'ja', 'fr', 'de'] as const;
-const baseUrl = 'https://rapidinvoice.eu';
+const baseUrl = 'https://www.rapidinvoice.eu';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
